@@ -27,8 +27,8 @@ class SpriteManager {
 
     draw () {
         for (var i=0; i<64; i++) {
-            const spritey = this.sprites[i*4 + 2];
-            if (spritey > 240) continue;
+            const y = this.sprites[i*4 + 2];
+            if (y > 240) continue;
             const x = this.sprites[i*4 + 1];
             const index = this.sprites[i*4 + 0];
             const attrs = this.sprites[i*4 + 3];
@@ -43,14 +43,23 @@ class SpriteManager {
     };
 
     drawSprite (index, x, y, flipX, flipY, priority, palette) {
+        
         for (var pi=0; pi<8; pi++) {
-            const px = flipX ? 8-pi : pi;
+            const px = flipX ? 7-pi : pi;
             for (var pj=0; pj<8; pj++) {
-                const py = flipY ? 8-pj : pj;
+                const py = flipY ? 7-pj : pj;
+
+                if (priority) {
+                    const bg = ppu.getPixel(x+pi, y+pj);
+                    if (bg !== ppu.getCommonBackground) continue;
+                }
+
                 // check sprite table for pixel value
                 const color = ppu.getSpritePixel(index, px, py);
-                const displayColor = ppu.getSpriteColor(palette, color);
-                this.display.setPixelColor(x + pi, y + pj, displayColor);
+                if (color > 0) {
+                    const displayColor = ppu.getSpriteColor(palette, color);
+                    this.display.setPixel(x + pi, y + pj, displayColor);
+                }
             }
         }
     }

@@ -48,6 +48,8 @@ const setCommonBackground = (color) => {
     state.common_background = color;
 };
 
+const getCommonBackground = () => state.common_background;
+
 // HORIZONTAL:0, VERTICAL:1
 const setMirroring = (mode) => {
     state.mirroring = mode;
@@ -275,6 +277,7 @@ export default {
     HORIZONTAL,
     VERTICAL,
     setCommonBackground,
+    getCommonBackground,
     setMirroring,
     setScroll,
     setNametable,      // sets the tile index for a nametable entry
@@ -286,4 +289,5 @@ export default {
     setSpriteData,     // writes pixel data to the tile sheet
     setBackgroundData, // writes pixel data to the tile sheet
     getPixel,
+    getSpritePixel
 };

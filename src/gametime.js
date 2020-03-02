@@ -1,7 +1,6 @@
 export default class gametime {
-    constructor (timestamp, elapsed, totalElapsed) {
+    constructor (timestamp, elapsed) {
         this.timestamp = timestamp || Date.now();
         this.elapsed = elapsed || 0;
-        this.totalElapsed = totalElapsed || 0;
     }
 };
