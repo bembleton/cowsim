@@ -20,11 +20,11 @@ module.exports = {
             },
             {
                 test: /\.bmp$/i,
-                use: [
-                    {
-                        loader: 'buffer-loader'
-                    }
-                ]
+                loader: 'file-loader',
+                options: {
+                    name: 'sprites/[name].[ext]',
+                    publicPath: '../'
+                }
             }
         ],
     },

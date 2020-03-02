@@ -39,5 +39,4 @@ function handleVisibilityChange() {
 document.addEventListener(visibilityChange, handleVisibilityChange, false);
 
 // start
-game.reset();
-game.play();
+game.reset().then(() => game.play());

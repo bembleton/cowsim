@@ -1,7 +1,9 @@
 import bmp from 'bmp-js';
 
-const loadBitmap = (bmpBuffer, setData) => {
-    var bmpData = bmp.decode(bmpBuffer);
+const loadBitmap = async (url, setData) => {
+    const res = await fetch(url);
+    const arryBuffer = await res.arrayBuffer();
+    var bmpData = bmp.decode(new Buffer(arryBuffer));
     const width = bmpData.width;
     const height = bmpData.height;
     if (width !== 128 || height !== 128) {

@@ -49,11 +49,11 @@ export default class Game {
         this.animationFrame = new AnimationFrame(30);
     }
     
-    reset () {
+    async reset () {
         console.log('RESET');
         // load tile sheets
-        loadBitmap(tileSheet, ppu.setBackgroundData);
-        loadBitmap(spriteSheet, ppu.setSpriteData);
+        await loadBitmap(tileSheet, ppu.setBackgroundData);
+        await loadBitmap(spriteSheet, ppu.setSpriteData);
         this.spriteManager.clearSprites();
 
         this.loadTitleScreen();
@@ -113,8 +113,8 @@ export default class Game {
         this.clear();
         this.updateTitleScreen();
         this.pacman = {
-            x: 64,
-            y: 64,
+            x: 68,
+            y: 68,
             frame: 0
         };
         this.updatePacman();
@@ -166,13 +166,13 @@ export default class Game {
         let flipx = false;
         let flipy = false;
         
-        if (y === 64 && x < 192 - 8) {
+        if (y === 68 && x < 188 - 8) {
             x += 2;
-        } else if (y < 104 -8 && x > 64) {
+        } else if (y < 100 -8 && x > 68) {
             idx += 4;
             y += 2;
             flipy = flipx = true;
-        } else if (x > 64) {
+        } else if (x > 68) {
             x -= 2;
             flipx = true;
         } else {
