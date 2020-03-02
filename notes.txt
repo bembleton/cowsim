@@ -1,0 +1,12 @@
+titleScreen:
+    [PRESS ENTER]
+menuScreen:
+    [NEW GAME]
+    [CONTINUE]
+    [QUIT]
+
+
+ToDo:
+    font
+    title screen art
+    
