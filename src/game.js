@@ -162,29 +162,34 @@ export default class Game {
 
     updatePacman () {
         let { x, y, frame } = this.pacman;
-        let idx = [0,1,2,3,2,1][frame];
+        
+        // chomp animation sequence
+        let idx = [0,1,2,3,2,1][(frame + 1) % 6];
         let flipx = false;
         let flipy = false;
-        
+
+        // run around the title
         if (y === 68 && x < 188 - 8) {
-            x += 2;
+            x += 2;     // go right
         } else if (y < 100 -8 && x > 68) {
             idx += 4;
-            y += 2;
+            y += 2;     // go down
             flipy = flipx = true;
         } else if (x > 68) {
-            x -= 2;
+            x -= 2;     // go left
             flipx = true;
         } else {
             idx += 4;
-            y -= 2;
+            y -= 2;     // go up
         }
+
+        // update sprite
         this.spriteManager.setSprite (0, idx, x, y, flipx, flipy, false, 0);
-        this.pacman.frame = (frame + 1) % 6;
+
+        // update state
+        this.pacman.frame = idx;
         this.pacman.x = x;
         this.pacman.y = y;
-
-
     }
 
     clear () {
