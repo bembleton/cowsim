@@ -1,7 +1,8 @@
 export default class Animation {
-    constructor ({ frames, duration }) {
-        this.frames = frames;
+    constructor ({ update, duration, frameCount }) {
+        this.onUpdate = update;
         this.duration = duration;
+        this.frameCount = frameCount;
         this.currentFrame = 0;
         this.time = 0;
     }
@@ -10,10 +11,14 @@ export default class Animation {
         this.time += time.elapsed;
         if (this.time >= this.duration) {
             this.time -= this.duration;
-            if (this.currentFrame >= this.frames.length) {
-                this.currentFrame = 0;
+            if (this.frameCount) {
+              if (this.currentFrame >= this.frameCount) {
+                  this.currentFrame = 0;
+              }
+              this.onUpdate(this.currentFrame++);
+            } else {
+              this.onUpdate();
             }
-            this.frames[this.currentFrame++]();
         }
     }
 }
