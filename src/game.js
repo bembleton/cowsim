@@ -46,6 +46,7 @@ export default class Game {
             attract: true,
             menuOpen: false,
         }
+        this.animationFrame = new AnimationFrame(30);
     }
     
     reset () {
@@ -58,8 +59,7 @@ export default class Game {
         this.loadTitleScreen();
     }
 
-    start () {
-        const animationFrame = new AnimationFrame(30);
+    play () {
         const self = this;
 
         this.startTime = this.time = new gametime(Date.now(), 0, 0);
@@ -74,10 +74,15 @@ export default class Game {
             self.update(time);
             self.draw();
     
-            animationFrame.request(tick);
+            self.frameId = self.animationFrame.request(tick);
         }
 
-        animationFrame.request(tick);
+        this.frameId = this.animationFrame.request(tick);
+    }
+
+
+    pause () {
+        this.animationFrame.cancel(this.frameId);
     }
 
     update (time) {
