@@ -143,7 +143,7 @@ export default class Game {
 
         this.pacmanAnimation = new Animation({
             duration: 30,
-            frameCount: 6,
+            framecount: 6,
             update: (frame) => this.updatePacman(frame)
         });
     }

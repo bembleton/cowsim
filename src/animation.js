@@ -1,17 +1,15 @@
 export default class Animation {
   constructor ({ update, duration = 0, frameskip = 0, framecount = 1 }) {
-    this.state = {
-      onUpdate: update,
-      duration,
-      frameskip,
-      framecount,
-      currentFrame: 0,
-      time: 0
-    };
+    this.onUpdate = update;
+    this.duration;
+    this.frameskip;
+    this.framecount;
+    this.currentFrame = 0;
+    this.time = 0;
   }
 
   update (gametime) {
-    const { duration, frameskip, framecount } = this;
+    const { duration, frameskip, framecount, onUpdate } = this;
     let shouldUpdate = false;
     
     if (duration) {
@@ -25,6 +23,10 @@ export default class Animation {
         shouldUpdate = true;
         this.time = 0;
       }
+    } else {
+      // every frame
+      onUpdate();
+      return;
     }
       
     if (shouldUpdate) {
