@@ -19,4 +19,12 @@ document.addEventListener('keyup', (event) => {
     if (debug) console.log(`keyup: ${key}`);
 }, false);
 
+
+const UP = 'ArrowUp';
+const LEFT = 'ArrowLeft';
+const RIGHT = 'ArrowRight';
+const DOWN = 'ArrowDown';
+const ACTION = '';
+const JUMP = ' ';
+
 export default keystate;

@@ -1,9 +1,9 @@
 export default class Animation {
   constructor ({ update, duration = 0, frameskip = 0, framecount = 1 }) {
     this.onUpdate = update;
-    this.duration;
-    this.frameskip;
-    this.framecount;
+    this.duration = duration;
+    this.frameskip = frameskip;
+    this.framecount = framecount;
     this.currentFrame = 0;
     this.time = 0;
   }

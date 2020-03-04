@@ -26,3 +26,15 @@ h1 {
 #btnReset {
     margin: 60px;
 }
+
+.button {
+    display: inline-block;
+    height: 32px;
+    width: 32px;
+    margin: 4px;
+    border: 1px solid lightslategray;
+}
+
+.button.pressed {
+    background-color: lightseagreen;
+}

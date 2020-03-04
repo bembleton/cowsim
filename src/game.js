@@ -1,5 +1,6 @@
 import AnimationFrame from 'animation-frame';
 import keystate from './keybindings';
+import { inputs, isPressed, getAxis } from './gamepad';
 import Display from './display';
 import SpriteManager from './spriteManager';
 import ppu from './ppu';
@@ -46,6 +47,10 @@ export default class Game {
             attract: true,
             menuOpen: false,
         }
+        this.scroll = {
+            x: 0,
+            y: 0
+        };
         this.animationFrame = new AnimationFrame(30);
     }
     
@@ -91,19 +96,38 @@ export default class Game {
         if (this.onUpdate) {
             this.onUpdate();
         }
-        if (this.titleAnimation) {
-            this.titleAnimation.update(time);
-        }
+        // if (this.titleAnimation) {
+        //     this.titleAnimation.update(time);
+        // }
         if (this.pacmanAnimation) {
             this.pacmanAnimation.update(time);
         }
+
+        const scrollAmt = 2;
+        if (isPressed(inputs.dpad.UP)) {
+            this.scroll.y -= scrollAmt;
+        }
+        if (isPressed(inputs.dpad.DOWN)) {
+            this.scroll.y += scrollAmt;
+        }
+        if (isPressed(inputs.dpad.RIGHT)) {
+            this.scroll.x += scrollAmt;
+        }
+        if (isPressed(inputs.dpad.LEFT)) {
+            this.scroll.x -= scrollAmt;
+        }
+
+        setScroll(this.scroll.x, this.scroll.y);
     }
 
     loadTitleScreen () {
         setCommonBackground(BLACK);
         setMirroring(HORIZONTAL);
         setScroll(0, 0);
-        this.scroll = 0;
+        this.scroll = {
+            x: 0,
+            y: 0
+        };
         
         setBgPalette(0, BLACK, 0x00, 0x10, WHITE);
         setBgPalette(1, BLACK, 0x11, 0x21, 0x31); // blues
@@ -136,10 +160,10 @@ export default class Game {
         this.updatePacman();
 
         // animate the screen once a second
-        this.titleAnimation = new Animation({
-            duration: 30,
-            update: () => this.updateTitleScreen()
-        });
+        // this.titleAnimation = new Animation({
+        //     duration: 30,
+        //     update: () => this.updateTitleScreen()
+        // });
 
         this.pacmanAnimation = new Animation({
             duration: 30,

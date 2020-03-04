@@ -1,3 +1,4 @@
+import keystate from './keybindings';
 
 const dir = {
     up: 'up',
@@ -30,6 +31,15 @@ export default class Player {
 
     update (time) {
       // get input and update state if necessary
+      if (keystate['ArrowUp']) {
+        this.facing = dir.up;
+      } else if (keystate['ArrowRight']) {
+        this.facing = dir.right;
+      } else if (keystate['ArrowDown']) {
+        this.facing = dir.right;
+      } else if (keystate['ArrowLeft']) {
+        this.facing = dir.right;
+      }
       // this.setState(this.states.walking)
       this.state.update(time);
     }
