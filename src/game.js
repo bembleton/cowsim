@@ -235,7 +235,7 @@ export default class Game {
             const color = getPixel(x, y);
             this.display.setPixel(x, y, color);
         }
-        spriteManager.draw();
+        spriteManager.draw(this.display);
         this.display.draw();
     }
 };
