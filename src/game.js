@@ -1,8 +1,8 @@
 import AnimationFrame from 'animation-frame';
-import keystate from './keybindings';
-import { inputs, isPressed, getAxis } from './gamepad';
+import { isPressed, buttons } from './controller';
+// import { inputs, isPressed, getAxis } from './gamepad';
 import Display from './display';
-import SpriteManager from './spriteManager';
+import spriteManager from './spriteManager';
 import ppu from './ppu';
 import loadBitmap from './bitmapLoader';
 import text from './text';
@@ -42,7 +42,6 @@ const randInt = (max) => Math.floor(Math.random() * max);
 export default class Game {
     constructor (canvas) {
         this.display = new Display(canvas.getContext('2d'));
-        this.spriteManager = new SpriteManager(this.display);
         this.state = {
             attract: true,
             menuOpen: false,
@@ -57,9 +56,9 @@ export default class Game {
     async reset () {
         console.log('RESET');
         // load tile sheets
-        await loadBitmap(tileSheet, ppu.setBackgroundData);
-        await loadBitmap(spriteSheet, ppu.setSpriteData);
-        this.spriteManager.clearSprites();
+        await loadBitmap(tileSheet, setBackgroundData);
+        await loadBitmap(spriteSheet, setSpriteData);
+        spriteManager.clearSprites();
 
         this.loadTitleScreen();
     }
@@ -104,16 +103,14 @@ export default class Game {
         }
 
         const scrollAmt = 2;
-        if (isPressed(inputs.dpad.UP)) {
+        if (isPressed(buttons.UP)) {
             this.scroll.y -= scrollAmt;
-        }
-        if (isPressed(inputs.dpad.DOWN)) {
+        } else if (isPressed(buttons.DOWN)) {
             this.scroll.y += scrollAmt;
         }
-        if (isPressed(inputs.dpad.RIGHT)) {
+        if (isPressed(buttons.RIGHT)) {
             this.scroll.x += scrollAmt;
-        }
-        if (isPressed(inputs.dpad.LEFT)) {
+        } else if (isPressed(buttons.LEFT)) {
             this.scroll.x -= scrollAmt;
         }
 
@@ -154,7 +151,8 @@ export default class Game {
         this.pacman = {
             x: 68,
             y: 68,
-            frame: 0
+            frame: 0,
+            spriteId: spriteManager.requestSprite()
         };
         
         this.updatePacman();
@@ -193,7 +191,7 @@ export default class Game {
     }
 
     updatePacman (frame) {
-        let { x, y } = this.pacman;
+        let { x, y, spriteId } = this.pacman;
         
         // chomp animation sequence
         let idx = [0,1,2,3,2,1][frame % 6];
@@ -216,7 +214,7 @@ export default class Game {
         }
 
         // update sprite
-        this.spriteManager.setSprite (0, idx, x, y, flipx, flipy, false, 0);
+        spriteManager.setSprite (spriteId, idx, x, y, flipx, flipy, false, 0);
 
         // update state
         this.pacman.x = x;
@@ -237,7 +235,7 @@ export default class Game {
             const color = getPixel(x, y);
             this.display.setPixel(x, y, color);
         }
-        this.spriteManager.draw();
+        spriteManager.draw();
         this.display.draw();
     }
 };

@@ -24,7 +24,7 @@ const UP = 'ArrowUp';
 const LEFT = 'ArrowLeft';
 const RIGHT = 'ArrowRight';
 const DOWN = 'ArrowDown';
-const ACTION = '';
-const JUMP = ' ';
+const A = 'z';
+const B = 'x';
 
 export default keystate;
