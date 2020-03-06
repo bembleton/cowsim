@@ -3,6 +3,11 @@ import {
     getColorByte
 } from './palette';
 
+const toBinary = (x) => {
+  const n = x.toString(2);
+  return '00000000'.substr(n.length) + n;
+};
+
 /**
  * bg_palette_1: 0
  * bg_palette_2: 4
@@ -108,37 +113,46 @@ const setAttribute = (x, y, palette) => {
     const adr = getAttributeAdr(x, y);
     const offset = getAttributeOffset(x, y);
     const current_value = attributes[adr];
-    const mask = ~(0x03 << offset);
     const value = (palette & 0x03) << offset;
-    attributes[adr] = (current_value & mask) | value;
+    const mask = (~(0x03 << offset)) & 0xff;
+    const new_value = (current_value & mask) | value;
+    attributes[adr] = new_value;
+    
+    // console.log(`
+    // attribute address: 0x${adr.toString(16)}
+    // attribute offset:  ${offset}
+    // value:             b${toBinary(current_value)}
+    // new value:         b${toBinary(new_value)}`);
 };
 
 const getAttributeAdr = (x, y) => {
-    const X = x % 16;
-    let Y = (state.mirroring == HORIZONTAL) ?
-        y : (y % 15) << (x >> 4);
+  if (state.mirroring == HORIZONTAL) {
+    let byte_row = ((y > 14 ? y+1 : y) >> 1);
+    return byte_row * 8 + ((x % 16) >> 1);
 
-    // the bottom row does not have attributes c or d
-    if (Y > 14) Y++;
-
-    // X,Y = 16x30
-    // BX,BY = 8x15
-    const BX = X >> 1;
-    const BY = Y >> 1;
-    return BY * 8 + BX;
+  } else {
+    const Y = (x > 15) ? (y % 15) + 15 : (y % 15); // Y = 15
+    let byte_row = ((Y > 14 ? Y+1 : Y) >> 1);  // 16 >> 1 = 8
+    return byte_row * 8 + ((x % 16) >> 1); // 64 + 0
+  }
 };
 
 const getAttributeOffset = (x, y) => {
-    const X = x % 16;
-    let Y = (state.mirroring == HORIZONTAL) ?
-        y : (y % 15) << (x >> 4);
+  if (state.mirroring == HORIZONTAL) {
+    const shiftX = (x % 2) << 1; // 0 or 2
+    const shiftY = ((y > 14 ? y+1 : y) % 2) << 2; // 0 or 4
+    return shiftX + shiftY;
 
-    // the bottom row does not have attributes c or d
-    if (Y > 14) Y++;
+  } else {
+    const shiftX = (x % 2) << 1; // 0 or 2
 
-    const shiftX = (X % 2) << 1;
-    const shiftY = (Y % 2) << 2;
-    return shiftX << shiftY;
+    const Y = (x > 15) ? (y % 15) + 15 : (y % 15); // Y = 15
+    const shiftY = ((Y > 14 ? Y+1 : Y) % 2) << 2; // 0 or 4
+    return shiftX + shiftY;
+  }
+
+
+    
 };
 
 /**
@@ -289,5 +303,9 @@ export default {
     setSpriteData,     // writes pixel data to the tile sheet
     setBackgroundData, // writes pixel data to the tile sheet
     getPixel,
-    getSpritePixel
+    getSpritePixel,
+
+    // test
+    attributes,
+    getAttributeAdr
 };
