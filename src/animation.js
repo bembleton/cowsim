@@ -25,8 +25,7 @@ export default class Animation {
       }
     } else {
       // every frame
-      onUpdate();
-      return;
+      shouldUpdate = true;
     }
       
     if (shouldUpdate) {

@@ -8,6 +8,7 @@ import loadBitmap from './bitmapLoader';
 import text from './text';
 import gametime from './gametime';
 import Animation from './animation';
+import terrain from './terrain';
 import tileSheet from './assets/background.bmp';
 import spriteSheet from './assets/sprites.bmp';
 
@@ -50,7 +51,7 @@ export default class Game {
             x: 0,
             y: 0
         };
-        this.animationFrame = new AnimationFrame(30);
+        this.animationFrame = new AnimationFrame(60);
     }
     
     async reset () {
@@ -98,11 +99,18 @@ export default class Game {
         // if (this.titleAnimation) {
         //     this.titleAnimation.update(time);
         // }
+        if (isPressed(buttons.START)) {
+            terrain.load();
+            this.state.menuOpen = false;
+        }
+
+        
+
         if (this.pacmanAnimation) {
             this.pacmanAnimation.update(time);
         }
 
-        const scrollAmt = 2;
+        const scrollAmt = 1;
         if (isPressed(buttons.UP)) {
             this.scroll.y -= scrollAmt;
         } else if (isPressed(buttons.DOWN)) {
@@ -138,15 +146,16 @@ export default class Game {
         this.fillWithSquiggles(0,0, 32,60, 2);
 
         // add the title
-        for (let y=8; y<13; y++)
+        for (let y=8; y<15; y++)
         for (let x=8; x<24; x++) {
             setNametable(x, y, BLANK);
         }
-        for (let y=5; y<6; y++)
+        for (let y=5; y<7; y++)
         for (let x=5; x<12; x++) {
             setAttribute(x, y, 1);
         }
         text(10,10, 'HELLO WORLD!');
+        text(10,12, 'PRESS START ');
 
         this.pacman = {
             x: 68,
@@ -164,10 +173,11 @@ export default class Game {
         // });
 
         this.pacmanAnimation = new Animation({
-            duration: 30,
-            framecount: 6,
+            framecount: 12,
             update: (frame) => this.updatePacman(frame)
         });
+
+        this.state.menuOpen = true;
     }
 
     updateTitleScreen () {
@@ -194,23 +204,23 @@ export default class Game {
         let { x, y, spriteId } = this.pacman;
         
         // chomp animation sequence
-        let idx = [0,1,2,3,2,1][frame % 6];
+        let idx = [0,1,2,3,2,1][(frame>>1) % 6];
         let flipx = false;
         let flipy = false;
 
         // run around the title
         if (y === 68 && x < 188 - 8) {
-            x += 2;     // go right
+            x += 1;     // go right
         } else if (y < 100 -8 && x > 68) {
             idx += 4;
-            y += 2;     // go down
+            y += 1;     // go down
             flipy = flipx = true;
         } else if (x > 68) {
-            x -= 2;     // go left
+            x -= 1;     // go left
             flipx = true;
         } else {
             idx += 4;
-            y -= 2;     // go up
+            y -= 1;     // go up
         }
 
         // update sprite

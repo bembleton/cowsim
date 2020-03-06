@@ -57,12 +57,12 @@ const setMirroring = (mode) => {
 
 /**
  * Sets the amount of horizontal and vertical scrolling in pixels
- * @param {*} x 0-512
+ * @param {*} x 0-511
  * @param {*} y 0-479
  */
 const setScroll = (x, y) => {
-    state.scroll.x = x >= 0 ? x : x + 512;
-    state.scroll.y = y > 0 ? y : y + 479;
+    state.scroll.x = x >= 0 ? x % 512: x + 512;
+    state.scroll.y = y > 0 ? y % 480 : y + 480;
 };
 
 // with mirroring
@@ -229,9 +229,9 @@ const getTilePixel = (idx, pixelx, pixely) => {
  * @returns NES color
  */
 const getPixel = (screenx, screeny) => {
-    const x = (screenx + state.scroll.x) % 512;
+    let x = (screenx + state.scroll.x) % 512;
     if (x < 0) x += 512;
-    const y = (screeny + state.scroll.y) % 480;
+    let y = (screeny + state.scroll.y) % 480;
     if (y < 0) y += 480;
 
     const tilex = x >> 3; // 0-31 (0-63)
