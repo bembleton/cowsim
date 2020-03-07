@@ -9,11 +9,14 @@ import tileSheet from './assets/background.bmp';
 import spriteSheet from './assets/sprites.bmp';
 import LoadingScreen from './loadingScreen';
 import TerrainScreen from './terrainScreen';
+import spriteAttributes from './spriteAttributes';
+import TestScreen from './testScreen';
 
 const {
     HORIZONTAL,
     setMirroring,
     setNametable,
+    setAttribute,
     setSpriteData,
     setBackgroundData,
     getPixel,
@@ -27,7 +30,8 @@ export default class Game {
         this.animationFrame = new AnimationFrame(60);
         this.screens = {
           title: new LoadingScreen(this),
-          terrain: new TerrainScreen(this)
+          terrain: new TerrainScreen(this),
+          test: new TestScreen(this)
         };
         this.currentScreen = {};
     }
@@ -84,6 +88,11 @@ export default class Game {
         for (let y=0; y<60; y++)
         for (let x=0; x<32; x++) {
             setNametable(x, y, BLANK);
+        }
+
+        for (let y=0; y<30; y++)
+        for (let x=0; x<16; x++) {
+          setAttribute(x,y,0);
         }
     }
 

@@ -57,9 +57,9 @@ const getRock = (up, down, left, right) => {
 const LIGHT_GREEN = 0x1a;
 const DARK_GREEN = 0x0a;
 const LIGHT_BLUE = 0x11;
-const DARK_BLUE = 0x01;
-const LIGHT_BROWN = 0x1B;
-const DARK_BROWN = 0x08;
+const DARK_BLUE = 0x21;
+const LIGHT_BROWN = 0x18;
+const DARK_BROWN = 0x17;
 const LIGHT_GRAY = 0x10;
 const DARK_GRAY = 0x00;
 
@@ -144,6 +144,10 @@ export default class TerrainScreen {
   }
 
   update (time) {
+    if (isPressed(buttons.START)) {
+      game.loadScreen(game.screens.terrain);
+    }
+
     const scrollAmt = 1;
     if (isPressed(buttons.UP)) {
         this.scroll.y -= scrollAmt;
