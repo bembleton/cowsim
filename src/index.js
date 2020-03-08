@@ -1,5 +1,7 @@
 import Game from './game';
 import './dark.css';
+import * as sound from './sound';
+
 
 const canvas = document.getElementById('canvas');
 const game = new Game(canvas);
@@ -12,8 +14,12 @@ game.onUpdate = () => {
 
 window.game = game;
 
+document.getElementById('btnPower').onclick = async (e) => {
+  game.power();
+};
+
 document.getElementById('btnReset').onclick = (e) => {
-    game.reset();
+  game.reset();
 };
 
 var hidden, visibilityChange; 
@@ -37,6 +43,3 @@ function handleVisibilityChange() {
 }
 
 document.addEventListener(visibilityChange, handleVisibilityChange, false);
-
-// start
-game.reset().then(() => game.play());

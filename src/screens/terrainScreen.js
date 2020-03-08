@@ -1,7 +1,7 @@
-import ppu from './ppu';
-import { rand, randInt } from './random';
+import ppu from '../ppu';
+import { rand, randInt } from '../random';
 import Terrain from './terrain';
-import { isPressed, buttons } from './controller';
+import { isPressed, buttons } from '../controller';
 
 const {
   HORIZONTAL,
@@ -13,6 +13,15 @@ const {
   setBgPalette,
   setScroll
 } = ppu;
+
+const LIGHT_GREEN = 0x1a;
+const DARK_GREEN = 0x0a;
+const LIGHT_BLUE = 0x11;
+const DARK_BLUE = 0x21;
+const LIGHT_BROWN = 0x18;
+const DARK_BROWN = 0x17;
+const LIGHT_GRAY = 0x10;
+const DARK_GRAY = 0x00;
 
 const getWater = (up, down, left, right) => {
   const [u, d, l, r] = [up == 0, down == 0, left == 0, right == 0];
@@ -53,15 +62,6 @@ const getRock = (up, down, left, right) => {
   //if (!u && d && !l && !r) return 0x43;
   //if (!u && !d && l && r)
 };
-
-const LIGHT_GREEN = 0x1a;
-const DARK_GREEN = 0x0a;
-const LIGHT_BLUE = 0x11;
-const DARK_BLUE = 0x21;
-const LIGHT_BROWN = 0x18;
-const DARK_BROWN = 0x17;
-const LIGHT_GRAY = 0x10;
-const DARK_GRAY = 0x00;
 
 export default class TerrainScreen {
   constructor (game) {

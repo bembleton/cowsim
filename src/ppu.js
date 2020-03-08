@@ -70,6 +70,8 @@ const setScroll = (x, y) => {
     state.scroll.y = y > 0 ? y % 480 : y + 480;
 };
 
+const getScroll = () => state.scroll;
+
 // with mirroring
 // 32+32 x 30+30 = 64x60
 /**
@@ -81,6 +83,11 @@ const setScroll = (x, y) => {
 const setNametable = (x, y, tile) => {
     const adr = getNametableAdr(x, y);
     nametables[adr] = tile;
+};
+
+const getNametable = (x, y) => {
+    const adr = getNametableAdr(x, y);
+    return nametables[adr];
 };
 
 // with mirroring
@@ -263,7 +270,29 @@ const getPixel = (screenx, screeny) => {
         getBgColor(palette, color);
 };
 
+const getScreenSpaceTile = (screenx, screeny) => {
+    let x = (screenx + state.scroll.x) % 512;
+    if (x < 0) x += 512;
+    let y = (screeny + state.scroll.y) % 480;
+    if (y < 0) y += 480;
 
+    const tilex = x >> 3; // 0-31 (0-63)
+    const tiley = y >> 3; // 0-29 (0-59)
+
+    return getTile(tilex, tiley);
+};
+
+const screenToTileX = (screenx) => {
+    let x = (screenx + state.scroll.x) % 512;
+    if (x < 0) x += 512;
+    return x >> 3; // 0-31 (0-63)
+};
+
+const screenToTileY = (screeny) => {
+    let y = (screeny + state.scroll.y) % 480;
+    if (y < 0) y += 480;
+    return y >> 3; // 0-29 (0-59)
+};
 
 // idx: 0-255
 // pixelx: 0-7
@@ -275,7 +304,7 @@ const getSpritePixel = (idx, pixelx, pixely) => {
     // 4 pixels per byte. 32 bytes per row
     // 2 bytes per row of pixels per sprite
 
-    const top_left = ((idx >> 5) * 256) + ((idx % 16) * 2);
+    const top_left = ((idx >> 4) * 256) + ((idx % 16) * 2);
     const adr = top_left + (pixely * 32) + (pixelx >> 2);
     const data = spriteTable[adr];
     const offset = 6 - ((pixelx % 4) * 2);
@@ -294,7 +323,9 @@ export default {
     getCommonBackground,
     setMirroring,
     setScroll,
-    setNametable,      // sets the tile index for a nametable entry
+    getScroll,
+    setNametable,
+    getNametable,      // sets the tile index for a nametable entry
     setAttribute,      // sets the palette for an attribute entry
     getBgColor,
     getSpriteColor,
@@ -304,7 +335,9 @@ export default {
     setBackgroundData, // writes pixel data to the tile sheet
     getPixel,
     getSpritePixel,
-
+    getScreenSpaceTile,
+    screenToTileX,
+    screenToTileY,
     // test
     attributes,
     getAttributeAdr

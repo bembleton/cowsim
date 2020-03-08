@@ -23,15 +23,16 @@ h1 {
     transform: translate(0, 50%) scale(2);
 }
 
-#btnReset {
-    margin: 60px;
+.controls {
+    margin: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.button {
-    display: inline-block;
-    height: 32px;
-    width: 32px;
-    margin: 4px;
+.controls button {
+    margin: 8px;
+    width: 200px;
     border: 1px solid lightslategray;
 }
 

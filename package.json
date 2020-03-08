@@ -14,7 +14,9 @@
   "dependencies": {
     "animation-frame": "^0.3.0",
     "bmp-js": "^0.1.0",
-    "key-events": "^0.1.1"
+    "key-events": "^0.1.1",
+    "perlin-noise": "0.0.1",
+    "tone": "^13.8.25"
   },
   "devDependencies": {
     "@babel/core": "^7.8.7",

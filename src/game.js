@@ -1,25 +1,31 @@
 import AnimationFrame from 'animation-frame';
+import { start as startAudio } from 'tone';
 // import { inputs, isPressed, getAxis } from './gamepad';
 import Display from './display';
 import spriteManager from './spriteManager';
 import ppu from './ppu';
 import loadBitmap from './bitmapLoader';
 import gametime from './gametime';
-import tileSheet from './assets/background.bmp';
+import tileSheet from './assets/background2.bmp';
 import spriteSheet from './assets/sprites.bmp';
-import LoadingScreen from './loadingScreen';
-import TerrainScreen from './terrainScreen';
 import spriteAttributes from './spriteAttributes';
-import TestScreen from './testScreen';
+
+import LoadingScreen from './screens/loadingScreen';
+import TerrainScreen from './screens/terrainScreen';
+import TestScreen from './screens/testScreen';
 
 const {
     HORIZONTAL,
+    setCommonBackground,
     setMirroring,
     setNametable,
     setAttribute,
     setSpriteData,
     setBackgroundData,
     getPixel,
+    setScroll,
+    setBgPalette,
+    setSpritePalette,
 } = ppu;
 
 const BLANK = 0xFF;
@@ -33,16 +39,50 @@ export default class Game {
           terrain: new TerrainScreen(this),
           test: new TestScreen(this)
         };
-        this.currentScreen = {};
+        this.currentScreen = null;
+        this.on = false; // 
+        this.running = false;
     }
     
+    async power (enable) {
+        this.on = ~this.on;
+        if (this.on) {
+            await this.reset();
+            await startAudio();
+            this.play();
+        } else {
+            this.pause();
+            await this.reset();
+        }
+    }
+
     async reset () {
         console.log('RESET');
+
+
         // load tile sheets
         await loadBitmap(tileSheet, setBackgroundData);
         await loadBitmap(spriteSheet, setSpriteData);
+        
+        setMirroring(HORIZONTAL);
+        setCommonBackground(0x3F);
+        setScroll(0, 0);
+        for (let i=0;i<4;i++) {
+            setBgPalette(i, 0x3F, 0x3F, 0x3F, 0x3F);
+            setSpritePalette(i, 0x3F, 0x3F, 0x3F, 0x3F);
+        }
+        this.clearBackground();
         spriteManager.clearSprites();
-        this.loadScreen(this.screens.title);
+        
+        this.draw(); // blank the screen
+
+        if (this.on) {
+            // wait a sec ...
+            window.setTimeout(() => {
+                this.loadScreen(this.screens.test);
+                this.play();
+            }, 500);
+        }
     }
 
     loadScreen (screen) {
@@ -52,6 +92,8 @@ export default class Game {
 
     play () {
         const self = this;
+
+        if (!this.on || this.running) return;
 
         this.startTime = this.time = new gametime(Date.now(), 0, 0);
         this.fps = 0;
@@ -67,10 +109,12 @@ export default class Game {
         }
 
         this.frameId = this.animationFrame.request(tick);
+        this.running = true;
     }
 
     pause () {
         this.animationFrame.cancel(this.frameId);
+        this.running = false;
     }
 
     update (time) {
@@ -80,11 +124,12 @@ export default class Game {
             this.onUpdate();
         }
         
-        this.currentScreen.update(time);
+        if (this.currentScreen) {
+            this.currentScreen.update(time);
+        }
     }
 
-    clear () {
-        setMirroring(HORIZONTAL);
+    clearBackground () {
         for (let y=0; y<60; y++)
         for (let x=0; x<32; x++) {
             setNametable(x, y, BLANK);

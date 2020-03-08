@@ -1,8 +1,8 @@
-import spriteManager from './spriteManager';
-import ppu from './ppu';
-import text from './text';
-import { isPressed, buttons } from './controller';
-import Animation from './animation';
+import spriteManager from '../spriteManager';
+import ppu from '../ppu';
+import text from '../text';
+import { isPressed, buttons } from '../controller';
+import Animation from '../animation';
 
 const {
     HORIZONTAL,
