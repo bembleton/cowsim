@@ -1,5 +1,6 @@
 import AnimationFrame from 'animation-frame';
-import { start as startAudio } from 'tone';
+//import { start as startAudio } from 'tone';
+import * as sound from './sound';
 // import { inputs, isPressed, getAxis } from './gamepad';
 import Display from './display';
 import spriteManager from './spriteManager';
@@ -12,7 +13,7 @@ import spriteAttributes from './spriteAttributes';
 
 import LoadingScreen from './screens/loadingScreen';
 import TerrainScreen from './screens/terrainScreen';
-import TestScreen from './screens/testScreen';
+import ZeldaScreen from './screens/zeldaScreen';
 
 const {
     HORIZONTAL,
@@ -37,10 +38,11 @@ export default class Game {
         this.screens = {
           title: new LoadingScreen(this),
           terrain: new TerrainScreen(this),
-          test: new TestScreen(this)
+          zelda: new ZeldaScreen(this)
         };
+        this.startingScreen = this.screens.title;
         this.currentScreen = null;
-        this.on = false; // 
+        this.on = false;
         this.running = false;
     }
     
@@ -48,7 +50,7 @@ export default class Game {
         this.on = ~this.on;
         if (this.on) {
             await this.reset();
-            await startAudio();
+            await sound.enable();
             this.play();
         } else {
             this.pause();
@@ -58,7 +60,6 @@ export default class Game {
 
     async reset () {
         console.log('RESET');
-
 
         // load tile sheets
         await loadBitmap(tileSheet, setBackgroundData);
@@ -73,13 +74,14 @@ export default class Game {
         }
         this.clearBackground();
         spriteManager.clearSprites();
-        
+        this.currentScreen = null;
+
         this.draw(); // blank the screen
 
         if (this.on) {
             // wait a sec ...
             window.setTimeout(() => {
-                this.loadScreen(this.screens.test);
+                this.loadScreen(this.startingScreen);
                 this.play();
             }, 500);
         }
@@ -149,5 +151,9 @@ export default class Game {
         }
         spriteManager.draw(this.display);
         this.display.draw();
+    }
+
+    setVolume (volume) {
+        sound.setVolume(volume);
     }
 };

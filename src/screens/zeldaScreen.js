@@ -279,6 +279,7 @@ export default class TestScreen {
       }
     }
 
+    spriteManager.clearSprites();
     this.link.swordSprite[0] = spriteManager.requestSprite();
     this.link.swordSprite[1] = spriteManager.requestSprite();
     

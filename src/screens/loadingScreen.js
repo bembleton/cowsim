@@ -49,8 +49,6 @@ export default class LoadingScreen {
 
     setSpritePalette(0, BLACK, 0x18, 0x28, 0x38); // pacman
 
-    this.game.clear();
-    //this.updateTitleScreen();
     // fill the screen with squiggles
     this.fillWithSquiggles(0,0, 32,60, 2);
 
@@ -137,7 +135,7 @@ export default class LoadingScreen {
     const { game, pacmanAnimation } = this;
 
     if (isPressed(buttons.START)) {
-      game.loadScreen(game.screens.terrain);
+      game.loadScreen(game.screens.zelda);
     }
 
     if (pacmanAnimation) {

@@ -39,3 +39,23 @@ h1 {
 .button.pressed {
     background-color: lightseagreen;
 }
+
+.slider {
+    -webkit-appearance: none;
+    background: #000000  ;
+    width: 50%;
+    height: 20px;
+    opacity: 2;
+}
+
+.slider:hover {
+    opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    cursor: pointer;
+    background: #34495E  ;
+    width: 5%;
+    height: 20px;
+}

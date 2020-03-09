@@ -1,10 +1,19 @@
-import { Synth, NoiseSynth, Part, Loop, Transport, start, context } from 'tone';
+import {
+  Synth,
+  NoiseSynth,
+  Part,
+  Loop,
+  Transport,
+  start,
+  context,
+  Master
+} from 'tone';
 
 const pulseOptions = {
   oscillator:{
     type: "pulse"
   },
-  envelope:{
+    envelope:{
     release: 0.07
   }
 };
@@ -32,10 +41,9 @@ const part = new Part(function(time, note){
  ]
 );
 
-// doesnt work
 const footsteps = new Loop(time => {
   noise.triggerAttackRelease(0.1, time, 0.1);
-}, "8n").start(0);
+}, "8n");
 
 export const play = () => {
   //part.start(0);
@@ -47,6 +55,7 @@ export const enable = async (enable) => {
   Transport.bpm.value = 150;
   Transport.start();
   context.resume()
+  Master.volume.value = -12;
 };
 const noop = () => {};
 
@@ -55,3 +64,6 @@ export const effects = {
   footStep: noop, //() => noise.triggerAttackRelease(0.15, '+0', 0.1)
 };
 
+export const setVolume = (volume) => {
+  Master.volume.value = volume;
+}
