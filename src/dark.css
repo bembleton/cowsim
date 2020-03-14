@@ -2,11 +2,12 @@ body {
     margin: 0;
     background-color: #222;
     text-align: center;
+    color: #ddd;
     font-family: Lato;
 }
 
 h1 {
-    color: #ddd;
+    
     letter-spacing: 0.3rem;
     margin: 15px 0;
 }
@@ -30,6 +31,12 @@ h1 {
     align-items: center;
 }
 
+.controls label {
+    width: 200px;
+    text-align: left;
+    margin-top: 12px;
+}
+
 .controls button {
     margin: 8px;
     width: 200px;
@@ -41,15 +48,7 @@ h1 {
 }
 
 .slider {
-    -webkit-appearance: none;
-    background: #000000  ;
-    width: 50%;
-    height: 20px;
-    opacity: 2;
-}
-
-.slider:hover {
-    opacity: 1;
+    width: 200px;
 }
 
 .slider::-webkit-slider-thumb {

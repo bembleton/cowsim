@@ -1,16 +1,20 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: './src/index.js',
     devtool: 'inline-source-map',
     mode: 'development',
     devServer: {
-        contentBase: './public',
+        contentBase: './dist',
         hot: true,
     },
     plugins: [
-        new MiniCssExtractPlugin()
+        new MiniCssExtractPlugin(),
+        new CopyWebpackPlugin([
+            { from: 'src/static' }
+        ])
     ],
     module: {
         rules: [
@@ -30,6 +34,6 @@ module.exports = {
     },
     output: {
         filename: 'main.js',
-        path: path.resolve(__dirname, 'public')
+        path: path.resolve(__dirname, 'dist')
     }
 };
