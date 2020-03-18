@@ -6,6 +6,9 @@ import * as sound from './sound';
 const canvas = document.getElementById('canvas');
 const game = new Game(canvas);
 
+// turn on now
+game.power();
+
 const fps = document.getElementById('fps');
 
 game.onUpdate = () => {

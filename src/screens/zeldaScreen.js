@@ -1,3 +1,4 @@
+import perlin from 'perlin-noise';
 import ppu from '../ppu';
 import spriteManager from '../spriteManager';
 import { isPressed, buttons } from '../controller';
@@ -21,7 +22,6 @@ const {
   screenToTileY,
 } = ppu;
 
-import perlin from 'perlin-noise';
 
 const LIGHT_GREEN = 0x29;
 const MED_GREEN = 0x1a;

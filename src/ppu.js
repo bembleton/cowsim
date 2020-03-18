@@ -101,7 +101,7 @@ const getNametable = (x, y) => {
 const getNametableAdr = (x, y) => {
     const X = x % 32; // x is either 0-31 or 0-63
     const Y = (state.mirroring == HORIZONTAL) ?
-        y : (y % 30) << (x >> 5);
+        y : y + (30 * (x >> 5));
 
     // X,Y = 32x60
     return Y * 32 + X;
@@ -265,9 +265,10 @@ const getPixel = (screenx, screeny) => {
     const tile_pixel_y = y % 8;
     const color = getTilePixel(tile, tile_pixel_x, tile_pixel_y)
 
-    return color === 0 ? 
-        state.common_background :
-        getBgColor(palette, color);
+    // return color === 0 ? 
+    //     state.common_background :
+    //     getBgColor(palette, color);
+    return getBgColor(palette, color);
 };
 
 const getScreenSpaceTile = (screenx, screeny) => {

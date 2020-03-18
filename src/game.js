@@ -14,6 +14,7 @@ import spriteAttributes from './spriteAttributes';
 import LoadingScreen from './screens/loadingScreen';
 import TerrainScreen from './screens/terrainScreen';
 import ZeldaScreen from './screens/zeldaScreen';
+import HudWrapScreen from './screens/hudWrapScreen';
 
 const {
     HORIZONTAL,
@@ -35,15 +36,9 @@ export default class Game {
     constructor (canvas) {
         this.display = new Display(canvas.getContext('2d'));
         this.animationFrame = new AnimationFrame(60);
-        this.screens = {
-          title: new LoadingScreen(this),
-          terrain: new TerrainScreen(this),
-          zelda: new ZeldaScreen(this)
-        };
-        this.startingScreen = this.screens.title;
-        this.currentScreen = null;
         this.on = false;
         this.running = false;
+        this.currentScreen = null;
     }
     
     async power (enable) {
@@ -74,7 +69,15 @@ export default class Game {
         }
         this.clearBackground();
         spriteManager.clearSprites();
+        
         this.currentScreen = null;
+        this.screens = {
+          title: new LoadingScreen(this),
+          terrain: new TerrainScreen(this),
+          zelda: new ZeldaScreen(this),
+          hudWrap: new HudWrapScreen(this)
+        };
+        this.startingScreen = this.screens.hudWrap;
 
         this.draw(); // blank the screen
 
@@ -122,9 +125,7 @@ export default class Game {
     update (time) {
         this.fps = Math.floor(1000 / time.elapsed);
 
-        if (this.onUpdate) {
-            this.onUpdate();
-        }
+        if (this.onUpdate) this.onUpdate();
         
         if (this.currentScreen) {
             this.currentScreen.update(time);
@@ -144,10 +145,13 @@ export default class Game {
     }
 
     draw () {
-        for (let y=0; y<240; y++)
-        for (let x=0; x<256; x++) {
-            const color = getPixel(x, y);
-            this.display.setPixel(x, y, color);
+        for (let y=0; y<240; y++){
+          if (this.onScanLine) this.onScanLine(y);
+
+          for (let x=0; x<256; x++) {
+              const color = getPixel(x, y);
+              this.display.setPixel(x, y, color);
+          }
         }
         spriteManager.draw(this.display);
         this.display.draw();
