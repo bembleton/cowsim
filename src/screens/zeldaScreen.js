@@ -102,7 +102,7 @@ export default class TestScreen {
   }
 
   update (time) {
-    const scrollAmt = 1;
+    const scrollAmt = 2;
     const { scroll, link } = this;
     const wasMoving = link.moving;
     link.moving = false;

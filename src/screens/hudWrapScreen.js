@@ -169,22 +169,6 @@ export default class HudWrapScreen {
 
     // null, 'up', 'down', 'left', 'right'
     this.scrolling = null;
-
-    game.onScanLine = (y) => {
-      if (y === 0) {
-        // draw hud
-        setScroll(0, 0);
-        hud_palettes.forEach((x,i) => {
-          setBgPalette(i, x[0], x[1], x[2], x[3]);
-        });
-
-      } else if (y === 48) {
-        setScroll(this.scroll.x, this.scroll.y);
-        palettes.forEach((x,i) => {
-          setBgPalette(i, x[0], x[1], x[2], x[3]);
-        });
-      }
-    };
   }
 
   load () {
@@ -203,6 +187,22 @@ export default class HudWrapScreen {
     drawArea(posx, posy, 0, 3);
 
     drawHud();
+  }
+
+  onScanLine (y) {
+    if (y === 0) {
+      // draw hud
+      setScroll(0, 0);
+      hud_palettes.forEach((x,i) => {
+        setBgPalette(i, x[0], x[1], x[2], x[3]);
+      });
+
+    } else if (y === 48) {
+      setScroll(this.scroll.x, this.scroll.y);
+      palettes.forEach((x,i) => {
+        setBgPalette(i, x[0], x[1], x[2], x[3]);
+      });
+    }
   }
 
   update () {

@@ -77,7 +77,7 @@ export default class Game {
           zelda: new ZeldaScreen(this),
           hudWrap: new HudWrapScreen(this)
         };
-        this.startingScreen = this.screens.hudWrap;
+        this.startingScreen = this.screens.zelda;
 
         this.draw(); // blank the screen
 
@@ -146,7 +146,7 @@ export default class Game {
 
     draw () {
         for (let y=0; y<240; y++){
-          if (this.onScanLine) this.onScanLine(y);
+          if (this.currentScreen && this.currentScreen.onScanLine) this.currentScreen.onScanLine(y);
 
           for (let x=0; x<256; x++) {
               const color = getPixel(x, y);
