@@ -3,6 +3,8 @@ const {
   attributes,
   setAttribute,
   getAttributeAdr,
+  setNametableAdr,
+  getNametableAdr,
   setMirroring,
   HORIZONTAL,
   VERTICAL
@@ -183,6 +185,17 @@ describe('ppu', () => {
       });
     });
   });
+
+  describ('getNametableAdr', () => {
+    describe('with vertical mirroring', () => {
+      it.each([
+        [63, 6, ]
+      ])('should return correct address for %i,%i',
+      (x,y, expected) => {
+
+      });
+    })
+  })
 });
 
 /*
