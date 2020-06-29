@@ -1,5 +1,6 @@
-import { inputs, isPressed as gamepadPressed, getAxis } from './gamepad';
-import keystate from './keybindings';
+import { inputs, isPressed as gamepadPressed, getAxis } from './input/gamepad';
+import keystate from './input/keybindings';
+import touchstate from './input/touch';
 
 const buttons = {
   UP: 'UP',
@@ -57,7 +58,7 @@ const isPressed = (button) => {
   const key = buttonsToKeys[button];
   const input = buttonsToGamepadInputs[button];
 
-  return keystate[key] || gamepadPressed(input) || hasAnalogStickEquivalent(button);
+  return keystate[key] || touchstate[key] || gamepadPressed(input) || hasAnalogStickEquivalent(button);
 };
 
 // handle gamepad 

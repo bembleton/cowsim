@@ -1,6 +1,3 @@
-// import keyevents from 'key-events';
-
-//const keys = keyevents();
 const keystate = {};
 let debug = false;
 
@@ -26,5 +23,7 @@ const RIGHT = 'ArrowRight';
 const DOWN = 'ArrowDown';
 const A = 'z';
 const B = 'x';
+const SELECT = 'a';
+const START = 's';
 
 export default keystate;

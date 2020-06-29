@@ -1,9 +1,9 @@
 import perlin from 'perlin-noise';
-import ppu from '../ppu';
-import spriteManager from '../spriteManager';
-import { isPressed, buttons } from '../controller';
-import { randInt } from '../random';
-import { effects } from '../sound.js';
+import ppu from '~/ppu';
+import spriteManager from '~/spriteManager';
+import { isPressed, buttons } from '~/controller';
+import { randInt } from '~/random';
+import { effects } from '~/sound';
 
 const {
   HORIZONTAL,
@@ -287,6 +287,10 @@ export default class TestScreen {
     for (let i=0; i<4; i++){
       this.link.sprites.push(spriteManager.requestSprite());
     }
+  }
+
+  unload () {
+    spriteManager.clearSprites();
   }
 
   drawBlank (X, Y) {

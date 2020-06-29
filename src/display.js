@@ -29,11 +29,8 @@ class Display {
         const g = getColorByte(displayColor, 1);
         const b = getColorByte(displayColor, 2);
         const idx = y * ROW_WIDTH + x * BYTES_PER_PIXEL;
-        
-        this.pixels[idx + 0] = r;
-        this.pixels[idx + 1] = g;
-        this.pixels[idx + 2] = b;
-        this.pixels[idx + 3] = 0xFF;
+        if (idx < 0 || idx >= this.pixels.length) return;
+        this.pixels.set([r, g, b, 0xFF], idx);
     }
     
     draw () {

@@ -157,9 +157,6 @@ const getAttributeOffset = (x, y) => {
     const shiftY = ((Y > 14 ? Y+1 : Y) % 2) << 2; // 0 or 4
     return shiftX + shiftY;
   }
-
-
-    
 };
 
 /**
@@ -171,10 +168,12 @@ const getAttributeOffset = (x, y) => {
  * @param {*} c3 color 3
  */
 const setBgPalette = (idx, c0, c1, c2, c3) => {
-    palettes[idx * 4 + 0] = c0;
-    palettes[idx * 4 + 1] = c1;
-    palettes[idx * 4 + 2] = c2;
-    palettes[idx * 4 + 3] = c3;
+  palettes.set([c0, c1, c2, c3], idx*4);
+};
+
+/** sets all background palettes */
+const setBgPalettes = (colors) => {
+  palettes.set(colors)
 };
 
 /**
@@ -183,10 +182,7 @@ const setBgPalette = (idx, c0, c1, c2, c3) => {
  * @param {*} colors [c0, c1, c2, c3]
  */
 const setSpritePalette = (idx, c0, c1, c2, c3) => {
-    palettes[16 + idx * 4 + 0] = c0;
-    palettes[16 + idx * 4 + 1] = c1;
-    palettes[16 + idx * 4 + 2] = c2;
-    palettes[16 + idx * 4 + 3] = c3;
+  palettes.set([c0, c1, c2, c3], 16 + idx*4);
 };
 
 const getBgColor = (idx, colorIdx) => {
@@ -265,10 +261,10 @@ const getPixel = (screenx, screeny) => {
     const tile_pixel_y = y % 8;
     const color = getTilePixel(tile, tile_pixel_x, tile_pixel_y)
 
-    // return color === 0 ? 
-    //     state.common_background :
-    //     getBgColor(palette, color);
-    return getBgColor(palette, color);
+    return color === 0 ? 
+        state.common_background :
+        getBgColor(palette, color);
+    //return getBgColor(palette, color);
 };
 
 const getScreenSpaceTile = (screenx, screeny) => {
@@ -331,6 +327,7 @@ export default {
     getBgColor,
     getSpriteColor,
     setBgPalette,
+    setBgPalettes,
     setSpritePalette,
     setSpriteData,     // writes pixel data to the tile sheet
     setBackgroundData, // writes pixel data to the tile sheet

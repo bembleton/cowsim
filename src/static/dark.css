@@ -1,0 +1,223 @@
+body {
+  margin: 0;
+  background-color: #222;
+  text-align: center;
+  color: #ddd;
+  font-family: Lato;
+  letter-spacing: 0.15rem;
+  display: flex;
+  justify-content: center;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 5vw;
+}
+
+h1 {
+  letter-spacing: 0.3rem;
+  margin: 15px 0;
+}
+
+#canvas {
+  border: 0.75px solid #aaa;
+  background-color: #000;
+  width: 100%;
+}
+
+.controls {
+  margin: 16px;
+  justify-items: center;
+  align-items: center;
+  display: inline-grid;
+  grid-template-columns: auto auto;
+  gap: 4px;
+}
+
+.controls label {
+  line-height: 1.5rem;
+}
+
+.controls button {
+  width: 135px;
+  height: 32px;
+  border: 1px solid lightslategray;
+  border-radius: 4px;
+  font-family: 'Lato';
+  font-weight: bold;
+  letter-spacing: 0.15rem;
+}
+
+.controls button.ON {
+  background-color: chartreuse;
+}
+
+.button.pressed {
+  background-color: lightseagreen;
+}
+
+.controls button svg.icon {
+  height: 18px;
+  fill: black;
+}
+
+.slider {
+  height: 32px;
+}
+
+/* reset */
+input[type=range] {
+  -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+  width: 100%; /* Specific width is required for Firefox. */
+  background: transparent; /* Otherwise white in Chrome */
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+}
+
+input[type=range]:focus {
+  outline: none; /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
+}
+
+input[type=range]::-ms-track {
+  width: 100%;
+  cursor: pointer;
+
+  /* Hides the slider so custom styles can be added */
+  background: transparent; 
+  border-color: transparent;
+  color: transparent;
+}
+
+/* slider */
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 0.8rem;
+  cursor: pointer;
+  background: #3071a9;
+  border-radius: 1.3px;
+  border: 1px solid lightslategray;
+}
+input[type=range]::-webkit-slider-thumb {
+  border: 1px solid lightslategray;
+  height: 1.6rem;
+  width: 16px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -0.4rem;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: #367ebd;
+}
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  background: #3071a9;
+  border-radius: 1.3px;
+  border: 0.2px solid #010101;
+}
+input[type=range]::-moz-range-thumb {
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  border: 1px solid #000000;
+  height: 36px;
+  width: 16px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+}
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  border-width: 16px 0;
+  color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+  background: #2a6495;
+  border: 0.2px solid #010101;
+  border-radius: 2.6px;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+}
+input[type=range]::-ms-fill-upper {
+  background: #3071a9;
+  border: 0.2px solid #010101;
+  border-radius: 2.6px;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+}
+input[type=range]::-ms-thumb {
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  border: 1px solid #000000;
+  height: 36px;
+  width: 16px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+}
+input[type=range]:focus::-ms-fill-lower {
+  background: #3071a9;
+}
+input[type=range]:focus::-ms-fill-upper {
+  background: #367ebd;
+}
+.gamepad-image {
+  margin-bottom: 64px;
+  touch-action: none;
+}
+
+.gamepad-image .dpad {
+  fill:#000000;
+  fill-opacity:1;
+  fill-rule:nonzero;
+  stroke:#ffffff;
+  stroke-width:1.65229523;
+  stroke-linecap:round;
+  stroke-linejoin:miter;
+  stroke-miterlimit:4;
+  stroke-opacity:1;
+  stroke-dasharray:none;
+}
+
+.dpad.pressed {
+  fill: url('#dpadGradient');
+}
+
+.gamepad-image .system-button {
+  fill: #000000;
+  fill-opacity: 1;
+  fill-rule: nonzero;
+}
+
+.gamepad-image .system-button.pressed {
+  fill: #333333;
+}
+
+.gamepad-image .action-button {
+  fill: #ff0000;
+  fill-opacity:1;
+  fill-rule:nonzero;
+  stroke: #000000;
+  stroke-width: 0.5px;
+}
+
+.gamepad-image .action-button.pressed {
+  fill: #bb0000;
+  
+}

@@ -32,6 +32,12 @@ module.exports = {
             }
         ],
     },
+    resolve: {
+      extensions: [".js"],
+      alias: {
+        "~": path.resolve(__dirname, "src")
+      }
+    },
     output: {
         filename: 'main.js',
         path: path.resolve(__dirname, 'dist')

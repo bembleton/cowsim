@@ -8,12 +8,12 @@ export default class Animation {
     this.time = 0;
   }
 
-  update (gametime) {
+  update () {
     const { duration, frameskip, framecount, onUpdate } = this;
     let shouldUpdate = false;
     
     if (duration) {
-      this.time += gametime.elapsed;
+      this.time += 1000/60.0; //gametime.elapsed;
       if (this.time >= duration) {
         shouldUpdate = true;
         this.time -= duration;

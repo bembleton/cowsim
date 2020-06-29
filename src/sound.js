@@ -57,6 +57,11 @@ export const enable = async (enable) => {
   context.resume()
   Master.volume.value = -12;
 };
+
+export const disable = async () => {
+  await enable(false);
+}
+
 const noop = () => {};
 
 export const effects = {

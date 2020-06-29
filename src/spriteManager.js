@@ -36,6 +36,7 @@ class SpriteManager {
       const inUse = (attrs & SPRITE_IN_USE) > 0;
       if (inUse) continue;
       this.sprites[i * 4 + 3] |= SPRITE_IN_USE;
+      this.sprites[i * 4 + 2] = 0xff & 140;
       return i;
     }
   }
@@ -43,8 +44,9 @@ class SpriteManager {
   /**
    * Releases 
    */
-  freeSprite(index) {
-    this.sprites[i * 4 + 3] &= ~SPRITE_IN_USE;
+  freeSprite(idx) {
+    this.sprites[idx * 4 + 3] &= ~SPRITE_IN_USE;
+    this.sprites[idx * 4 + 2] = 0xff & 140;
   }
 
   draw(display) {
@@ -69,11 +71,16 @@ class SpriteManager {
 
     for (var pi = 0; pi < 8; pi++) {
       const px = flipX ? 7 - pi : pi;
+      const dx = x + pi;
+      if (dx < 0 || dx >= 256) continue;
+
       for (var pj = 0; pj < 8; pj++) {
         const py = flipY ? 7 - pj : pj;
+        const dy = y + pj;
+        if (dy < 0 || dy >= 240) continue;
 
         if (priority) {
-          const bg = ppu.getPixel(x + pi, y + pj);
+          const bg = ppu.getPixel(dx, dy);
           if (bg !== ppu.getCommonBackground) continue;
         }
 
@@ -81,7 +88,7 @@ class SpriteManager {
         const color = ppu.getSpritePixel(index, px, py);
         if (color > 0) {
           const displayColor = ppu.getSpriteColor(palette, color);
-          display.setPixel(x + pi, y + pj, displayColor);
+          display.setPixel(dx, dy, displayColor);
         }
       }
     }
