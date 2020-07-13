@@ -16,7 +16,7 @@
   "dependencies": {
     "animation-frame": "^0.3.0",
     "bmp-js": "^0.1.0",
-    "npm": "^6.14.5",
+    "npm": "^6.14.6",
     "perlin-noise": "0.0.1",
     "simplex-noise": "^2.4.0",
     "tone": "^13.8.25"
