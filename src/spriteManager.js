@@ -101,6 +101,21 @@ class SpriteManager {
     this.sprites[i * 4 + 3] = getAttributeByte(flipX, flipY, priority, true, palette);
   };
 
+  updateSprite(i, options) {
+    const attrs = this.sprites[i * 4 + 3];
+    const {
+      index = this.sprites[i * 4 + 0],
+      x = this.sprites[i * 4 + 1],
+      y = this.sprites[i * 4 + 2],
+      flipX = (attrs & SPRITE_FLIP_X) > 0,
+      flipY = (attrs & SPRITE_FLIP_Y) > 0,
+      priority = (attrs & SPRITE_PRIORITY) > 0,
+      palette = attrs & SPRITE_PALETTE
+    } = options;
+
+    this.setSprite(i, index, x, y, flipX, flipY, priority, palette);
+  }
+
   clearSprite(i) {
     this.sprites[i * 4 + 0] = 0x00;
     this.sprites[i * 4 + 1] = 0x00;

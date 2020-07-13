@@ -2,18 +2,20 @@ const keystate = {};
 let debug = false;
 
 document.addEventListener('keydown', (event) => {
-    const { key, keyCode } = event;
-    if (keystate[key]) return;
-    keystate[key] = true;
-    if (key === '`') debug = !debug;
-    if (debug) console.log(`keydown: ${key}`);
+  event.preventDefault();
+  const { key, keyCode } = event;
+  if (keystate[key]) return;
+  keystate[key] = true;
+  if (key === '`') debug = !debug;
+  if (debug) console.log(`keydown: ${key}`);
 }, false);
 
 document.addEventListener('keyup', (event) => {
-    const { key, keyCode } = event;
-    if (keystate[key] === false) return;
-    keystate[key] = false;
-    if (debug) console.log(`keyup: ${key}`);
+  event.preventDefault();
+  const { key, keyCode } = event;
+  if (keystate[key] === false) return;
+  keystate[key] = false;
+  if (debug) console.log(`keyup: ${key}`);
 }, false);
 
 

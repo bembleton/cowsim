@@ -6,6 +6,7 @@ import * as sound from './sound';
 
 const {
   HORIZONTAL,
+  enableCommonBackground,
   setCommonBackground,
   setMirroring,
   setNametable,
@@ -81,6 +82,8 @@ export default class Console {
     setMirroring(HORIZONTAL);
     setScroll(0, 0);
     // reset palettes to black
+    
+    enableCommonBackground(true);
     setCommonBackground(0x3F);
     for (let i=0;i<4;i++) {
         setBgPalette(i, 0x3F, 0x3F, 0x3F, 0x3F);

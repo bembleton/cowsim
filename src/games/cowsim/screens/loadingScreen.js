@@ -5,13 +5,14 @@ import { isPressed, buttons } from '~/controller';
 import Animation from '~/animation';
 import { randInt, randBool, choice } from '~/random';
 import Link from '../link';
-import { fillBlocks, fillWithBrush } from '../utils';
+import { fillBlocks, getBlock, fillWithMetaTiles, dialog, SubPixels } from '../utils';
 
 const { dir } = Link;
 
 const {
     HORIZONTAL,
     VERTICAL,
+    enableCommonBackground,
     setCommonBackground,
     setMirroring,
     setScroll,
@@ -21,8 +22,11 @@ const {
     setSpritePalette,
 } = ppu;
 
-const BLACK = 0x3f;
+const BLACK = 0x3F;
+const DARKGRAY = 0x2D;
+const LIGHTGRAY = 0x10;
 const WHITE = 0x30;
+const ORANGE = 0x19;
 
 const BLANK = 0xFF;
 const BRICK = 0x30;
@@ -37,32 +41,22 @@ const dayLength = 4096;
 const hourLength = Math.floor(dayLength/12);
 const night = dayLength/2;
 const timeOfDayColors = [
-  0x12,
-  0x21,
-  0x21,
-  0x21,
-  0x21,
-  0x23,
-  0x03,
-  0x3f,
-  0x3f,
-  0x3f,
-  0x3f,
-  0x03,
+  0x03, 0x12, 0x12, 0x12, 0x12, 0x22,
+  0x03, 0x3f, 0x3f, 0x3f, 0x3f, 0x03,
 ];
 
-const subPixelAdd = (subpixel, value) => {
-  const x = subpixel + value;
-  return {
-    // signed byte: -128, 127
-  };
-}
+const brownTanGreen       = [BLACK, 0x06, 0x27, 0x2A];
+const yellowLavenderGreen = [BLACK, 0x37, 0x23, 0x09];
+const redOrangeGreen      = [BLACK, 0x15, 0x26, 0x19];
+const grays               = [BLACK, 0x2D, 0x10, 0x20];
+
 export default class LoadingScreen {
   constructor (game) {
     this.game = game;
   }
 
   load () {
+    enableCommonBackground(true);
     setCommonBackground(BLACK);
     setMirroring(HORIZONTAL);
     setScroll(0, 0);
@@ -71,16 +65,16 @@ export default class LoadingScreen {
         y: 0
     };
     
-    setBgPalette(0, BLACK, 0x00, 0x10, WHITE);
+    setBgPalette(0, 0x07, BLACK, 0x17, 0x27); // title
     setBgPalette(1, BLACK, 0x11, 0x21, 0x31); // blues
     setBgPalette(2, BLACK, 0x07, 0x17, 0x27); // oranges
     setBgPalette(3, BLACK, 0x0b, 0x1a, 0x2a); // greens
 
     //setSpritePalette(0, BLACK, 0x06, 0x27, 0x12); // blue link
-    setSpritePalette(0, BLACK, 0x06, 0x27, 0x2A); // green link
-    setSpritePalette(1, BLACK, 0x15, 0x26, 0x19); // flower 1
-    setSpritePalette(2, BLACK, 0x28, 0x23, 0x09); // flower 2
-    setSpritePalette(3, BLACK, 0x2D, 0x10, 0x20); // moon
+    setSpritePalette(0, brownTanGreen); // green link
+    setSpritePalette(1, redOrangeGreen); // flower 1
+    setSpritePalette(2, yellowLavenderGreen); // flower 2
+    setSpritePalette(3, grays); // moon
 
 
     // fill the screen with squiggles
@@ -89,8 +83,11 @@ export default class LoadingScreen {
     //fillBlocks(4, 4, 8, 3, BLANK, 1);
     
     // add the title
-    text(10,10, 'HELLO WORLD!');
-    text(10,11, 'PRESS START.');
+    dialog(9, 7, `THE EPIC OF
+
+    C O W S I M
+
+    PRESS START`, 2);
     
     this.drawGround();
 
@@ -100,17 +97,16 @@ export default class LoadingScreen {
     
     this.drawFlowers();
 
+    const bunnyColors = [0,3];
     this.bunnies = [
-      new Bunny(randInt(16,232), (9*16+8), randInt(3)),
-      new Bunny(randInt(16,232), (9*16+8), randInt(3)),
-      new Bunny(randInt(16,232), (9*16+8), randInt(3)),
-      new Bunny(randInt(16,232), (9*16+8), randInt(3)),
+      new Bunny(randInt(16,232), (9*16+8), choice(bunnyColors)),
+      new Bunny(randInt(16,232), (9*16+8), choice(bunnyColors)),
+      new Bunny(randInt(16,232), (9*16+8), choice(bunnyColors)),
+      new Bunny(randInt(16,232), (9*16+8), choice(bunnyColors)),
     ];
 
     this.link = Link.create();
-    // link should go from 64,64 to 176,104
-    this.link.x = 64;
-    this.link.y = 64;
+    this.link.pos = SubPixels.fromPixels(64, 9*16);
 
     this.updateLink();
 
@@ -148,51 +144,47 @@ export default class LoadingScreen {
 
   drawGround () {
     fillBlocks(0, 10, 16, 1, 0x46, 3); // grass
-    fillWithBrush(0, 11, 16, 5, {
-      palette: 2,
-      tiles: [0x46,0x47,0x56,0x57]
-    });
-    //fillBlocks(0, 11, 16, 5, 0x80, 2); // dirt
+    const block = getBlock(0x46);
+    fillWithMetaTiles(0, 11, 16, 5, block, 2);
   }
 
   drawFlowers () {
     for (let i=0; i<5; i++) {
-      const flower1 = spriteManager.requestSprite();
+      const i = spriteManager.requestSprite();
       const x = randInt(16, 232);
       const y = 9*16+8;
-      const sprite = choice(plants);
+      const index = choice(plants);
       const palette = choice([1,2]);
-      spriteManager.setSprite(flower1, sprite, x, y, randBool(), false, false, palette);    
+      spriteManager.updateSprite(i, { index, x, y, flipX: randBool(), palette });    
     }
   }
 
   updateTimeOfDay () {
     if (this.timeOfDay >= dayLength) this.timeOfDay = 0;
-    if (this.timeOfDay === 0) {
-      setSpritePalette(3, BLACK, 0x38, 0x38, 0x38); // sun
-    } else if (this.timeOfDay === dayLength/2) {
-      setSpritePalette(3, BLACK, 0x2D, 0x10, 0x20); // moon
-    }
+    const isDay = this.timeOfDay < dayLength/2;
 
     if ((this.timeOfDay % hourLength) === 0) {
       let hour = Math.floor(this.timeOfDay/hourLength);
       if (hour > 11) hour = 0;
       setCommonBackground(timeOfDayColors[hour]);
     }
+
     
+    const index = isDay ? 0x19 : 0x15;
+    const palette = isDay ? 2 : 3;
     const theta = (2*Math.PI * this.timeOfDay/dayLength)%(Math.PI);
     const x = 128 + 256 * Math.cos(theta);
     let y = 280 - 256 * Math.sin(theta);
     if (x < 0 || x >= 256) y = 240;
 
-    spriteManager.setSprite(this.moon, 0x15, x, y, false, false, false, 3);
+    spriteManager.updateSprite(this.moon, { index, x, y, palette });
 
     this.timeOfDay += 1;
   }
 
   updateLink (frame) {
     const { link } = this;
-    let { x, y } = link;
+    let { pos } = link;
 
     link.frame = frame;
     link.moving = true;
@@ -200,9 +192,10 @@ export default class LoadingScreen {
     link.direction = dir.RIGHT;
     
     // move
-    link.x = (link.x+1)%256; //x;
-    link.y = 9*16; //y;
-
+    const v = new SubPixels(20, 0);
+    const max = SubPixels.fromPixels(256,240);
+    link.pos = pos.add(v).mod(max);
+    
     Link.draw(link);
   }
 
@@ -210,7 +203,7 @@ export default class LoadingScreen {
     const { game, linkAnimation, moonAnimation } = this;
 
     if (isPressed(buttons.START)) {
-      game.loadScreen(game.screens.zelda);
+      game.loadScreen(game.screens.world);
       return;
     }
 

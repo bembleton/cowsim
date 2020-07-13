@@ -9,7 +9,7 @@
     "start": "webpack-dev-server",
     "ww": "webpack --watch",
     "test": "jest",
-    "deploy": "cd dist && surge --domain cowsim.surge.sh && cd -"
+    "deploy": "cd dist && surge --project ./ --domain cowsim.surge.sh"
   },
   "author": "",
   "license": "ISC",
@@ -23,8 +23,11 @@
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
+    "@babel/plugin-transform-runtime": "^7.10.4",
     "@babel/preset-env": "^7.10.2",
     "babel-jest": "^25.5.1",
+    "babel-loader": "^8.1.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "buffer-loader": "^0.1.0",
     "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^3.6.0",

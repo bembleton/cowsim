@@ -41,13 +41,13 @@ const ongoingTouches = [];
 function copyTouch({ pageX, pageY, identifier }) { return { pageX, pageY, identifier } };
 
 function startTouches(ev) {
-  //ev.preventDefault();
+  ev.preventDefault();
   const touches = [...ev.changedTouches].map(copyTouch);
   ongoingTouches.push(...touches);
   checkTouchState();
 }
 function updateTouches(ev) {
-  //ev.preventDefault();
+  ev.preventDefault();
   const touches = [...ev.changedTouches].map(copyTouch);
   touches.forEach(t => {
     const idx = ongoingTouches.findIndex(x => x.identifier === t.identifier);
@@ -56,7 +56,7 @@ function updateTouches(ev) {
   checkTouchState();
 }
 function endTouches(ev) {
-  //ev.preventDefault();
+  ev.preventDefault();
   [...ev.changedTouches].forEach(t => {
     const idx = ongoingTouches.findIndex(x => x.identifier === t.identifier);
     if (idx > -1) ongoingTouches.splice(idx, 1);

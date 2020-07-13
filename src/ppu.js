@@ -20,6 +20,9 @@ const toBinary = (x) => {
  */
 const palettes = new Uint8Array(32);
 
+/** Set to false to override the standard behavior of sharing the background color for all BG tiles */
+const SHARED_BG_COLOR_ENABLED = false;
+
 /*
     128x128 pixels
     4 pixels/byte,
@@ -41,7 +44,8 @@ const state = {
         x: 0,
         y: 0
     },
-    common_background: 0x3f // black
+    common_background: 0x3f, // black
+    common_background_enabled: false
 };
 
 // 0x00-0x3f
@@ -54,6 +58,8 @@ const setCommonBackground = (color) => {
 };
 
 const getCommonBackground = () => state.common_background;
+
+const enableCommonBackground = (enable) => state.common_background_enabled = enable;
 
 // HORIZONTAL:0, VERTICAL:1
 const setMirroring = (mode) => {
@@ -167,8 +173,12 @@ const getAttributeOffset = (x, y) => {
  * @param {*} c2 color 2
  * @param {*} c3 color 3
  */
-const setBgPalette = (idx, c0, c1, c2, c3) => {
-  palettes.set([c0, c1, c2, c3], idx*4);
+const setBgPalette = (idx, ...colors) => {
+  if (colors.length > 1) {
+    palettes.set(colors, idx*4);
+  } else {
+    palettes.set(colors[0], idx*4);
+  }
 };
 
 /** sets all background palettes */
@@ -181,8 +191,12 @@ const setBgPalettes = (colors) => {
  * @param {*} idx 0-3
  * @param {*} colors [c0, c1, c2, c3]
  */
-const setSpritePalette = (idx, c0, c1, c2, c3) => {
-  palettes.set([c0, c1, c2, c3], 16 + idx*4);
+const setSpritePalette = (idx, ...colors) => {
+  if (colors.length > 1) {
+    palettes.set(colors, 16 + idx*4);
+  } else {
+    palettes.set(colors[0], 16 + idx*4);
+  }
 };
 
 const getBgColor = (idx, colorIdx) => {
@@ -261,10 +275,9 @@ const getPixel = (screenx, screeny) => {
     const tile_pixel_y = y % 8;
     const color = getTilePixel(tile, tile_pixel_x, tile_pixel_y)
 
-    return color === 0 ? 
-        state.common_background :
-        getBgColor(palette, color);
-    //return getBgColor(palette, color);
+    return color === 0 && state.common_background_enabled ? 
+      state.common_background :
+      getBgColor(palette, color);
 };
 
 const getScreenSpaceTile = (screenx, screeny) => {
@@ -318,6 +331,7 @@ export default {
     VERTICAL,
     setCommonBackground,
     getCommonBackground,
+    enableCommonBackground,
     setMirroring,
     setScroll,
     getScroll,

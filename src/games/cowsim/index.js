@@ -5,6 +5,7 @@ import ppu from '~/ppu';
 
 import LoadingScreen from './screens/loadingScreen';
 import ZeldaScreen from './screens/zeldaScreen';
+import HudWrapScreen from './screens/hudWrapScreen';
 
 const {
   HORIZONTAL,
@@ -31,6 +32,7 @@ class Cowsim {
 
     this.screens = {
       title: new LoadingScreen(this),
+      world: new HudWrapScreen(this),
       zelda: new ZeldaScreen(this),
     };
 
@@ -40,6 +42,11 @@ class Cowsim {
   // implements Game.update
   update() {
     this.currentScreen.update();
+  }
+
+  onScanline(y) {
+    const current = this.currentScreen;
+    current && current.onScanline && current.onScanline(y);
   }
 
   loadScreen(screen) {

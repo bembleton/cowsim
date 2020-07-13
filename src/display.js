@@ -1,7 +1,4 @@
-import {
-    colors,
-    getColorByte
-} from'./palette';
+import colors from'./palette';
 
 const WIDTH = 256;
 const HEIGHT = 240;
@@ -25,12 +22,15 @@ class Display {
     }
     
     setPixel (x, y, displayColor) {
-        const r = getColorByte(displayColor, 0);
-        const g = getColorByte(displayColor, 1);
-        const b = getColorByte(displayColor, 2);
-        const idx = y * ROW_WIDTH + x * BYTES_PER_PIXEL;
-        if (idx < 0 || idx >= this.pixels.length) return;
-        this.pixels.set([r, g, b, 0xFF], idx);
+      // 0xrrggbb;
+      const color = colors[displayColor];
+      const r = 0xff & (color>>16);
+      const g = 0xff & (color>>8);
+      const b = 0xff & (color);
+
+      const idx = y * ROW_WIDTH + x * BYTES_PER_PIXEL;
+      if (idx < 0 || idx >= this.pixels.length) return;
+      this.pixels.set([r, g, b, 0xFF], idx);
     }
     
     draw () {

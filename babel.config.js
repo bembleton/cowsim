@@ -7,6 +7,9 @@ module.exports = {
           node: 'current',
         },
       },
-    ],
+    ]
   ],
+  plugins: [
+    ["transform-class-properties", { "spec": true }]
+  ]
 };
