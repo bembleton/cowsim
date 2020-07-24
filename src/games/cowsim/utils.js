@@ -68,6 +68,10 @@ export const drawMetaTile = (x, y, metaTile, palette) => {
  */
 export const getBlock = (tile) => [tile, tile+1, tile+16, tile+17];
 
+export const drawTile = (x, y, tile, palette) => {
+  const block = getBlock(tile);
+  drawMetaTile(x, y, block, palette);
+};
 
 export const fillWithMetaTiles = (x, y, width, height, metaTile, palette) => {
   for (let j=0; j<height; j++)

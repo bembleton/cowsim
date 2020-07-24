@@ -1,11 +1,11 @@
 import loadBitmap from '~/bitmapLoader';
-import tileSheet from '~/assets/background2.bmp';
+import tileSheet from '~/assets/background.bmp';
 import spriteSheet from '~/assets/sprites.bmp';
 import ppu from '~/ppu';
 
 import LoadingScreen from './screens/loadingScreen';
 import ZeldaScreen from './screens/zeldaScreen';
-import HudWrapScreen from './screens/hudWrapScreen';
+import OverworldScreen from './screens/overWorldScreen';
 
 const {
   HORIZONTAL,
@@ -32,7 +32,7 @@ class Cowsim {
 
     this.screens = {
       title: new LoadingScreen(this),
-      world: new HudWrapScreen(this),
+      world: new OverworldScreen(this),
       zelda: new ZeldaScreen(this),
     };
 
