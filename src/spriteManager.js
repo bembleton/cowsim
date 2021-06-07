@@ -7,6 +7,7 @@ import {
   getAttributeByte
 } from './spriteAttributes';
 import ppu from './ppu';
+import { copyBitmap } from './bitmapLoader';
 
 // 64 sprites, 4 bytes each
 /*
@@ -36,7 +37,7 @@ class SpriteManager {
       const inUse = (attrs & SPRITE_IN_USE) > 0;
       if (inUse) continue;
       this.sprites[i * 4 + 3] |= SPRITE_IN_USE;
-      this.sprites[i * 4 + 2] = 0xff & 140;
+      this.sprites[i * 4 + 2] = 0xff & 240;
       return i;
     }
   }
@@ -50,7 +51,7 @@ class SpriteManager {
   }
 
   draw(display) {
-    for (var i = 0; i < 64; i++) {
+    for (var i = 63; i >= 0; i--) {
       const attrs = this.sprites[i * 4 + 3];
       const inUse = (attrs & SPRITE_IN_USE) > 0;
       const y = this.sprites[i * 4 + 2];
@@ -128,8 +129,155 @@ class SpriteManager {
       this.clearSprite(i);
     }
   };
+
+  /** Copies a sprite from an extended bitmap buffer into the ppu sprite table at the selected index */
+  loadExtendedSprite(source, srcIndex, targetIndex) {
+    const sOffset = (srcIndex >> 4) * 128 + (srcIndex & 0x0f) << 1;
+    const tOffset = (targetIndex >> 4) * 128 + (targetIndex & 0x0f) << 1;
+    for (let i=0; i<8; i++) {
+      const sIdx = sOffset + (i << 5);
+      const tIdx = tOffset + (i << 5);
+      ppu.setSpriteData(tIdx, source[sIdx]);
+      ppu.setSpriteData(tIdx+1, source[sIdx+1]);
+    }
+  }
 }
 
 const spriteManager = new SpriteManager();
 
 export default spriteManager;
+
+/** Base class for MetaSprite and Sprite */
+export class SpriteBase {}
+export class Sprite extends SpriteBase {
+  constructor(options) {
+    super();
+    this.index = undefined;
+    this.data = {
+      index: 0x00,
+      palette: 0,
+      x: 0,
+      y: 0,
+      flipX: false,
+      flipY: false,
+      priority: false
+    };
+    this.update(options);
+  }
+
+  draw() {
+    if (this.index !== undefined) return;
+    this.index = spriteManager.requestSprite();
+    this.update();
+  }
+
+  update(options) {
+    const { data } = this;
+    const opts = removeUndefinedProps(options || {});
+    Object.assign(data, opts);
+
+    if (this.index) {
+      spriteManager.updateSprite(this.index, data);
+    }
+  }
+
+  dispose() {
+    if (this.index) {
+      spriteManager.clearSprite(this.index);
+      this.index = undefined;
+    }
+  }
+}
+ 
+const removeUndefinedProps = (obj) => {
+  return Object.entries(obj).reduce((a,[k,v]) => {
+    if (v !== undefined) a[k] = v;
+    return a;
+  }, {});
+};
+
+export class MetaSprite extends SpriteBase {
+  constructor({ x = 0, y = 0, palette, flipX, flipY, priority } = {}) {
+    super();
+    this.rendered = false;
+    this.sprites = [];
+    Object.assign(this, { x, y, palette, flipX, flipY, priority });
+  }
+
+  add(sprite, x, y) {
+    if (typeof sprite === 'number') {
+      sprite = new Sprite({ index: sprite });
+    }
+    // override the sprite's position using offset from the meta sprite position
+    sprite.offset = { x, y };
+    sprite.update({
+      x: this.x + x,
+      y: this.y + y,
+      palette: this.palette
+    });
+    this.sprites.push(sprite);
+    return this;
+  }
+
+  update(options) {
+    const { sprites } = this;
+
+    const {
+      x = this.x,
+      y = this.y,
+      sprite: index, // if sprite is set, set the first sprite and then update all other sprites, keeping the same offsets
+      palette = this.palette,
+      priority = this.priority,
+      flipX = this.flipX,
+      flipY = this.flipY
+    } = options || {};
+    
+    Object.assign(this, { x, y, palette, flipX, flipY, priority });
+
+    let l, r, t, b;
+    if (flipX || flipY) {
+      // get bounds
+      const { left, right, top, bottom } = sprites.reduce((a,s) => {
+        a.left = Math.min(a.left, s.offset.x);
+        a.right = Math.max(a.right, s.offset.x + 8);
+        a.top = Math.min(a.top, s.offset.y);
+        a.bottom = Math.max(a.bottom, s.offset.y + 8);
+        return a;
+      }, { left: 256, right: 0, top: 256, bottom: 0 });
+      l = left;
+      r = right;
+      t = top;
+      b = bottom;
+    }
+
+    const idx_offset = (index !== undefined) 
+      ? index - sprites[0].data.index 
+      : 0;
+    
+    sprites.forEach(sprite => {
+      const { data, offset } = sprite;
+      sprite.update({
+        x: flipX ? (x + l + r - offset.x - 8) : (x + offset.x),
+        y: flipY ? (y + top + bottom - offset.y - 8) : (y + offset.y),
+        index: data.index + idx_offset,
+        palette,
+        priority,
+        flipX: flipX,
+        flipY: flipY
+      })
+    });
+
+    return this;
+  }
+  draw() {
+    if (this.rendered) return;
+    this.rendered = true;
+    this.sprites.forEach(x => x.draw());
+    return this;
+  }
+  dispose() {
+    if (!this.rendered) return;
+    this.sprites.forEach(x => x.dispose());
+    this.rendered = false;
+  }
+}

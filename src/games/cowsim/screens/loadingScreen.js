@@ -6,6 +6,8 @@ import Animation from '~/animation';
 import { randInt, randBool, choice } from '~/random';
 import Link from '../link';
 import { fillBlocks, getBlock, fillWithMetaTiles, dialog, SubPixels } from '../utils';
+import sprites from '../data/sprites';
+import { palettes } from '../data/colors';
 
 const { dir } = Link;
 
@@ -34,8 +36,6 @@ const CIRCLE_TL = 0x31;
 const CIRCLE_TR = 0x32;
 const CIRCLE_BL = 0x33;
 const CIRCLE_BR = 0x34;
-
-const plants = [0x09, 0x0a, 0x0b, 0x0c];
 
 const dayLength = 4096;
 const hourLength = Math.floor(dayLength/12);
@@ -71,7 +71,7 @@ export default class LoadingScreen {
     setBgPalette(3, BLACK, 0x0b, 0x1a, 0x2a); // greens
 
     //setSpritePalette(0, BLACK, 0x06, 0x27, 0x12); // blue link
-    setSpritePalette(0, brownTanGreen); // green link
+    setSpritePalette(0, palettes.greenTanBrown); // green link
     setSpritePalette(1, redOrangeGreen); // flower 1
     setSpritePalette(2, yellowLavenderGreen); // flower 2
     setSpritePalette(3, grays); // moon
@@ -95,9 +95,9 @@ export default class LoadingScreen {
     this.timeOfDay = 0;
     this.moon = spriteManager.requestSprite();
     
-    this.drawFlowers();
+    //this.drawFlowers();
 
-    const bunnyColors = [0,3];
+    const bunnyColors = [1,2,3];
     this.bunnies = [
       new Bunny(randInt(16,232), (9*16+8), choice(bunnyColors)),
       new Bunny(randInt(16,232), (9*16+8), choice(bunnyColors)),
@@ -143,9 +143,10 @@ export default class LoadingScreen {
   }
 
   drawGround () {
-    fillBlocks(0, 10, 16, 1, 0x46, 3); // grass
-    const block = getBlock(0x46);
-    fillWithMetaTiles(0, 11, 16, 5, block, 2);
+    const grass = getBlock(0x45);
+    fillWithMetaTiles(0, 10, 16, 1, grass, 3);
+    const stone = getBlock(0x84);
+    fillWithMetaTiles(0, 11, 16, 4, stone, 2);
   }
 
   drawFlowers () {
@@ -153,7 +154,7 @@ export default class LoadingScreen {
       const i = spriteManager.requestSprite();
       const x = randInt(16, 232);
       const y = 9*16+8;
-      const index = choice(plants);
+      const index = choice(sprites.plants);
       const palette = choice([1,2]);
       spriteManager.updateSprite(i, { index, x, y, flipX: randBool(), palette });    
     }
@@ -170,7 +171,7 @@ export default class LoadingScreen {
     }
 
     
-    const index = isDay ? 0x19 : 0x15;
+    const index = isDay ? sprites.circle : sprites.moon;
     const palette = isDay ? 2 : 3;
     const theta = (2*Math.PI * this.timeOfDay/dayLength)%(Math.PI);
     const x = 128 + 256 * Math.cos(theta);
@@ -240,11 +241,11 @@ class Bunny {
           dxx = randBool() ? -4 : 4;
           frame = 0;
         }
-        idx = 0x16;
+        idx = sprites.bunny_sit;
         break;
       case 'jumping':
         if (frame < 10) {
-          idx = 0x17;
+          idx = sprites.bunny_stand;
           dyy = -8;
         } else {
           xx += dxx;
@@ -256,7 +257,7 @@ class Bunny {
             yy = (9*16+8)<<3;
             state = 'idle';
           }
-          idx = dyy <= 0 ? 0x18 : 0x17;
+          idx = dyy <= 0 ? sprites.bunny_jump : sprites.bunny_stand;
         }
         frame = frame+1;
         break;

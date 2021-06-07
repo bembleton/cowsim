@@ -7,6 +7,15 @@ menuScreen:
 
 
 ToDo:
-    font
-    title screen art
-    
+  menu open/close (START)
+  menu select (SELECT)
+
+PauseMenu
+  Screens
+    Map
+    Weapons
+    Bows
+    Food
+    Quest
+  load - scroll into view - show current screen
+  SELECT - switch to next menu screen

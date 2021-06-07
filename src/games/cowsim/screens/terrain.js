@@ -11,34 +11,67 @@ const {
 
 
 /* terrain generation */
-let simplex = new SimplexNoise();
+let simplex; // = new SimplexNoise();
 
-const noise2d = (x, y) => {
+// the map seed is set when the page loads
+let baseSeed; // = new Date().getTime();
+
+// general game randomizer for enemies, drops, etc
+export const randy = new Randy(0);
+
+export const setSeed = function (seed) {
+  baseSeed = seed;
+  console.log(`Seed: ${seed}`);
+  randy.reset(seed);
+  // todo seed the noise function, too
+  const randomFn = randy.next.bind(randy);
+  simplex = new SimplexNoise(randomFn);
+};
+
+const noise2d = function (x, y) {
+  // x and y should be from 0 to +1 (to prevent tiling)
+  // noise2D return values -1 to +1
+  // normalize to 0 to +1
   return (simplex.noise2D(x, y) + 1) / 2;
 };
 
-const exp = 1.1;
-const scale = 48; // pixel wide
-const mapScale = 12; // 1-quarter scale
+const exp = 1.0;
+
+/** Terrain scaling
+ *  
+ * larger numbers make the map smoother, with less variation
+ */
+const elevationScale = 64;
+
+/*
+  The world is 16x16 screens
+  Each game screen is 16x12 tiles
+  Each pixel represents a 2x2, 16x16 tile block, displayed as the average elevation for the 4 tiles
+  The full map is 128 x 96 pixels, stored in a tile sheet, being 16x12, 8x8 pixel tiles
+  In the full map, a screen is represented by 8x6 pixels (16x16 total screens)
+*/
+
+const screenWidth = 16;  // tiles
+const screenHeight = 12; // tiles
+const mapWidth = screenWidth * 16;  // 256 tiles
+const mapHeight = screenHeight * 16; // 192 tiles
 
 const noise = (x, y) => {
-  const val = noise2d(x / scale, y / scale);
+  const nx = x / elevationScale;
+  const ny =  y / elevationScale;
+  const val = (
+    1.0 * noise2d(nx, ny)
+    + 0.5 * noise2d(2 * nx, 2 * ny)
+  ) / 1.5;
   return Math.pow(val, exp);
 };
 
-
-// the map seed is set when the page loads
-const baseSeed = new Date().getTime();
-
-// general game randomizer for enemies, drops, etc
-export const randy = new Randy(baseSeed);
 
 // gets a randy instance for a specific map area
 // used to add deterministic terrain variations
 let area_randomizer = null;
 const getAreaRandomizer = (posx, posy) => {
-  const mapBlocksWidth = 192;
-  const seed = baseSeed + posx + posy*mapBlocksWidth;
+  const seed = baseSeed + posx + posy*mapWidth;
   const r = new Randy(seed);
   // throw away the first 5 values
   for (let i=0; i<5; i++) r.next();
@@ -55,9 +88,9 @@ const getAreaRandomizer = (posx, posy) => {
 */
 export const elevation = (x, y) => {
   // taper map edges to 0 to create a continent
-  //0,0 - 192,96 ?
-  const mapWidth = 192; //12*16
-  const mapHeight = 128; //8*16
+  //0,0 - 256,192 ?
+  //const mapWidth = 256; //16*16
+  //const mapHeight = 192; //12*16
   let n = noise(x, y);
   const oceanSize = 16;
   const dx = Math.max(0, mapWidth/2 - Math.abs(mapWidth/2 - x));
@@ -69,9 +102,20 @@ export const elevation = (x, y) => {
 
 // make this better
 export const isWater = (e) => e === 0;
+export const isDesert = (e) => e === 4;
 export const isSolid = (e) => e === 5;
 export const isGrass = (e) => e > 0 && e < 4;
 
+/** Returns a random position within the map bounds. It could be anywhere. */
+export const randomPosition = () => ({
+  x: randInt(mapWidth),
+  y: randInt(mapHeight)
+});
+
+export const getAreaTopLeft = (x, y) => ({
+  x: Math.floor(x / screenWidth) * screenWidth,
+  y: Math.floor(y / screenHeight) * screenHeight
+})
 
 const area_elevations = [];
 const setAreaElevation = (x, y, e) => {
@@ -85,13 +129,25 @@ const drawWaterOrSand = (x, y, tilex, tiley, palette) => {
   const d = isGrass(getAreaElevation(x, y+1)) << 0;
   const l = isGrass(getAreaElevation(x-1, y)) << 0;
 
+  // grass sand/water edges
+  // const ul = isGrass(getAreaElevation(x-1, y-1)) << 7;
+  // const uu = u << 6;
+  // const ur = isGrass(getAreaElevation(x+1, y-1)) << 5;
+  // const ll = l << 4;
+  // const rr = r << 3;
+  // const dl = isGrass(getAreaElevation(x-1, y+1)) << 2;
+  // const dd = d << 1;
+  // const dr = isGrass(getAreaElevation(x+1, y+1)) << 0;
+
   x += tilex;
   y += tiley;
 
   if (palette === 1) {
+    // sand
     if (!u && !r && !d && !l) {
+      // no edges
       if (area_randomizer.next() < 0.75) {
-        drawMetaTile(x, y, [0x32, 0x32, 0x32, 0x32], 1);
+        drawMetaTile(x, y, [0x48, 0x48, 0x48, 0x48], 1);
       } else {
         drawTile(x, y, 0x55, 1);
       }
@@ -105,10 +161,47 @@ const drawWaterOrSand = (x, y, tilex, tiley, palette) => {
       return;
     }
   }
-  const tl = 0x55 - l - (u*16);
-  const tr = 0x56 + r - (u*16);
-  const bl = 0x65 - l + (d*16);
-  const br = 0x66 + r + (d*16);
+
+  
+
+  let tl,tr,bl,br;
+
+  const state = 0; //ul|uu|ur|ll|rr|dl|dd|dr;
+  switch (state) {
+    // diagonals?
+    /*
+    case 0b01101000: //u&r // 104
+      tl = 0x43;
+      br = 0x43;
+      tr = 0x41;
+      bl = 0x32;
+      break;
+    case 0b00001011: //d&r // 11
+      tl = 0x32;
+      br = 0x51;
+      tr = 0x53;
+      bl = 0x53;
+      break;
+    case 0b00010110: //d&l // 22
+      tl = 0x52;
+      br = 0x52;
+      tr = 0x32;
+      bl = 0x50;
+      break;
+    case 0b11010000: //u&l / 208
+      tl = 0x40;
+      br = 0x32;
+      tr = 0x42;
+      bl = 0x42;
+      break;
+    */
+    default:
+      tl = 0x55 - l - (u*16);
+      tr = 0x56 + r - (u*16);
+      bl = 0x65 - l + (d*16);
+      br = 0x66 + r + (d*16);
+      break;
+  }
 
   drawMetaTile(x, y, [tl,tr,bl,br], palette);
 };
@@ -174,30 +267,32 @@ export const drawArea = (posx, posy, tilex, tiley) => {
       // 4 sand
       // 5 rock
       const e = getAreaElevation(x, y);
-      if (e === 0) drawWaterOrSand(x, y, tilex, tiley, 0);
-      else if (e === 4) drawWaterOrSand(x, y, tilex, tiley, 1);
+      if (e === 0) drawWaterOrSand(x, y, tilex, tiley, 0); // water
+      else if (e === 4) drawWaterOrSand(x, y, tilex, tiley, 1); // sand
       else if (e === 5) drawRock(x, y, tilex, tiley);
       else drawGrass(x+tilex, y+tiley, e);
 
-      //todo draw dungeons, items
+      //todo draw dungeons
     }
   }
 }
 
 /** draws the current terrain elevation to the hud minimap */
-export const drawMinimap = () => {
-  const start = 0x00c0 << 4;  // byte offset in the background tilesheet
-  const width = 48;           // pixels
-  const height = 32;          // pixels
-  const scaleX = 192/width;
-  const scaleY = 128/height;
+export const drawMinimap = (centerX, centerY, scale) => {
+  const start = 0x00c0 << 4;  // byte offset in the background tilesheet, tile xC0, 16 bytes per tile, sort of
+  const width = 32            // minimap pixels
+  const height = 32           // minimap pixels
+  const minimapWidth = mapWidth / scale;   // world tiles. (192 tiles / scale 2) = 96
+  const minimapHeight = mapHeight / scale; // world tiles. (128 tiles / scale 2) = 64
 
   const paletteMap = [0, 1, 1, 1, 2, 3];
+  const [offsetX, offsetY] = [(centerX - minimapWidth/2), (centerY - minimapHeight/2)];
+  const viewToWorld = (x,y) => [offsetX + (x/width) * minimapWidth, offsetY + (y/height) * minimapHeight];
 
   let data = 0x00;
   for (let y=0; y<height; y++)
   for (let x=0; x<width; x++) {
-    const [posx, posy] = [x*scaleX, y*scaleY];
+    const [posx, posy] = viewToWorld(x, y);
     const elev = elevation(posx, posy);
     const color = paletteMap[Math.floor(elev)] & 0xff;
     data = (data << 2 | color) & 0xff; 
@@ -206,11 +301,4 @@ export const drawMinimap = () => {
       setBackgroundData(adr, data);
     }
   }
-
-  drawTile(0, 0, 0xc0, 0);
-  drawTile(1, 0, 0xc2, 0);
-  drawTile(2, 0, 0xc4, 0);
-  drawTile(0, 1, 0xe0, 0);
-  drawTile(1, 1, 0xe2, 0);
-  drawTile(2, 1, 0xe4, 0);
 };

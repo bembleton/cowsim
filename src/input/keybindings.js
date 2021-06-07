@@ -1,9 +1,13 @@
 const keystate = {};
 let debug = false;
 
+
+
 document.addEventListener('keydown', (event) => {
-  event.preventDefault();
   const { key, keyCode } = event;
+  if (keys.hasOwnProperty(key)) event.preventDefault();
+  else return;
+
   if (keystate[key]) return;
   keystate[key] = true;
   if (key === '`') debug = !debug;
@@ -11,13 +15,25 @@ document.addEventListener('keydown', (event) => {
 }, false);
 
 document.addEventListener('keyup', (event) => {
-  event.preventDefault();
   const { key, keyCode } = event;
+  if (keys.hasOwnProperty(key)) event.preventDefault();
+  else return;
+  event.preventDefault();
   if (keystate[key] === false) return;
   keystate[key] = false;
   if (debug) console.log(`keyup: ${key}`);
 }, false);
 
+const keys = {
+  ArrowUp: 'ArrowUp',
+  ArrowLeft: 'ArrowLeft',
+  ArrowRight: 'ArrowRight',
+  ArrowDown: 'ArrowDown',
+  z: 'z',
+  x: 'x',
+  a: 'a',
+  s: 's'
+}
 
 const UP = 'ArrowUp';
 const LEFT = 'ArrowLeft';

@@ -11,8 +11,6 @@ const {
   setMirroring,
   setNametable,
   setAttribute,
-  setSpriteData,
-  setBackgroundData,
   getPixel,
   setScroll,
   setBgPalette,
@@ -36,6 +34,7 @@ const BLANK = 0xFF;
 export default class Console {
   constructor(canvas) {
     this.display = new Display(canvas.getContext('2d'));
+    this.ppu = ppu;
     this.animationFrame = new AnimationFrame(60);
 
     // if the game should not run continuously

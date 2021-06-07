@@ -1,5 +1,6 @@
 import ppu from '~/ppu';
 import text from '~/text';
+import TILES from './data/tiles';
 
 const {
   HORIZONTAL,
@@ -94,21 +95,21 @@ export const dialog = (x, y, message, palette) => {
   
   for (let i=0; i<width; i++) {
     if (i === 0) {
-      setNametable(x+i, y, 0x38);
-      setNametable(x+i, y+height-1, 0x58);
+      setNametable(x+i, y, TILES.menu.topleft);           // top left corner
+      setNametable(x+i, y+height-1, TILES.menu.bottomleft);  // bottom left corner
     } else if (i < width-1) {
-      setNametable(x+i, y, 0x39);
-      setNametable(x+i, y+height-1, 0x59);
+      setNametable(x+i, y, TILES.menu.horizontal);           // top edges
+      setNametable(x+i, y+height-1, TILES.menu.horizontal);  // bottom edges
     } else {
-      setNametable(x+i, y, 0x3a);
-      setNametable(x+i, y+height-1, 0x5a);
+      setNametable(x+i, y, TILES.menu.topright);           // top right corner
+      setNametable(x+i, y+height-1, TILES.menu.bottomright);  // bottom right corner
     }
   }
 
   for (let i=0; i<lines.length; i++) {
-    setNametable(x, y+1+i, 0x48);
+    setNametable(x, y+1+i, TILES.menu.vertical);
     text(x+1, y+1+i, lines[i]);
-    setNametable(x+width-1, y+1+i, 0x4a);
+    setNametable(x+width-1, y+1+i, TILES.menu.vertical);
   }
 
   // fill the attribute table
@@ -183,6 +184,9 @@ export class SubPixels {
   }
 }
 
+export const frameIndex = (frame, frameDuration, frameCount = 2) => {
+  return Math.floor(frame / frameDuration) % frameCount;
+}
 
 //  8: 1 (0) = 1<<4 + 0.  8>>4 = 1
 //  4: 0 (4) = 0<<4 + 4.  4>>4 = 0

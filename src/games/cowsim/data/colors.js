@@ -1,30 +1,48 @@
 //const white = 0x20;
 const black = 0x3f;
-const red = 0x16;
 const gray = 0x00;
-const blue = 0x11;
-
-// terrain colors
-const lightgreen = 0x1b;
-const darkgreen = 0x0a;
-const darkblue = 0x12;
-const lightblue = 0x21;
-const tan = 0x37;
-const brown = 0x07;
-const darkgray = 0x2d;
-const lightgray = 0x3d;
 const white = 0x30;
 
-const grassAndWater = [lightgreen, darkgreen, darkblue, lightblue];
-const grassAndDirt = [lightgreen, darkgreen, tan, brown];
-const grays = [tan, darkgray, lightgray, white];
-const brownTanGreen = [black, 0x06, 0x27, 0x2A];
+const navy = 0x02;
+const blue = 0x12;
+const lightblue = 0x22;
+
+const darkred = 0x06;
+const red = 0x16;
+
+const darkbrown = 0x07;
+const brown = 0x17;
+const gold = 0x27;
+const tan = 0x37;
+
+const darkgreen = 0x0a;
+const green = 0x2A;
+const lightgreen = 0x1b;
+
+// terrain colors
+const darkblue = 0x12;
+const darkgray = 0x2d;
+const lightgray = 0x3d;
+
+
 const blues = [black, blue, gray, white];
-const miniMap = [blue, 0x0a, 0x36, gray];
-const reds = [black, 0x06, 0x16, white];
+const miniMap = [blue, darkgreen, tan, gray];
+const reds = [black, red, gold, white];
 const seagreens = [black, 0x0b, 0x2b, white]
-const golds = [black, black, 0x27, white];
+const golds = [black, black, gold, white];
 const blueRedWhite = [black, blue, red, white];
+
+
+// terrain palettes
+const grassAndWater = [lightgreen, darkgreen, blue, lightblue];
+const grassAndDirt = [lightgreen, darkgreen, tan, brown];
+const grays = [tan, black, darkgray, lightgray];
+
+
+// sprite palettes
+const greenTanBrown = [black, green, gold, brown];
+const redGoldWhite = [black, red, gold, white];
+const navyBlueWhite = [black, navy, lightblue, white];
 
 export const colors = {
   black,
@@ -51,6 +69,8 @@ export const palettes = {
   blues,
   seagreens,
   golds,
-  brownTanGreen,
+  greenTanBrown,
+  redGoldWhite,
+  navyBlueWhite,
   blueRedWhite
 };

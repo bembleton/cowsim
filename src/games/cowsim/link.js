@@ -1,6 +1,8 @@
 import spriteManager from '~/spriteManager';
 import { randInt } from '~/random';
 import { SubPixels } from './utils';
+import Sprites from './data/sprites';
+import { bbox } from '../../boundingBox';
 
 const dir = {
   UP: 0,
@@ -12,16 +14,31 @@ const dir = {
 function create() {
   const link = {
     pos: SubPixels.fromPixels(0,0),
+    getBbox: function() {
+      const { x, y } = this.pos.toPixels();
+      return new bbox(x, y, 16, 16);
+    },
     direction: dir.DOWN,
     frame: 0,
     moving: false,
     swimming: false,
     drowning: false,
     speed: 24,
+    attackFrame: 0,
     attacking: false,
     canAttack: true,
     palette: 0, // palette number
+    weaponSprites: [
+      spriteManager.requestSprite(),
+      spriteManager.requestSprite()
+    ],
+    shieldSprites: [
+
+    ],
     sprites: [],
+    itemA: null,
+    itemB: null,
+    items: 0
   };
 
   for (let i=0; i<4; i++){
@@ -32,6 +49,7 @@ function create() {
 }
 
 function remove(link) {
+  link.weaponSprites.forEach(i => spriteManager.freeSprite(i));
   link.sprites.forEach(i => spriteManager.freeSprite(i));
 }
 
@@ -65,20 +83,22 @@ function draw(link) {
   let idx, flipx;
   switch (d) {
     case dir.UP:
-      idx = attacking ? 0x44 : 0x28;
+      idx = attacking ? Sprites.link_attack_up : Sprites.link_up;
       flipx = !attacking && step;
       break;
     case dir.DOWN:
       idx =
-        attacking ? 0x40 : 
+        attacking ? Sprites.link_attack_down : 
         (drowning && third) ? 0x46 :
         (drowning && fifth) ? 0x48 :
-        0x20 + 2 * step;
-      flipx = drowning ? even : false;
+        Sprites.link_down;
+      flipx = drowning ? even : step;
       break;
     case dir.LEFT:
     case dir.RIGHT:
-      idx = 0x24 + 2 * step;
+      idx = 
+        attacking ? Sprites.link_attack_right :
+        Sprites.link_right[1*step];
       flipx = d === dir.LEFT;
       break;
   }
@@ -106,15 +126,15 @@ function drawDyingLink(link) {
   let flipx = false;
   switch (d) {
     case dir.UP:
-      idx = 0x28;
+      idx = Sprites.link_up;
       break;
     case dir.DOWN:
-      idx = 0x20;
+      idx = Sprites.link_down;
       break;
     case dir.LEFT:
       flipx = true;
     case dir.RIGHT:
-      idx = 0x24;
+      idx = Sprites.link_right;
       break;
   }
 
@@ -136,7 +156,7 @@ function drawLink(x, y, idx, sprites, flipx, swimming, palette) {
 }
 
 function drawPoof(x, y, frame, sprites, palette) {
-  const idx = frame < 8 ? 0x3d : 0x4d;
+  const idx = Sprites.death_blink[frame < 8 ? 0 : 1];
   spriteManager.setSprite(sprites[0], idx, x,   y,   false, false, false, palette);
   spriteManager.setSprite(sprites[1], idx, x+8, y,   true, false, false, palette);
   spriteManager.setSprite(sprites[2], idx, x,   y+8, false, true, false, palette);

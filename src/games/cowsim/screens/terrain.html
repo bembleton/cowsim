@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <script src="https://cdn.rawgit.com/jwagner/simplex-noise.js/87440528bcf8ec89840e974d8f76cfe3da548c37/simplex-noise.min.js"></script>
+    <style>
+      canvas {
+        border: 0.75px solid #aaa;
+        background-color: #000;
+        width: 512px;
+        height: 384px;
+        image-rendering: pixelated;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: crisp-edges;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="128" height="96"></canvas>
+    <canvas id="canvas2" width="128" height="96"></canvas>
+    <script src="terrain-test.js"></script>
+  </body>
+</html>

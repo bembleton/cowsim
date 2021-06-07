@@ -6,7 +6,8 @@ export const randInt = (maxOrMin, max) => {
   return Math.floor(Math.random() * maxOrMin);
 }
 export const randBool = () => Math.random() < 0.5;
-export const choice = (choices) => {
+export const choice = (...choices) => {
+  if (choices.length === 1 && Array.isArray(choices[0])) choices = choices[0];
   const i = Math.floor(Math.random() * choices.length);
   return choices[i];
 }
@@ -20,6 +21,10 @@ export class Randy {
   static FB3 = BigInt(31);
 
   constructor (seed) {
+    this.reset(seed);
+  }
+
+  reset(seed) {
     this.x = BigInt(seed || new Date().getTime());
   }
 
@@ -33,13 +38,30 @@ export class Randy {
 
   nextInt(max) {
     var z;
-     this.x += Randy.C1;
+    this.x += Randy.C1;
     
-      z = this.x;
-      z = z ^ (z >> Randy.FB1) * Randy.C2;
-      z = z ^ (z >> Randy.FB2) * Randy.C3;
-      z = z ^ (z >> Randy.FB3);
-      const n = Number(BigInt.asUintN(32, z));
-      return max !== undefined ? (n % max) : n;
+    z = this.x;
+    z = z ^ (z >> Randy.FB1) * Randy.C2;
+    z = z ^ (z >> Randy.FB2) * Randy.C3;
+    z = z ^ (z >> Randy.FB3);
+    const n = Number(BigInt.asUintN(32, z));
+    return max !== undefined ? (n % max) : n;
   }
+}
+
+export const accumulateChance = (arry) => {
+  const count = arry.reduce((a,x) => a + x.rarity, 0);
+  let a = 0;
+  for (const x of arry) {
+    const chance = x.rarity/count;
+    a += chance;
+    x.chance = a;
+  }
+}
+
+export const getRareItem = (arry, chance = undefined) => {
+  chance = chance !== undefined ? chance : rand();
+  // arry is sorted by chance asc
+  // find the first item that has a cumulative rarity higher than the random chance
+  return arry.find(x => x.chance >= chance);
 }

@@ -13,13 +13,13 @@ export default class Animation {
     let shouldUpdate = false;
     
     if (duration) {
-      this.time += 1000/60.0; //gametime.elapsed;
+      this.time += 1000/60.0; // 16.6 ms
       if (this.time >= duration) {
         shouldUpdate = true;
         this.time -= duration;
       }
     } else if (frameskip > 0) {
-      if (time++ >= frameskip) {
+      if (this.time++ >= frameskip) {
         shouldUpdate = true;
         this.time = 0;
       }
@@ -27,7 +27,8 @@ export default class Animation {
       // every frame
       shouldUpdate = true;
     }
-      
+    
+    
     if (shouldUpdate) {
       if (this.currentFrame >= framecount) {
           this.currentFrame = 0;
@@ -39,5 +40,16 @@ export default class Animation {
   reset () {
     this.time = 0;
     this.currentFrame = 0;
+  }
+}
+
+class KeyframeAnimation {
+  constructor(keyFrames) {
+    this.frame = 0;
+    this.keyframes = keyframes;
+  }
+  update() {
+    const keyframe = this.keyframes[this.frame++];
+    if (keyframe) keyframe();
   }
 }
