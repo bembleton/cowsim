@@ -5,8 +5,8 @@ import { isPressed, buttons } from '~/controller';
 import { randInt, choice, Randy } from '~/random';
 import { palettes } from '../data/colors';
 import SPRITES from '../data/sprites';
-import Link from '../link';
-import { SubPixels } from '../utils';
+import { Link } from '../link';
+import { pixelToTile, SubPixels } from '../utils';
 import { setSeed, drawArea, elevation, isSolid, isWater, isDesert, isGrass, randomPosition, getAreaTopLeft } from './terrain';
 import Hud from './hud';
 import { MetaSprite } from '../../../spriteManager';
@@ -22,8 +22,10 @@ import { StaminaContainer } from '../staminaContainer';
 import { Key } from '../key';
 import { getRandomWeapon } from '../drop';
 import { Weapon } from '../Weapon';
-
-const { dir } = Link;
+import { Direction } from '../direction';
+import { Moblin } from '../moblin';
+import { woodenSword } from '../sword';
+import { Chest } from '../chest';
 
 const {
   HORIZONTAL,
@@ -91,6 +93,7 @@ export default class OverworldScreen {
       itemA: null, // sword
       itemB: null, // 
       inventory: new Inventory(),
+      hurtTimer: 0,
       dead: false,
       equipWeapon: this.equipWeapon.bind(this)
     };
@@ -136,9 +139,7 @@ export default class OverworldScreen {
     setSpritePalette(0, palettes.greenTanBrown); // link
     setSpritePalette(1, palettes.redGoldWhite);
     setSpritePalette(2, palettes.navyBlueWhite);
-    //setSpritePalette(1, palettes.blues); // bomb
-    //setSpritePalette(2, palettes.blueRedWhite); // 
-    // setSpritePalette(3, black, blue, gray, white); // 
+    setSpritePalette(3, palettes.redBlackBlue);
 
     this.mirroring = HORIZONTAL;
     setMirroring(HORIZONTAL);
@@ -153,14 +154,18 @@ export default class OverworldScreen {
     this.hud.load();
     this.hud.setItemB({ sprite: SPRITES.bomb, palette: 2 });
 
-    const link = Link.create();
+    const link = new Link();
     const { x: px, y: py } = this.worldToScreen(pos);
     console.log(`link position: ${px}, ${py}`)
     link.pos = SubPixels.fromPixels(px, py);
     link.palette = 0;
     this.link = link;
 
-    Link.draw(link);
+    link.draw();
+
+    const { x: tilex, y: tiley } = this.findAvailableScreenTile();
+    const startingWeapon = this.dropWeapon(0, 0, woodenSword);
+    this.spawnTreasure(tilex, tiley, startingWeapon);
   }
 
   setBgPalettes() {
@@ -213,10 +218,27 @@ export default class OverworldScreen {
     }
   }
 
+  findAvailableScreenTile () {
+    const { position: { x: posx, y: posy } } = this;
+
+    const cols = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+    for (let i=0; i<10; i++) {
+      const xi = randInt(cols.length);
+      const x = cols[xi] + posx;
+      const y = randInt(1, 11) + posy;
+      const e = elevation(x, y);
+      if (!isWater(e) && !isSolid(e)) {
+        return this.worldToTile(x, y);
+      }
+    }
+
+    return null;
+  }
+
   spawnCreatures () {
     const { position: { x: posx, y: posy } } = this;
     // spawn 3 to 8 creatures
-    const toSpawn = randInt(3,8);
+    const toSpawn = randInt(3,7);
     const cols = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
     for (let i=0; i<toSpawn; i++) {
       const xi = randInt(cols.length);
@@ -226,12 +248,33 @@ export default class OverworldScreen {
       if (!isWater(e) && !isSolid(e)) {
         cols.splice(xi, 1);
         const { x: px, y: py } = this.worldToScreen({x, y});
-        this.spawnDrop(px + 4, py)
+        this.spawnCreature(px, py)
       }
     }
   }
 
-  spawnDrop (px, py) {
+  spawnCreature (px, py) {
+    const type = choice('moblin');
+    console.log(`spawning a ${type} at ${px}, ${py}`)
+
+    let creature;
+    switch (type) {
+      case 'moblin':
+        creature = new Moblin(px, py, { dir: Direction.down, palette: choice(1,2,3) });
+        break;
+    }
+    creature.draw();
+    this.creatures.push(creature);
+  }
+
+  spawnTreasure (tilex, tiley, contents) {
+    const { x, y } = this.tileToScreen(tilex, tiley);
+    const drop = new Chest(x, y, contents);
+    drop.draw();
+    this.drops.push(drop);
+  }
+
+  getRandomDrop (px, py) {
     const type = choice('rupee', 'bomb', 'heart', 'staminaVial', 'fairy', 'heartContainer', 'staminaContainer', 'hourglass', 'key', 'weapon');
     let drop;
     switch (type) {
@@ -266,24 +309,23 @@ export default class OverworldScreen {
         drop = this.dropWeapon(px, py);
         break;
     }
-    
-    drop.draw(spriteManager);
+    return drop;
+  }
 
-    // const drop = new MetaSprite({ x: px, y: py, palette: 1 });
-    // drop.add(SPRITES.rupee_light, 0, 0);
-    // drop.add(SPRITES.rupee_light + 16, 0, 8);
-    // drop.draw(spriteManager);
+  spawnDrop (drop) {
+    drop.draw();
     this.drops.push(drop);
   }
 
-  dropWeapon (px, py) {
-    const weapon = getRandomWeapon();
+  dropWeapon (px, py, weapon = null) {
+    weapon = weapon || getRandomWeapon();
     console.log('weapon', weapon);
     const { sprites, palette } = weapon;
     // sprites indexes are in items.bmp
     // copy the sprite into the dynamic weapon drop slot in the spritesheet
     spriteManager.loadExtendedSprite(this.game.spriteSheets.items, sprites[0], 0xf0);
     spriteManager.loadExtendedSprite(this.game.spriteSheets.items, sprites[1], 0xf1);
+
     const metaSprite = this.treasureDropSprites[0];
     console.log(metaSprite);
     metaSprite.update({ x: px, y: py, palette });
@@ -292,9 +334,7 @@ export default class OverworldScreen {
   }
 
   clearCreatures (...creatures) {
-    (creatures.length ? creatures : this.creatures).forEach(x => {
-      x.sprites.forEach(sprite => spriteManager.clearSprite(sprite));
-    });
+    (creatures.length ? creatures : this.creatures).forEach(x => x.dispose());
     this.creatures = [];
   }
 
@@ -334,6 +374,7 @@ export default class OverworldScreen {
     }
     
     this.updateLink();
+    this.updateCreatures();
     this.updateDrops();
 
     hud.update(player);
@@ -343,16 +384,33 @@ export default class OverworldScreen {
   updateLink () {
     const { link, scrolling, player, stasisCounter } = this;
     let { direction, frame, dying, dead } = link;
+    const { hurtTimer } = player;
 
-    if (dead && frame >= 64+32){
+    if (dead){
       this.removeLink();
       return;
     };
 
+    if (hurtTimer) {
+      player.hurtTimer--;
+    }
+
+    link.hurt = hurtTimer > 0;
+    link.stunned = hurtTimer > 40;
     link.frame = (frame+1) % 256;
     link.moving = scrolling;
     link.lastDirection = direction;
     link.palette = stasisCounter > 0 ? stasisCounter % 4 : 0;
+
+    // attack state
+    if (!link.canAttack && link.attacking) {
+      if (link.attackFrame > 0) {
+        link.attackFrame--;
+      } else {
+        link.attacking = false;
+        link.canAttack = true; // todo: cooldown
+      }
+    }
 
     if (!dying && !scrolling) {
       this.checkInputs();
@@ -368,35 +426,53 @@ export default class OverworldScreen {
       link.frame = 0;
     }
     
-    Link.draw(link);
+    link.draw();
+  }
+
+  updateCreatures() {
+    const { creatures, player, stasisCounter } = this;
+    const link = this.link.getBbox();
+    const canMove = stasisCounter === 0;
+    this.creatures = creatures.filter(c => {
+      c.update(canMove, this, player);
+      
+      if(!c.disposed && c.bbox.intersects(link)) {
+        c.onCollision(player, this);
+        
+      }
+
+      return !c.disposed;
+    });
   }
 
   updateDrops() {
     const { drops, player, stasisCounter } = this;
     const link = this.link.getBbox();
     const canMove = stasisCounter === 0;
-    this.drops = drops.filter(d => {
-      d.update(canMove);
+    for (let i=drops.length-1; i>=0; i--) {
+      const d = drops[i];
+      d.update(canMove, this);
       
       if(!d.disposed && d.bbox.intersects(link)) {
         d.onCollision(player, this);
-        d.dispose();
+        if (d.disposeOnCollision) d.dispose();
       }
 
-      return !d.disposed;
-    });
+      if (d.disposed) drops.splice(i, 1);
+    }
   }
 
   removeLink() {
     const { link, player } = this;
-    Link.remove(link);
+    link.dispose();
     player.dead = true;
   }
 
   getSpeed() {
     const { link, player } = this;
-    const { moving, swimming, dashing } = link;
+    const { moving, swimming, dashing, stunned } = link;
     const { speedSwimming, speedWalking, speedDash } = player;
+    if (stunned) return 64;
     if (swimming) return speedSwimming;
     if (dashing) return speedDash;
     return speedWalking;
@@ -441,7 +517,10 @@ export default class OverworldScreen {
 
   takeDamage(amount) {
     const { player } = this;
-    const { health, stamina } = this.player;
+    const { hurtTimer } = this.player;
+    if (hurtTimer > 0) return;
+    player.hurtTimer = 48;
+
     player.health -= amount;
     if (player.health < 0) player.health = 0;
     if (player.health === 0) {
@@ -453,30 +532,55 @@ export default class OverworldScreen {
     // animation
     // end screen
     const { link } = this;
-    link.frame = 1;
+    link.frame = 0;
     link.dead = false;
     link.dying = true;
   }
 
+  /** not scrolling, not dying */
   checkInputs() {
-    const { link, scrolling, player } = this;
-    const canMove = !scrolling;
+    const { link, player } = this;
 
-    if (!scrolling && isPressed(buttons.START)) {
+    if (isPressed(buttons.START)) {
       // open menu
+      return;
     }
 
+    if (link.stunned) {
+      this.tryMoveLink();
+      return;
+    }
+
+    if (isPressed(buttons.A) && link.canAttack) {
+      // if not attacking, and attackFrame == 0,
+      // start powering up the attackFrame while A is pressed,
+      // until attackFrame is X,
+      // then set attacking to true,
+      // and start counting attackFrame down
+      link.attacking = true;
+      if (link.attackFrame < 64) {
+        link.attackFrame++;
+      }
+      return;
+    } else if (!isPressed(buttons.A) && link.canAttack && link.attackFrame > 0) {
+      // start attacking and counting down
+      link.canAttack = false;
+      return;
+    }
+
+    if (link.attacking) return;
+    
     if (isPressed(buttons.UP)) {
-      link.direction = dir.UP;
+      link.direction = Direction.up;
       this.tryMoveLink();
     } else if (isPressed(buttons.DOWN)) {
-      link.direction = dir.DOWN;
+      link.direction = Direction.down;
       this.tryMoveLink();
     } else if (isPressed(buttons.RIGHT)) {
-      link.direction = dir.RIGHT;
+      link.direction = Direction.right;
       this.tryMoveLink();
     } else if (isPressed(buttons.LEFT)) {
-      link.direction = dir.LEFT;
+      link.direction = Direction.left;
       this.tryMoveLink();
     }
 
@@ -485,19 +589,22 @@ export default class OverworldScreen {
 
   tryMoveLink() {
     const { link, scrolling, player } = this;
-    const  { direction, speed, drowning } = link;
+    const  { drowning, stunned } = link;
     
     if (scrolling) return;
     if (drowning) return;
 
-    link.moving = true;
+    link.moving = !stunned; // walk animation
 
-    const [dx, dy, e1x, e1y, e2x, e2y] = [
-      [0, -speed, 0, 8, 15, 8], // UP
-      [0, speed, 0, 16, 15, 16], // DOWN
-      [-speed, 0, 0, 8, 0, 15], // LEFT
-      [speed, 0, 16, 8, 16, 15]  // RIGHT
-    ][direction];
+    const speed = this.getSpeed();
+    const direction = stunned ? Direction.flipped[link.direction] : link.direction;
+
+    const [dx, dy, e1x, e1y, e2x, e2y] = {
+      up:    [0,-speed, 0,8,  15,8], // UP
+      down:  [0, speed, 0,16, 15,16], // DOWN
+      left:  [-speed,0, 0,8,  0,15], // LEFT
+      right: [speed, 0, 16,8, 16,15]  // RIGHT
+    }[direction];
 
     this.coerceLink();
     const newPos = link.pos.add(dx, dy);
@@ -509,6 +616,13 @@ export default class OverworldScreen {
     if (isSolid(e1) || isSolid(e2)) {
       // push back to a tile edge?
       return;
+    }
+    // prevent knockback off the screen
+    if (stunned) {
+      if (x < 0) newPos.setPixelX(0);
+      if (x > 240) newPos.setPixelX(240);
+      if (y < 48) newPos.setPixelY(48);
+      if (y > 224) newPos.setPixelY(224);
     }
 
     // move
@@ -543,16 +657,16 @@ export default class OverworldScreen {
     const left = 0;
     const right = 256-16;
 
-    if (y < top && direction === dir.UP) {
+    if (y < top && direction === Direction.up) {
       link.pos.setPixelY(top);
       this.scrollUp()
-    } else if (y > bottom && direction === dir.DOWN) {
+    } else if (y > bottom && direction === Direction.down) {
       link.pos.setPixelY(bottom);
       this.scrollDown();
-    } else if (x < left && direction === dir.LEFT) {
+    } else if (x < left && direction === Direction.left) {
       link.pos.setPixelX(left);
       this.scrollLeft()
-    } else if (x > right && direction === dir.RIGHT) {
+    } else if (x > right && direction === Direction.right) {
       link.pos.setPixelX(right);
       this.scrollRight()
     } else {
@@ -571,15 +685,15 @@ export default class OverworldScreen {
 
     if (link.moving) {
       // coerce alignment to half-blocks (8 pixels)
-      if (direction === dir.UP || direction === dir.DOWN) {
+      if (direction === Direction.up || direction === Direction.down) {
         if (x % 8 > 0) {
-          const min = lastDirection === dir.LEFT ? 4 : 3;
+          const min = lastDirection === Direction.LEFT ? 4 : 3;
           const dx = (x % 8) < min ? -1 : 1;
           link.pos = pos.addPixels(dx, 0);
         }
       } else {
         if (y % 8 > 0) {
-          const min = lastDirection === dir.UP ? 4 : 3;
+          const min = lastDirection === Direction.up ? 4 : 3;
           const dy = (y % 8) < min ? -1 : 1;
           link.pos = pos.addPixels(0, dy);
         }
@@ -735,16 +849,27 @@ export default class OverworldScreen {
    * @param {*} pos world position offset
    */
   screenToWorld({ x, y }) {
-    const { position } = this;
-    const { x: posx, y: posy } = position;
-    const i = (x>>4); // px to block
-    const j = (y>>4) - 3; // exclude hud
-    return {
-      x: posx + i,
-      y: posy + j
-    }
+    const { x: tilex, y: tiley } = pixelToTile(x, y); // screen tiles
+    return this.tileToWorld(tilex, tiley); // world position
   };
 
+  tileToWorld(tilex, tiley) {
+    const { position } = this;
+    const { x: posx, y: posy } = position;
+    return {
+      x: posx + tilex,    // offset by the current screen position
+      y: posy + tiley - 3 // ignore hud
+    }
+  }
+
+  tileToScreen(tilex, tiley) {
+    return {
+      x: (tilex << 4),
+      y: (tiley << 4)
+    };
+  }
+
+  /** convert a world position to pixel coordinates */
   worldToScreen({ x, y }) {
     const { x: posx, y: posy } = this.position; // topleft tile
     const [tilex, tiley] = [x - posx, y - posy + 3];
@@ -754,8 +879,17 @@ export default class OverworldScreen {
     };
   }
 
+  worldToTile(x, y) {
+    const { position } = this;
+    const { x: posx, y: posy } = position;
+    return {
+      x: x - posx,    // offset by the current screen position
+      y: y - posy + 3 // ignore hud
+    }
+  }
+
   /**
-   * gets the tile for a given pixel position 
+   * gets the 8x8 tile for a given pixel position 
    */
   screenToNametable(x, y) {
     const i = (x>>3);
@@ -763,9 +897,16 @@ export default class OverworldScreen {
     return getNametable(i, j);
   }
 
+  /** gets elevation at a pixel coordinate */
   screenToElevation(x, y) {
     const { x: posx, y: posy } = this.screenToWorld({ x, y });
     return elevation(posx, posy);
+  }
+
+  isPassableTile(tilex, tiley, game) {
+    const { x: wx, y: wy } = this.tileToWorld(tilex, tiley);
+    const e = elevation(wx, wy);
+    return !isWater(e) && !isSolid(e);
   }
 
 }

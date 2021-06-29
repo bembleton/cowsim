@@ -1,6 +1,5 @@
 
 export default {
-  
   // link
   link_down: 0x00,
   link_up: 0x02,
@@ -14,6 +13,17 @@ export default {
   shield_attack_down: 0x28,
   shield_attack_up: 0x38,
   shield_right: 0x29,
+
+  link: {
+    down: 0x00,
+    up: 0x02,
+    right: [0x04, 0x06],
+    attacking: {
+      down: 0x20,
+      up: 0x22,
+      right: 0x08
+    }
+  },
 
   // item drops
   rupee_dark: 0x0a,
@@ -29,6 +39,8 @@ export default {
   rupee_small: 0x3d,
   potion_small: 0x2e, // move to seconday_item slot
   potion_large: 0x2f, // move to seconday_item slot
+  chest_closed: 0x60, // move to seconday_item slot
+  chest_open: 0x61, // move to seconday_item slot
 
   // efects
   slash: 0x47, // 48, 57, 58
@@ -38,7 +50,7 @@ export default {
   death_blink: [0x5d, 0x4d],
   sword_splash: 0x4e,
   magic_splash: 0x4f,
-  
+
   // weapons
   weapon: 0x40,
   boomerang: [0x42, 0x43, 0x52],
@@ -52,4 +64,16 @@ export default {
   bunny_sit: 0x91,
   bunny_stand: 0x92,
   bunny_jump: 0x93,
+
+  enemies: {
+    moblin: {
+      down: 0xa0,
+      up: 0xa2,
+      right: [0xa4, 0xa6]
+    },
+    octorok: {
+      down: [0xa8, 0xaa],
+      right: [0xac, 0xae]
+    }
+  }
 };

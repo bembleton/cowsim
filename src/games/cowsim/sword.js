@@ -131,6 +131,15 @@ const blades = [
 
 const uniques = [
   {
+    palette: 0,
+    hilt: 0,
+    blade: 1,
+    name: 'Wooden Sword',
+    attack: 1,
+    speed: 1,
+    rarity: 20,
+  },
+  {
     palette: 1,
     hilt: 0,
     blade: 1,
@@ -171,6 +180,17 @@ const uniques = [
   }
 ];
 
+
+const build = (sword) => {
+  const { hilt, blade, name, speed, attack, palette } = sword;
+  const sprite = blade * 2;
+  const sprite2 = hilt * 2 + 16;
+  const sprites = [sprite, sprite2];
+  return { name, speed, attack, sprites, palette };
+};
+
+export const woodenSword = build(uniques.find(x => x.name === 'Wooden Sword'));
+
 accumulateChance(hilts);
 accumulateChance(blades);
 accumulateChance(uniques);
@@ -187,12 +207,5 @@ export function getRandomSword() {
   const { sprite: blade, name } = getRareItem(blades);
   const { attack, speed } = getAttrs(palette, hilt, blade);
 
-  return {
-    palette,
-    hilt,
-    blade,
-    name,
-    attack,
-    speed
-  };
+  return build({ name, hilt, blade, palette, speed, attack });
 }

@@ -168,6 +168,7 @@ export class Sprite extends SpriteBase {
   draw() {
     if (this.index !== undefined) return;
     this.index = spriteManager.requestSprite();
+    this.rendered = true;
     this.update();
   }
 
@@ -184,6 +185,7 @@ export class Sprite extends SpriteBase {
   dispose() {
     if (this.index) {
       spriteManager.clearSprite(this.index);
+      this.rendered = false;
       this.index = undefined;
     }
   }
@@ -197,11 +199,37 @@ const removeUndefinedProps = (obj) => {
 };
 
 export class MetaSprite extends SpriteBase {
-  constructor({ x = 0, y = 0, palette, flipX, flipY, priority } = {}) {
+  constructor({ x = 0, y = 0, sprite, palette, flipX, flipY, priority, width = 1, height = 1, mirrorX = false, mirrorY = false } = {}) {
     super();
     this.rendered = false;
     this.sprites = [];
     Object.assign(this, { x, y, palette, flipX, flipY, priority });
+    if (sprite) {
+      for (let j=0; j<height; j++)
+      for (let i=0; i<width; i++) {
+        this.add(sprite + i + j*16, i*8, j*8);
+      }
+    }
+    if (mirrorX) {
+      // 16x8, reflected left-right
+      this.add(new Sprite({ index: sprite, flipX: true }), 8, 0);
+    }
+    if (mirrorX && height === 2) {
+      // 16x16, reflected left-right
+      this.add(new Sprite({ index: sprite + 16, flipX: true }), 8, 8);
+    }
+    if (mirrorY) {
+      // 8x16, reflected up-down
+      this.add(new Sprite({ index: sprite, flipY: true }), 0, 8);
+    }
+    if (mirrorY && height) {
+      // 16x16, reflected up-down
+      this.add(new Sprite({ index: sprite + 1, flipY: true }), 8, 8);
+    }
+    if (mirrorX && mirrorY) {
+      // 16x16, rflected in both directions
+      this.add(new Sprite({ index: sprite, flipX: true, flipY: true }), 8, 8);
+    }
   }
 
   add(sprite, x, y) {
@@ -258,7 +286,7 @@ export class MetaSprite extends SpriteBase {
       const { data, offset } = sprite;
       sprite.update({
         x: flipX ? (x + l + r - offset.x - 8) : (x + offset.x),
-        y: flipY ? (y + top + bottom - offset.y - 8) : (y + offset.y),
+        y: flipY ? (y + t + b - offset.y - 8) : (y + offset.y),
         index: data.index + idx_offset,
         palette,
         priority,

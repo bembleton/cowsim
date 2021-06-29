@@ -7,7 +7,6 @@ export class StaminaContainer extends Drop {
     super(x, y, {
       sprite: SPRITES.potion_large,
       palette: 0,
-      height: 16,
       duration: null
     });
   }

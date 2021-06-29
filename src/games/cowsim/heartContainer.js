@@ -8,7 +8,7 @@ export class HeartContainer extends Drop {
       sprite: SPRITES.heart_container,
       palette: 1,
       height: 16,
-      mirrorx: true,
+      mirrorX: true,
       duration: null
     });
   }

@@ -43,6 +43,7 @@ const grays = [tan, black, darkgray, lightgray];
 const greenTanBrown = [black, green, gold, brown];
 const redGoldWhite = [black, red, gold, white];
 const navyBlueWhite = [black, navy, lightblue, white];
+const redBlackBlue = [black, black, 0x0b, red];
 
 export const colors = {
   black,
@@ -72,5 +73,6 @@ export const palettes = {
   greenTanBrown,
   redGoldWhite,
   navyBlueWhite,
-  blueRedWhite
+  blueRedWhite,
+  redBlackBlue
 };

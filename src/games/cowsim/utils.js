@@ -188,6 +188,12 @@ export const frameIndex = (frame, frameDuration, frameCount = 2) => {
   return Math.floor(frame / frameDuration) % frameCount;
 }
 
+/** Converts sprite pixel to tile coordinates */
+export const pixelToTile = (px, py) => ({
+  x: (px >> 4),
+  y: (py >> 4)
+});
+
 //  8: 1 (0) = 1<<4 + 0.  8>>4 = 1
 //  4: 0 (4) = 0<<4 + 4.  4>>4 = 0
 // -4: 0 (-4) = 0<<4 + -4. -4>>4 = -1

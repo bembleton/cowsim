@@ -6,7 +6,6 @@ export class Key extends Drop {
     super(x, y, {
       sprite: SPRITES.key,
       palette: 1,
-      height: 16,
       duration: null
     });
   }

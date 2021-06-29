@@ -22,6 +22,16 @@ const {
   setSpritePalette,
 } = ppu;
 
+const tiles = {
+  blank: 0x30,
+  horizontal: 0x32,
+  vertical: 0x33,
+  topleft: 0x34,
+  topright: 0x35,
+  bottomleft: 0x36,
+  bottomright: 0x37
+};
+
 export class Menu {
   constructor (parent, name, icon) {
     this.parent = parent;

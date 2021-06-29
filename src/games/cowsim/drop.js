@@ -13,13 +13,9 @@ export function getRandomWeapon() {
   let sprite2 = sprite+16;
 
   if (name === 'Sword') {
-    const sword = getRandomSword();
-    const { hilt, blade } = sword;
-    sprite = blade * 2;
-    sprite2 = hilt * 2 + 16;
-    name = sword.name;
-    palette = sword.palette;
+    return getRandomSword();
   }
+
   return {
     name,
     sprites: [sprite, sprite2],
@@ -35,48 +31,31 @@ const float_table = [0,-1,-1,0,1,1];
 export class Drop {
 
   constructor(x, y, options) {
-    const { sprite, palette, duration = 240, height = 16, width = 8, mirrorx = false, mirrory = false, floating = true } = options;
-    this.bbox = new bbox(x, y, width, 8);
+    const { sprite, palette, duration = 240, height = 16, width = 8, mirrorX, mirrorY, floating = true } = options;
+    
+    const effectiveWidth = mirrorX ? width * 2 : width;
+    this.bbox = new bbox(x, y, effectiveWidth, 8);
     this.duration = duration;
     this.frame = 0;
     this.disposed = false;
     this.floating = floating;
     this.float_count = 0;
+    this.disposeOnCollision = true;
 
     if (sprite instanceof SpriteBase) {
       this.sprite = sprite;
     }
     else if (typeof sprite === 'number') {
-      this.sprite = new MetaSprite({ x, y, palette });
-      this.sprite.add(sprite, 0, 0);
-      if (height === 16) {
-        // 8x16
-        this.sprite.add(sprite + 16, 0, 8);
-      }
-      if (width === 16) {
-        // 16x8
-        this.sprite.add(sprite + 1, 8, 0);
-      }
-      if (height === 16 && width === 16) {
-        // 16x16
-        this.sprite.add(sprite + 17, 8, 8);
-      }
-      if (mirrorx) {
-        // 16x8, reflected left-right
-        this.sprite.add(new Sprite({ index: sprite, flipX: true }), 8, 0);
-      }
-      if (mirrorx && height === 16) {
-        // 16x16, reflected left-right
-        this.sprite.add(new Sprite({ index: sprite + 16, flipX: true }), 8, 8);
-      }
-      if (mirrory) {
-        // 8x16, reflected up-down
-        this.sprite.add(new Sprite({ index: sprite, flipY: true }), 0, 8);
-      }
-      if (mirrory && height) {
-        // 16x16, reflected up-down
-        this.sprite.add(new Sprite({ index: sprite+1, flipY: true }), 8, 8);
-      }
+      // height: 16, mirrorX: true
+      this.sprite = new MetaSprite({
+        x, y,
+        sprite,
+        palette,
+        height: mirrorY ? 1 : height / 8,
+        width: mirrorX ? 1 : width / 8,
+        mirrorX,
+        mirrorY
+      });
     }
   }
 
@@ -105,8 +84,8 @@ export class Drop {
     this.sprite.update(options);
   }
 
-  draw(spriteManager) {
-    this.sprite.draw(spriteManager);
+  draw() {
+    this.sprite.draw();
   }
 
   dispose() {
@@ -114,7 +93,7 @@ export class Drop {
     this.disposed = true;
   }
 
-  onCollision(player) {
+  onCollision(player, game) {
   }
 
   frameIndex (frame, frameDuration, frameCount = 2) {
