@@ -53,7 +53,7 @@ class Cowsim {
       zelda: new ZeldaScreen(this),
     };
 
-    this.loadScreen(this.screens.world);
+    this.loadScreen(this.screens.title);
   }
 
   // implements Game.update

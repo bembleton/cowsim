@@ -376,6 +376,10 @@ export default class OverworldScreen {
     this.updateLink();
     this.updateCreatures();
     this.updateDrops();
+    // projectiles
+    // enemies
+    // drops
+    // weapon
 
     hud.update(player);
     shimmer.update();
