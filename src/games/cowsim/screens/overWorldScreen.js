@@ -95,7 +95,8 @@ export default class OverworldScreen {
       inventory: new Inventory(),
       hurtTimer: 0,
       dead: false,
-      equipWeapon: this.equipWeapon.bind(this)
+      equipWeapon: this.equipWeapon.bind(this),
+      takeDamage: this.takeDamage.bind(this)
     };
 
     this.creatures = [];
@@ -440,6 +441,11 @@ export default class OverworldScreen {
     this.creatures = creatures.filter(c => {
       c.update(canMove, this, player);
       
+      // projectile collisions
+      // if (!c.disposed && c.bbox.intersects()) {
+
+      // }
+
       if(!c.disposed && c.bbox.intersects(link)) {
         c.onCollision(player, this);
         

@@ -1,13 +1,15 @@
 import { bbox } from "../../boundingBox";
 import { frameIndex, SubPixels } from "./utils";
 import { Direction } from "./direction";
+import { MetaSprite } from "../../spriteManager";
 
 export class Enemy {
   static state = {
     idle: 0,
     moving: 1,
     knockedback: 2,
-    stunned: 3
+    stunned: 3,
+    dead: 4
   };
 
   constructor(x, y, dir, sprite, spriteData, palette, health, meleeDamage) {
@@ -34,15 +36,29 @@ export class Enemy {
   }
   update(canMove, game, player) {
     this.frame = (this.frame+1) % 256;
-    if (canMove) {
-      this.stateTimer && this.stateTimer--;
-      this.updateState(game, player);
+    if (this.state === Enemy.state.dead) {
+      this.damageTimer--;
+      if (this.damageTimer <= 0) {
+        this.spawnDrop(game);
+        this.dispose();
+        return;
+      }
+      const frame = this.damageTimer > 4 ? 0 : 1;
+      const sprite = SPRITES.death_blink[frame];
+      const palette = this.frame % 4;
+      this.sprite.update({ palette, sprite });
+    } else {
+      if (canMove) {
+        this.stateTimer && this.stateTimer--;
+        this.updateState(game, player);
+      }
+      const { x, y } = this.pos.toPixels();
+      this.bbox.x = x;
+      this.bbox.y = y;
     }
-    const { x, y } = this.pos.toPixels();
-    this.bbox.x = x;
-    this.bbox.y = y;
     this.updateSprite();
   }
+  //abstract
   updateState() {
   }
   updateSprite() {
@@ -62,12 +78,33 @@ export class Enemy {
     
     this.sprite.update({ x, y, sprite, palette, flipX, flipY });
   }
+  //abstract
+  spawnDrop(game) {
+  }
   dispose() {
     this.sprite.dispose();
     this.disposed = true;
   }
   onCollision(player, game) {
-    game.takeDamage(this.meleeDamage);
+    player.takeDamage(this.meleeDamage, game);
+  }
+  takeDamage(damage, game) {
+    if (this.damageTimer > 0) return;
+    this.damageTimer = 48;
+
+    this.health -= damage;
+    if (this.health <= 0)  {
+      this.die();
+    }
+  }
+
+  die() {
+    //poof
+    this.state = Enemy.state.dead;
+    this.damageTimer = 8;
+    const { x, y } = this.pos.toPixels();
+    this.sprite = new MetaSprite({ x, y, mirrorX: true, mirrorY: true })
+    //drop
   }
 
   static getSpriteFromState(spriteData, dir, frame) {
