@@ -38,6 +38,10 @@ const grassAndWater = [lightgreen, darkgreen, blue, lightblue];
 const grassAndDirt = [lightgreen, darkgreen, tan, brown];
 const grays = [tan, black, darkgray, lightgray];
 
+const blacks1 = [black, black, black, black];
+const blacks2 = [black, black, black, darkgray];
+const blacks3 = [darkgray, black, darkgray, darkgray];
+const blacks4 = [lightgray, black, darkgray, lightgray];
 
 // sprite palettes
 const greenTanBrown = [black, green, gold, brown];
@@ -48,6 +52,7 @@ const redBlackBlue = [black, black, 0x0b, red];
 export const colors = {
   black,
   red,
+  darkred,
   gray,
   blue,
   lightgreen,
@@ -74,5 +79,9 @@ export const palettes = {
   redGoldWhite,
   navyBlueWhite,
   blueRedWhite,
-  redBlackBlue
+  redBlackBlue,
+  blacks1,
+  blacks2,
+  blacks3,
+  blacks4
 };

@@ -30,12 +30,7 @@ const LIGHTGRAY = 0x10;
 const WHITE = 0x30;
 const ORANGE = 0x19;
 
-const BLANK = 0xFF;
-const BRICK = 0x30;
-const CIRCLE_TL = 0x31;
-const CIRCLE_TR = 0x32;
-const CIRCLE_BL = 0x33;
-const CIRCLE_BR = 0x34;
+const BLANK = 0x30;
 
 const dayLength = 4096;
 const hourLength = Math.floor(dayLength/12);
@@ -80,7 +75,7 @@ export default class LoadingScreen {
     // fill the screen with squiggles
     //this.fillWithSquiggles(0,0, 32,60, 2);
 
-    //fillBlocks(4, 4, 8, 3, BLANK, 1);
+    fillBlocks(0, 0, 16, 10, BLANK, 1);
     
     // add the title
     dialog(9, 7, `THE EPIC OF
@@ -110,36 +105,17 @@ export default class LoadingScreen {
 
     this.updateLink();
 
-    // animate the screen once a second
-    // this.titleAnimation = new Animation({
-    //     duration: 30,
-    //     update: () => this.updateTitleScreen()
-    // });
-
     this.linkAnimation = new Animation({
         framecount: 256,
         update: (frame) => this.updateLink(frame)
     });
+
+    this.startPressed = isPressed(buttons.START);
   }
 
   unload () {
     Link.remove(this.link);
     spriteManager.clearSprites();
-  }
-
-  // fills a rectangle with squiggles
-  fillWithSquiggles (fromx, fromy, tox, toy, palette) {
-    // fill the screen with squiggles
-    for (let y=fromy; y<toy; y++)
-    for (let x=fromx; x<tox; x++) {
-        setNametable(x, y, CIRCLE_TL + randInt(2)+2);
-    }
-
-    // fill the attribute table with orange
-    for (let y=(fromy>>1); y<(toy>>1); y++)
-    for (let x=(fromx>>1); x<(tox>>1); x++) {
-        setAttribute(x, y, palette);
-    }
   }
 
   drawGround () {
@@ -203,10 +179,11 @@ export default class LoadingScreen {
   update (time) {
     const { game, linkAnimation, moonAnimation } = this;
 
-    if (isPressed(buttons.START)) {
+    if (isPressed(buttons.START) && !this.startPressed) {
       game.loadScreen(game.screens.world);
       return;
     }
+    this.startPressed = isPressed(buttons.START);
 
     if (linkAnimation) {
         linkAnimation.update(time);

@@ -23,12 +23,16 @@ class Display {
     ];
   }
   
-  setPixel (x, y, displayColor) {
+  setPixel (x, y, displayColor, { grayscale, emphasizeRed, emphasizeGreen, emphasizeBlue } = {}) {
     // 0xrrggbb;
+    if (grayscale) displayColor &= 0x30;
+    emphasizeRed = emphasizeRed ? 3/4 : 1;
+    emphasizeGreen = emphasizeGreen ? 3/4 : 1;
+    emphasizeBlue = emphasizeBlue ? 3/4 : 1;
     const color = colors[displayColor];
-    const r = 0xff & (color>>16);
-    const g = 0xff & (color>>8);
-    const b = 0xff & (color);
+    const r = ((0xff & (color>>16)) * emphasizeGreen * emphasizeBlue) & 0xff; 
+    const g = ((0xff & (color>>8)) * emphasizeRed * emphasizeBlue);
+    const b = ((0xff & (color)) * emphasizeRed * emphasizeGreen);
     const X = x;// * 2;
     const Y = y;// * 2;
     const idx = Y * ROW_WIDTH + X * BYTES_PER_PIXEL;

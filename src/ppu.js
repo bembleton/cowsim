@@ -45,7 +45,16 @@ const state = {
         y: 0
     },
     common_background: 0x3f, // black
-    common_background_enabled: false
+    common_background_enabled: false,
+    // PPUMASK
+    grayscale: false,
+    leftColumnBackground: true,
+    leftColumnSprites: true,
+    showBackground: true,
+    showSprites: true,
+    emphasizeRed: false,
+    emphasizeGreen: false,
+    emphasizeBlue: false,
 };
 
 // 0x00-0x3f
@@ -257,9 +266,17 @@ const getTilePixel = (idx, pixelx, pixely) => {
  * Gets the background pixel color value
  * @param {*} screenx pixel 0-255
  * @param {*} screeny pixel 0-239
- * @returns NES color
+ * @returns NES color: 0x00 - 0x3D
  */
 const getPixel = (screenx, screeny) => {
+    if (!state.leftColumnBackground && screenx < 8) {
+        return 0x0D; // common background?
+    }
+
+    if (!state.showBackground) {
+        return state.common_background;
+    }
+
     let x = (screenx + state.scroll.x) % 512;
     if (x < 0) x += 512;
     let y = (screeny + state.scroll.y) % 480;
@@ -322,6 +339,20 @@ const getSpritePixel = (idx, pixelx, pixely) => {
     return color;
 };
 
+const enableGrayscale = (enable) => state.grayscale = enable;
+const enableLeftColumnBackground = (enable) => state.leftColumnBackground = enable;
+const enableLeftColumnSprites = (enable) => state.leftColumnSprites = enable;
+const enableBackground = (enable) => state.showBackground = enable;
+const enableSprites = (enable) => state.showSprites = enable;
+const emphasizeRed = (enable) => state.emphasizeRed = enable;
+const emphasizeGreen = (enable) => state.emphasizeGreen = enable;
+const emphasizeBlue = (enable) => state.emphasizeBlue = enable;
+
+const getMask = () => {
+  const { grayscale, leftColumnBackground, leftColumnSprites, showBackground, showSprites, emphasizeRed, emphasizeGreen, emphasizeBlue } = state;
+  return { grayscale, leftColumnBackground, leftColumnSprites, showBackground, showSprites, emphasizeRed, emphasizeGreen, emphasizeBlue };
+};
+
 const draw = () => {
 
 };
@@ -352,5 +383,14 @@ export default {
     screenToTileY,
     // test
     attributes,
-    getAttributeAdr
+    getAttributeAdr,
+    enableGrayscale,
+    enableLeftColumnBackground,
+    enableLeftColumnSprites,
+    enableBackground,
+    enableSprites,
+    emphasizeRed,
+    emphasizeGreen,
+    emphasizeBlue,
+    getMask
 };

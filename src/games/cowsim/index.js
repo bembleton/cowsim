@@ -10,6 +10,7 @@ import ZeldaScreen from './screens/zeldaScreen';
 import OverworldScreen from './screens/overWorldScreen';
 import Hud from './screens/hud';
 import PauseMenu from './screens/pauseMenu';
+import GameOverScreen from './screens/gameOverScreen';
 
 const {
   HORIZONTAL,
@@ -51,6 +52,7 @@ class Cowsim {
       world: new OverworldScreen(this),
       pause: new PauseMenu(this),
       zelda: new ZeldaScreen(this),
+      gameOver: new GameOverScreen(this)
     };
 
     this.loadScreen(this.screens.title);
@@ -67,9 +69,8 @@ class Cowsim {
   }
 
   loadScreen(screen) {
-    const current = this.currentScreen;
+    this.currentScreen && this.currentScreen.unload();
     this.currentScreen = screen;
-    current && current.unload();
     screen.load();
   }
 }

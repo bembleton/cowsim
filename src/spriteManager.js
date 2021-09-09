@@ -51,6 +51,10 @@ class SpriteManager {
   }
 
   draw(display) {
+    const { showSprites, leftColumnSprites } = ppu.getMask();
+    if (!showSprites) return;
+
+    // draw "newest" sprites first
     for (var i = 63; i >= 0; i--) {
       const attrs = this.sprites[i * 4 + 3];
       const inUse = (attrs & SPRITE_IN_USE) > 0;
@@ -64,16 +68,17 @@ class SpriteManager {
       const priority = (attrs & SPRITE_PRIORITY) > 0;
       const palette = attrs & SPRITE_PALETTE;
 
-      this.drawSprite(display, index, x, y, flipX, flipY, priority, palette);
+      this.drawSprite(display, index, x, y, flipX, flipY, priority, palette, leftColumnSprites);
     }
   };
 
-  drawSprite(display, index, x, y, flipX, flipY, priority, palette) {
+  drawSprite(display, index, x, y, flipX, flipY, priority, palette, leftColumnSprites) {
 
     for (var pi = 0; pi < 8; pi++) {
       const px = flipX ? 7 - pi : pi;
       const dx = x + pi;
       if (dx < 0 || dx >= 256) continue;
+      if (!leftColumnSprites && dx < 8) continue;
 
       for (var pj = 0; pj < 8; pj++) {
         const py = flipY ? 7 - pj : pj;
@@ -177,13 +182,13 @@ export class Sprite extends SpriteBase {
     const opts = removeUndefinedProps(options || {});
     Object.assign(data, opts);
 
-    if (this.index) {
+    if (this.index !== undefined) {
       spriteManager.updateSprite(this.index, data);
     }
   }
 
   dispose() {
-    if (this.index) {
+    if (this.index !== undefined) {
       spriteManager.clearSprite(this.index);
       this.rendered = false;
       this.index = undefined;
@@ -204,7 +209,7 @@ export class MetaSprite extends SpriteBase {
     this.rendered = false;
     this.sprites = [];
     Object.assign(this, { x, y, palette, flipX, flipY, priority });
-    if (sprite) {
+    if (sprite !== undefined) {
       for (let j=0; j<height; j++)
       for (let i=0; i<width; i++) {
         this.add(sprite + i + j*16, i*8, j*8);
@@ -222,7 +227,7 @@ export class MetaSprite extends SpriteBase {
       // 8x16, reflected up-down
       this.add(new Sprite({ index: sprite, flipY: true }), 0, 8);
     }
-    if (mirrorY && height) {
+    if (mirrorY && width === 2) {
       // 16x16, reflected up-down
       this.add(new Sprite({ index: sprite + 1, flipY: true }), 8, 8);
     }
@@ -230,6 +235,20 @@ export class MetaSprite extends SpriteBase {
       // 16x16, rflected in both directions
       this.add(new Sprite({ index: sprite, flipX: true, flipY: true }), 8, 8);
     }
+  }
+
+  static Create8x16(x, y, topSprite, bottomSprite, { palette, flipX = false, flipY = false }) {
+    return new MetaSprite({ x, y, palette })
+      .add(topSprite, 0, 0)
+      .add(bottomSprite, 0, 8)
+      .update({ flipX, flipY });
+  }
+
+  static Create16x8(x, y, leftSprite, rightSprite, { palette, flipX = false, flipY = false }) {
+    return new MetaSprite({ x, y, palette })
+      .add(leftSprite, 0, 0)
+      .add(rightSprite, 8, 0)
+      .update({ flipX, flipY });
   }
 
   add(sprite, x, y) {
@@ -241,7 +260,8 @@ export class MetaSprite extends SpriteBase {
     sprite.update({
       x: this.x + x,
       y: this.y + y,
-      palette: this.palette
+      palette: this.palette,
+      priority: this.priority
     });
     this.sprites.push(sprite);
     return this;

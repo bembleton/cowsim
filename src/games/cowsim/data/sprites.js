@@ -65,6 +65,14 @@ export default {
   bunny_stand: 0x92,
   bunny_jump: 0x93,
 
+  /**
+   * Enemy sprite data
+   * 
+   * All sprites are 16x16,
+   * Missing direction data implies that the mirrored direction should be flipped,
+   * Single-sprite directions imply they should be mirrored perpendicularly on alternating frames
+   * Todo: allow 8x16 and 16x8 sprites that get mirrored, eg, octorok
+   */
   enemies: {
     moblin: {
       down: 0xa0,

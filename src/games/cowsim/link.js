@@ -36,10 +36,10 @@ export class Link {
     this.shieldSprite = null;
 
     // vertical
-    this.weaponSprite = new MetaSprite({ sprite: SPRITES.weapon, height: 2, width: 1 });
+    //this.weaponSprite = new MetaSprite({ sprite: SPRITES.weapon, height: 2, width: 1 });
     // horizontal
-    this.weaponSprite.update({ sprite: SPRITES.weapon+1 });
-    this.weaponSprite.sprites[1].offset = { x:8, y:0 };
+    //this.weaponSprite.update({ sprite: SPRITES.weapon+1 });
+    //this.weaponSprite.sprites[1].offset = { x:8, y:0 };
 
   }
   getBbox() {
@@ -79,12 +79,12 @@ export class Link {
 
     this.sprite.draw();
 
-    if (attacking) {
-      this.weaponSprite.draw();
-      this.drawWeapon();
-    } else {
-      this.weaponSprite.dispose();
-    }
+    // if (attacking) {
+    //   this.weaponSprite.draw();
+    //   this.drawWeapon();
+    // } else {
+    //   this.weaponSprite.dispose();
+    // }
   }
 
   drawWeapon() {

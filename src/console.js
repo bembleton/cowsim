@@ -15,6 +15,7 @@ const {
   setScroll,
   setBgPalette,
   setSpritePalette,
+  getMask
 } = ppu;
 
 let hidden, visibilityChange; 
@@ -43,14 +44,20 @@ export default class Console {
 
     const handleVisibilityChange = () => {
       if (document[hidden]) {
-        this.stop();
+        this.pause();
       } else {
-        this.loop();
+        if (this.paused) this.run();
       }
     }
 
     // pause the console when not in view
+    document.removeEventListener(visibilityChange, handleVisibilityChange, false);
     document.addEventListener(visibilityChange, handleVisibilityChange, false);
+
+    this.fps = 0;
+    window.setInterval(() => {
+      document.getElementById('fps').innerText = "FPS: " + Math.floor(this.fps);
+    }, 1000);
   }
 
   // loads a cartridge/game instance
@@ -129,13 +136,20 @@ export default class Console {
     const self = this;
     if (this.paused || !this.on) return;
 
+    let starttime = Date.now();
     function tick () {
       const { paused, animationFrame } = self;
       if (paused) return;
+      const now = Date.now();
+      const elapsed = now - starttime;
+      starttime = now;
+      self.fps = Math.floor(1000/elapsed);
       self.step();
+      animationFrame && self.frameId && animationFrame.cancel(self.frameId);
       self.frameId = animationFrame.request(tick);
     }
 
+    this.animationFrame && this.frameId && this.animationFrame.cancel(this.frameId);
     this.frameId = this.animationFrame.request(tick);
     sound.enable();
   }
@@ -160,6 +174,8 @@ export default class Console {
   draw() {
     const { display, game } = this;
 
+    const ppumask = getMask();
+
     // draw the background
     for (let y=0; y<240; y++){
       // inform the game which scan line we're updating
@@ -168,8 +184,9 @@ export default class Console {
       }
 
       for (let x=0; x<256; x++) {
-        const color = getPixel(x, y);
-        display.setPixel(x, y, color);
+        const color = getPixel(x, y); // NES color index
+        // color options
+        display.setPixel(x, y, color, ppumask);
       }
     }
 

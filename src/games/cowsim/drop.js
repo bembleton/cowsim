@@ -86,6 +86,7 @@ export class Drop {
 
   draw() {
     this.sprite.draw();
+    this.disposed = false;
   }
 
   dispose() {

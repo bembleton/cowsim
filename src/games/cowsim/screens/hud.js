@@ -5,7 +5,7 @@ import text from '~/text';
 import SPRITES from '../data/sprites';
 import { colors, palettes } from '../data/colors';
 import tiles from '../data/tiles';
-import { drawTile } from '../utils';
+import { drawTile, fillBlocks } from '../utils';
 import * as terrain from './terrain';
 import { MetaSprite, Sprite } from '../../../spriteManager';
 
@@ -100,8 +100,7 @@ export default class Hud {
       visible: true
     };
 
-    this.rupeeCount = 0;
-    this.frame = 0;
+    
     this.hudAnimation = new Animation({
       duration: 700,
       update: () => this.updateMapIndicator()
@@ -112,10 +111,7 @@ export default class Hud {
     const { sprites } = this;
 
     /** Draw the static hud content */
-    for (let y=0; y<3; y++)
-    for (let x=0; x<16; x++) {
-      drawTile(x, y, tiles.blank, 3);
-    }
+    fillBlocks(0, 0, 16, 3, tiles.blank, 3);
 
     // render the minimap as background tiles
     renderMinimapToTiles(this.map);
@@ -181,6 +177,15 @@ export default class Hud {
     // });
 
     sprites.mapIndicator = spriteManager.requestSprite();
+
+    this.rupeeCount = 0;
+    this.frame = 0;
+  }
+
+  unload() {
+    spriteManager.clearSprite(this.sprites.mapIndicator);
+    this.setItemB(null);
+    this.setItemA(null);
   }
 
   // called before the screen is rendered in onScanline
@@ -263,6 +268,8 @@ export default class Hud {
       return;
     }
 
+    // itemA is always SPRITES.weapon which get's updated in the sprite table
+    // just update the palette
     const {  palette } = item;
     this.sprites.itemA.update({ palette });
     this.sprites.itemA.draw();

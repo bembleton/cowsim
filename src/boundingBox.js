@@ -27,4 +27,14 @@ export class bbox {
       && Math.abs((a.y*2 + a.height) - (b.y*2 + b.height)) < (a.height + b.height)
     );
   }
+  center() {
+    return {
+      x: this.x + this.width/2,
+      y: this.y + this.height/2
+    };
+  }
 }
+
+// Constants
+bbox.HUD = new bbox(0,0,256,48);        // HUD
+bbox.GAMEAREA = new bbox(0,48,256,192); // playable game area

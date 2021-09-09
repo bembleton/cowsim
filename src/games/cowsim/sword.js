@@ -133,7 +133,7 @@ const uniques = [
   {
     palette: 0,
     hilt: 0,
-    blade: 1,
+    blade: 2,
     name: 'Wooden Sword',
     attack: 1,
     speed: 1,

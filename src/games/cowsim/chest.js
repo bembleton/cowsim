@@ -5,12 +5,11 @@ import { frameIndex, SubPixels } from "./utils";
 
 export class Chest extends Drop {
   constructor(x, y, contents) {
+    // bottom sprite
     const sprite = new MetaSprite({
-      x, y,
-      sprite: SPRITES.chest_closed,
+      x, y: y+8,
+      sprite: SPRITES.chest_closed+16,
       palette: 0,
-      height: 2,
-      width: 1,
       mirrorX: true
     });
 
@@ -22,15 +21,32 @@ export class Chest extends Drop {
       duration: null
     });
 
+    this.lidSprite = new MetaSprite({
+      x, y,
+      sprite: SPRITES.chest_closed,
+      palette: 0,
+      mirrorX: true
+    })
+
     this.disposeOnCollision = false;
-    this.open = false;
+    this.opened = false;
     this.contents = contents;
     this.contentsPos = SubPixels.fromPixels(x+4, y);
   }
 
+  draw() {
+    super.draw();
+    this.lidSprite.draw();
+  }
+
+  dispose() {
+    super.dispose();
+    this.lidSprite.dispose();
+  }
+
   update(canMove, game) {
-    const { contentsDxdy, contentsPos, contents, open } = this;
-    if (!open || !contents) return;
+    const { contentsDxdy, contentsPos, contents, opened } = this;
+    if (!opened || !contents) return;
     
     if (contentsDxdy.y >= 20) {
       game.spawnDrop(contents);
@@ -45,15 +61,21 @@ export class Chest extends Drop {
     this.contents.updateSprite({ x, y });
   }
 
-  onCollision(player, game) {
-    if (this.open) return;
-    this.open = true;
-    this.updateSprite({ sprite: SPRITES.chest_open });
+  open() {
+    this.opened = true;
+    //this.updateSprite({ sprite: SPRITES.chest_open });
     // 0 2
     // 1 3
-    this.sprite.sprites[0].update({ palette: 1 });
-    this.sprite.sprites[2].update({ palette: 1 });
+    this.lidSprite.dispose();
+    this.lidSprite.update({ sprite: SPRITES.chest_open, palette: 1 });
+    this.lidSprite.draw();
+  }
 
+  onCollision(player, game) {
+    if (this.opened) return;
+
+    this.lidSprite.dispose();
+    
     // spawn the contents and toss it out
     const { contents, contentsPos } = this;
     const { x, y } = contentsPos.toPixels();
@@ -62,5 +84,7 @@ export class Chest extends Drop {
     const dx = x < 128 ? 8 : -8;
     this.contentsDxdy = new SubPixels(dx, -20);
     contents.draw();
+
+    this.open();
   }
 }

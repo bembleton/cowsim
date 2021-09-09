@@ -1,6 +1,7 @@
 import ppu from '~/ppu';
 import text from '~/text';
 import TILES from './data/tiles';
+import { Direction } from './direction';
 
 const {
   HORIZONTAL,
@@ -158,6 +159,7 @@ export class SubPixels {
       y: this.y >> 4
     };
   }
+
   /**
    * adds a subpixel. 
    * @param  {...any} args can be x, y args, an array or an object
@@ -165,6 +167,11 @@ export class SubPixels {
   add(...args) {
     const { x, y } = getSubPixels(...args);
     return new SubPixels(this.x + x, this.y + y);
+  }
+
+  subtract(...args) {
+    const { x, y } = getSubPixels(...args);
+    return new SubPixels(this.x - x, this.y - y);
   }
 
   addPixels(x, y) {
@@ -182,6 +189,15 @@ export class SubPixels {
     const { x, y } = getSubPixels(...args);
     return new SubPixels(this.x % x, this.y % y);
   }
+
+  toDirection() {
+    //if (this.x === 0 && this.y === 0) return undefined;
+    if (Math.abs(this.x) >= Math.abs(this.y)) {
+      return this.x < 0 ? Direction.left : Direction.right;
+    } else {
+      return this.y < 0 ? Direction.up : Direction.down;
+    }
+  }
 }
 
 export const frameIndex = (frame, frameDuration, frameCount = 2) => {
@@ -194,29 +210,21 @@ export const pixelToTile = (px, py) => ({
   y: (py >> 4)
 });
 
-//  8: 1 (0) = 1<<4 + 0.  8>>4 = 1
-//  4: 0 (4) = 0<<4 + 4.  4>>4 = 0
-// -4: 0 (-4) = 0<<4 + -4. -4>>4 = -1
-// -9: -1
+// filter2 modifies the original array but still returns a reference
+// https://stackoverflow.com/questions/30304719/javascript-fastest-way-to-remove-object-from-array
+Array.prototype.filter2 = function filter2 (predicate) {
+  let i, j;
 
+  for (i = 0, j = 0; i < this.length; ++i) {
+      if (predicate(this[i])) {
+          this[j] = this[i];
+          ++j;
+      }
+  }
 
-/*
-0000: 0
-0001: 1
-0010: 2
-0011: 3
-0100: 4
-0101: 5
-0110: 6
-0111: 7
-1000: -8
-1001: -7
-1010: -6
-1011: -5
-1100: -4
-1101: -3
-1110: -2
-1111: -1
+  while (j < this.length) {
+      this.pop();
+  }
 
-
-*/
+  return this;
+}

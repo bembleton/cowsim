@@ -21,11 +21,12 @@ import { StaminaVial } from '../staminaVial';
 import { StaminaContainer } from '../staminaContainer';
 import { Key } from '../key';
 import { getRandomWeapon } from '../drop';
-import { Weapon } from '../Weapon';
+import { weaponDrop } from '../weaponDrop';
 import { Direction } from '../direction';
 import { Moblin } from '../moblin';
 import { woodenSword } from '../sword';
 import { Chest } from '../chest';
+import { MeleeObject, ObjectManager } from '../objectManager';
 
 const {
   HORIZONTAL,
@@ -42,23 +43,9 @@ export default class OverworldScreen {
   constructor (game) {
     this.game = game;
 
-    this.scroll = {
-      x: 0,
-      y: 0
-    };
-
-    // current map position
-    // each 'screen' is 16x12
-    // the full map is 16 screens wide (16x16 = 256 blocks wide)
-    // and 16 screens tall (16x12 = 192 blocks tall)
-    this.position = {
-      x: 16 * 16/2,
-      y: 12 * 16/2,
-    };
-
-    // null, 'up', 'down', 'left', 'right'
-    this.scrolling = null;
-    this.mirroring = HORIZONTAL;
+    this.hud = new Hud();
+    this.player = {};
+    this.position = {};
 
     this.mapIndicator = {
       sprite: null,
@@ -67,40 +54,7 @@ export default class OverworldScreen {
       visible: true
     };
 
-    this.hud = new Hud();
-
-    this.frame = 0;
-    this.stasisCounter = 0;
-
-    this.player = {
-      maxHearts: 3,
-      health: 3*4,
-      maxStamina: 3*4,
-      stamina: 12,
-      staminaClock: 0,
-      staminaRates: {
-        recharge: 120,
-        dash: 30,
-        swim: 60
-      },
-      speedWalking: 20,
-      speedDash: 32,
-      speedSwimming: 8,
-      rupees: 0,
-      keys: 0,
-      bombs: 0,
-      maxBombs: 8,
-      itemA: null, // sword
-      itemB: null, // 
-      inventory: new Inventory(),
-      hurtTimer: 0,
-      dead: false,
-      equipWeapon: this.equipWeapon.bind(this),
-      takeDamage: this.takeDamage.bind(this)
-    };
-
-    this.creatures = [];
-    this.drops = [];
+    this.objectManager = new ObjectManager();
 
     // support for 2 dynamic 8x16 sprites
     this.treasureDropSprites = [
@@ -131,6 +85,9 @@ export default class OverworldScreen {
       maxAmount: 2.5,
       update: shimmerAnimation.update.bind(shimmerAnimation)
     };
+
+    this.recentBoards = [];
+    this.treasures = [];
   }
 
   load () {
@@ -153,7 +110,47 @@ export default class OverworldScreen {
     drawArea(x, y, 0, 3);
     this.setPosition(x, y);
     this.hud.load();
-    this.hud.setItemB({ sprite: SPRITES.bomb, palette: 2 });
+    //this.hud.setItemB({ sprite: SPRITES.bomb, palette: 2 });
+
+    this.scroll = {
+      x: 0,
+      y: 0
+    };
+
+    // null, 'up', 'down', 'left', 'right'
+    this.scrolling = null;
+    
+    this.frame = 0;
+    this.stasisCounter = 0;
+
+    this.player = {
+      maxHearts: 3,
+      health: 3*4,
+      maxStamina: 3*4,
+      stamina: 12,
+      staminaClock: 0,
+      staminaRates: {
+        recharge: 120,
+        dash: 30,
+        swim: 60
+      },
+      speedWalking: 20,
+      speedDash: 32,
+      speedSwimming: 8,
+      rupees: 0,
+      keys: 0,
+      bombs: 0,
+      maxBombs: 8,
+      itemA: null, // sword
+      itemB: null, // 
+      inventory: new Inventory(),
+      hurtTimer: 0,
+      dead: false,
+      equipWeapon: this.equipWeapon.bind(this),
+      takeDamage: this.takeDamage.bind(this)
+    };
+    
+    this.playerMeleeObject = null;
 
     const link = new Link();
     const { x: px, y: py } = this.worldToScreen(pos);
@@ -164,15 +161,40 @@ export default class OverworldScreen {
 
     link.draw();
 
+    this.recentBoards = [];
+    this.treasures = {};
+    
     const { x: tilex, y: tiley } = this.findAvailableScreenTile();
     const startingWeapon = this.dropWeapon(0, 0, woodenSword);
     this.spawnTreasure(tilex, tiley, startingWeapon);
+
+    this.loading = true;
+    this.loadingProgress = 120;
   }
 
   setBgPalettes() {
-    setBgPalette(0, palettes.grassAndWater);
-    setBgPalette(1, palettes.grassAndDirt);
-    setBgPalette(2, palettes.grays);
+    if (this.player.dead) {
+      const level = this.gameOverTimer>>4;
+      this.setBgGameOverPalettes(level);
+    } else {
+      setBgPalette(0, palettes.grassAndWater);
+      setBgPalette(1, palettes.grassAndDirt);
+      setBgPalette(2, palettes.grays);
+    }
+  }
+
+  /** level: 0-3 where 0 is completely blacks */
+  setBgGameOverPalettes(level) {
+    const palette = [
+      palettes.blacks1,
+      palettes.blacks2,
+      palettes.blacks3,
+      palettes.blacks4,
+    ][level];
+    setBgPalette(0, palette);
+    setBgPalette(1, palette);
+    setBgPalette(2, palette);
+    setBgPalette(3, palette);
   }
 
   unload () {
@@ -180,17 +202,26 @@ export default class OverworldScreen {
   }
 
   onScanline (y) {
+    if (this.player.dead) return;
+
+    const progress = this.loadingProgress;
+    const loading = progress > 0;
+
+    if (y < progress || y > 240-progress) {
+      setScroll(0, 32-y);
+      setMirroring(HORIZONTAL);
+    } else
     // draw hud
-    if (y === 0) {
+    if (y === 0 || loading && y < 8) {
       // draw one row of black tiles from the bottom of the hud
       // to mask the top part of the minimap
       setScroll(0, 32);
       setMirroring(HORIZONTAL);
       this.hud.setPalettes();
-    } else if (y === 8) {
+    } else if (y === 8 || loading && y < 48) {
       // set scroll-y to -8 to center the hud
       setScroll(0, -8);
-    } else if (y === 48) {
+    } else if (y === 48 || loading && y > 48) {
       // set the scroll and mirror mode back to normal
       setMirroring(this.mirroring);
       setScroll(this.scroll.x, this.scroll.y);
@@ -198,7 +229,7 @@ export default class OverworldScreen {
       this.setBgPalettes();
     }
     
-    if (y >= 48 && this.shimmer.count > 0) {
+    if (y >= 48 && this.shimmer.count > 0 && !loading) {
       const { frame, count, maxCount, maxAmount } = this.shimmer;
       const amount = ((count > 127 ? count : 0)/maxCount) * maxAmount;
       const dx = Math.floor(Math.sin( Math.PI * 2 *(y + frame) / 32 ) * amount);
@@ -237,11 +268,12 @@ export default class OverworldScreen {
   }
 
   spawnCreatures () {
-    const { position: { x: posx, y: posy } } = this;
-    // spawn 3 to 8 creatures
-    const toSpawn = randInt(3,7);
+    const { position: { x: posx, y: posy }, recentBoards } = this;
+
+    const board = this.getBoardId();
+    const { enemies = randInt(3,7) } = recentBoards.find(b => b.board === board) || {};
     const cols = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
-    for (let i=0; i<toSpawn; i++) {
+    for (let i=0; i<enemies; i++) {
       const xi = randInt(cols.length);
       const x = cols[xi] + posx;
       const y = randInt(1, 11) + posy;
@@ -265,14 +297,24 @@ export default class OverworldScreen {
         break;
     }
     creature.draw();
-    this.creatures.push(creature);
+    this.objectManager.creatures.push(creature);
   }
 
   spawnTreasure (tilex, tiley, contents) {
     const { x, y } = this.tileToScreen(tilex, tiley);
-    const drop = new Chest(x, y, contents);
-    drop.draw();
-    this.drops.push(drop);
+    const chest = new Chest(x, y, contents);
+    this.spawnDrop(chest);
+    return chest;
+  }
+
+  spawnTreasures() {
+    const { treasures } = this;
+    const board = this.getBoardId();
+    const drops = treasures[board];
+    if (!drops) return;
+    for (const drop of drops) {
+      this.spawnDrop(drop);
+    }
   }
 
   getRandomDrop (px, py) {
@@ -314,8 +356,9 @@ export default class OverworldScreen {
   }
 
   spawnDrop (drop) {
+    console.log('spawning a', drop);
     drop.draw();
-    this.drops.push(drop);
+    this.objectManager.drops.push(drop);
   }
 
   dropWeapon (px, py, weapon = null) {
@@ -330,18 +373,8 @@ export default class OverworldScreen {
     const metaSprite = this.treasureDropSprites[0];
     console.log(metaSprite);
     metaSprite.update({ x: px, y: py, palette });
-    const drop = new Weapon(px, py, weapon, metaSprite);
+    const drop = new weaponDrop(px, py, weapon, metaSprite);
     return drop;
-  }
-
-  clearCreatures (...creatures) {
-    (creatures.length ? creatures : this.creatures).forEach(x => x.dispose());
-    this.creatures = [];
-  }
-
-  clearDrops (...drops) {
-    (drops.length ? drops : this.drops).forEach(x => x.dispose());
-    this.drops = [];
   }
 
   equipWeapon (weapon) {
@@ -363,7 +396,19 @@ export default class OverworldScreen {
   update () {
     const { hud, scrolling, player, position, shimmer, frame, stasisCounter } = this;
     
-    if (player.dead) return;
+    if (player.dead) {
+      if (this.gameOverTimer) {
+        this.gameOverTimer--;
+        const level = this.gameOverTimer>>4;
+        this.setBgGameOverPalettes(level);
+        if (this.gameOverTimer === 0) {
+          this.showGameOver();
+        }
+      }
+      return;
+    }
+
+    if (this.loadingProgress > 0) this.loadingProgress -= 2;
 
     if (scrolling) {
       this.doScroll();
@@ -375,8 +420,9 @@ export default class OverworldScreen {
     }
     
     this.updateLink();
-    this.updateCreatures();
-    this.updateDrops();
+    this.objectManager.update(this);
+    //this.updateCreatures();
+    //this.updateDrops();
     // projectiles
     // enemies
     // drops
@@ -413,6 +459,7 @@ export default class OverworldScreen {
         link.attackFrame--;
       } else {
         link.attacking = false;
+        this.playerMeleeObject && this.playerMeleeObject.dispose();
         link.canAttack = true; // todo: cooldown
       }
     }
@@ -432,43 +479,8 @@ export default class OverworldScreen {
     }
     
     link.draw();
-  }
-
-  updateCreatures() {
-    const { creatures, player, stasisCounter } = this;
-    const link = this.link.getBbox();
-    const canMove = stasisCounter === 0;
-    this.creatures = creatures.filter(c => {
-      c.update(canMove, this, player);
-      
-      // projectile collisions
-      // if (!c.disposed && c.bbox.intersects()) {
-
-      // }
-
-      if(!c.disposed && c.bbox.intersects(link)) {
-        c.onCollision(player, this);
-        
-      }
-
-      return !c.disposed;
-    });
-  }
-
-  updateDrops() {
-    const { drops, player, stasisCounter } = this;
-    const link = this.link.getBbox();
-    const canMove = stasisCounter === 0;
-    for (let i=drops.length-1; i>=0; i--) {
-      const d = drops[i];
-      d.update(canMove, this);
-      
-      if(!d.disposed && d.bbox.intersects(link)) {
-        d.onCollision(player, this);
-        if (d.disposeOnCollision) d.dispose();
-      }
-
-      if (d.disposed) drops.splice(i, 1);
+    if (link.attacking) {
+      this.drawWeapon();
     }
   }
 
@@ -476,6 +488,9 @@ export default class OverworldScreen {
     const { link, player } = this;
     link.dispose();
     player.dead = true;
+    this.gameOverTimer = 63;
+    this.objectManager.clear();
+    this.hud.unload();
   }
 
   getSpeed() {
@@ -545,6 +560,11 @@ export default class OverworldScreen {
     link.frame = 0;
     link.dead = false;
     link.dying = true;
+    this.objectManager.clear();
+  }
+
+  showGameOver() {
+    this.game.loadScreen(this.game.screens.gameOver);
   }
 
   /** not scrolling, not dying */
@@ -561,12 +581,27 @@ export default class OverworldScreen {
       return;
     }
 
-    if (isPressed(buttons.A) && link.canAttack) {
+    if (isPressed(buttons.A) && link.canAttack && this.player.weapon) {
       // if not attacking, and attackFrame == 0,
       // start powering up the attackFrame while A is pressed,
       // until attackFrame is X,
       // then set attacking to true,
       // and start counting attackFrame down
+
+      /*
+      canAttack | attacking | attackFrame | then
+      false     | false     | 0
+      false     | false     | >0          | attackFrame--
+      true      | --        | <64 & A     | attackFrame++
+      true      | --        | >0 & !A     | canAttack=false
+      
+      if (!link.attacking) {
+        // draw new weapon sprite
+        this.drawWeapon();
+      } else {
+        // update weapon sprite offset
+      }
+      */
       link.attacking = true;
       if (link.attackFrame < 64) {
         link.attackFrame++;
@@ -581,20 +616,69 @@ export default class OverworldScreen {
     if (link.attacking) return;
     
     if (isPressed(buttons.UP)) {
-      link.direction = Direction.up;
-      this.tryMoveLink();
+      if (link.direction === (link.direction = Direction.up)) {
+        this.tryMoveLink();
+      }
     } else if (isPressed(buttons.DOWN)) {
-      link.direction = Direction.down;
-      this.tryMoveLink();
+      if (link.direction === (link.direction = Direction.down)) {
+        this.tryMoveLink();
+      }
     } else if (isPressed(buttons.RIGHT)) {
-      link.direction = Direction.right;
-      this.tryMoveLink();
+      if (link.direction === (link.direction = Direction.right)) {
+        this.tryMoveLink();
+      }
     } else if (isPressed(buttons.LEFT)) {
-      link.direction = Direction.left;
-      this.tryMoveLink();
+      if (link.direction === (link.direction = Direction.left)) {
+        this.tryMoveLink();
+      }
     }
 
     
+  }
+
+  /** draws SPRITES.weapon using link's direction and position */
+  drawWeapon() {
+    const {
+      pos, direction, attackFrame
+    } = this.link;
+    
+    const { x: posx, y: posy } = pos.toPixels();
+    const offset = (attackFrame < 4) ? 3 : 12;
+    const [x,y] = {
+      'up': [posx+3, posy-offset],
+      'down': [posx+5, posy+offset],
+      'left': [posx-offset, posy+6],
+      'right': [posx+offset, posy+6],
+    }[direction];
+
+    if (!this.playerMeleeObject || this.playerMeleeObject.disposed) {
+      // make a new sprite
+      const horiz = direction === Direction.left || direction === Direction.right;
+      const sprite1 = horiz ? SPRITES.weapon+17 : SPRITES.weapon;
+      const sprite2 = horiz ? SPRITES.weapon+1 : SPRITES.weapon+16;
+      const flipX = direction === Direction.left;
+      const flipY = direction === Direction.down;
+      const width = horiz ? 16 : 8;
+      const height = horiz ? 8 : 16;
+
+      const { palette, attack: damage } = this.player.weapon;
+      const options = { palette, flipX, flipY, priority: false };
+
+      if (horiz) {
+        this.link.weaponSprite = MetaSprite.Create16x8(x, y, sprite1, sprite2, options);
+      } else {
+        this.link.weaponSprite = MetaSprite.Create8x16(x, y, sprite1, sprite2, options);
+      }
+
+      this.playerMeleeObject = new MeleeObject({ sprite: this.link.weaponSprite, x, y, width, height, isFriendly: true, damage });
+      
+      this.objectManager.projectiles.push(this.playerMeleeObject);
+      this.playerMeleeObject.draw();
+
+    } else {
+      // update pos
+      this.playerMeleeObject.pos = SubPixels.fromPixels(x, y);
+    }
   }
 
   tryMoveLink() {
@@ -658,14 +742,21 @@ export default class OverworldScreen {
     this.checkScreenWrap();
   }
 
+  getBoardId() {
+    const { position } = this;
+    return (position.x / 16) + (position.y / 12) * 16;
+  }
+
   checkScreenWrap() {
-    const { link } = this;
+    const { link, pos, recentBoards } = this;
     const { direction } = link;
     const { x, y } = link.pos.toPixels();
     const top = 48;
     const bottom = 240-16;
     const left = 0;
     const right = 256-16;
+
+    const board = this.getBoardId();
 
     if (y < top && direction === Direction.up) {
       link.pos.setPixelY(top);
@@ -683,9 +774,22 @@ export default class OverworldScreen {
       return;
     }
 
+    // save board state
+    recentBoards.filter2(b => b.board !== board).push({
+      board,
+      enemies: this.objectManager.creatures.length
+    });
+    if (recentBoards.length > 8) recentBoards.shift();
+
+    // save treasures
+    if (this.objectManager.drops.length) {
+      this.treasures[board] = [...this.objectManager.drops];
+    } else {
+      delete this.treasures[board];
+    }
+
     // clear creatures and drops
-    this.clearCreatures();
-    this.clearDrops();
+    this.objectManager.clear();
   }
   
   coerceLink() {
@@ -851,6 +955,7 @@ export default class OverworldScreen {
     }
 
     this.spawnCreatures();
+    this.spawnTreasures();
   }
 
   /**

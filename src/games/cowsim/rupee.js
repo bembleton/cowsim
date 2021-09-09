@@ -3,7 +3,7 @@ import { Drop } from "./drop";
 import { frameIndex } from "./utils";
 
 export class Rupee extends Drop {
-  constructor(x, y, value) {
+  constructor(x, y, value = 1) {
     const palette = value === 5 ? 2 : 1;
     const sprite = value === 50 ? SPRITES.rupee_dark : SPRITES.rupee_light;
     super(x, y, { sprite, palette });
@@ -23,5 +23,15 @@ export class Rupee extends Drop {
 
   onCollision(player) {
     player.rupees = Math.min(player.rupees + this.value, 255);
+  }
+}
+export class Rupee5 extends Rupee {
+  constructor(x, y) {
+    super(x, y, 5);
+  }
+}
+export class Rupee50 extends Rupee {
+  constructor(x, y) {
+    super(x, y, 50);
   }
 }

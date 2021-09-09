@@ -1,6 +1,6 @@
 import { Drop } from "./drop";
 
-export class Weapon extends Drop {
+export class weaponDrop extends Drop {
   constructor(x, y, weapon, metaSprite) {
     super(x, y, {
       sprite: metaSprite,

@@ -1,0 +1,518 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files\\nodejs\\\\node.exe',
+1 verbose cli   'C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'i' ]
+2 info using npm@1.1.69
+3 info using node@v0.8.16
+4 verbose node symlink C:\Program Files\nodejs\\node.exe
+5 verbose read json D:\Dev\cowsim\package.json
+6 verbose readDependencies using package.json deps
+7 verbose install where, deps [ 'D:\\Dev\\cowsim',
+7 verbose install   [ 'animation-frame',
+7 verbose install     'bmp-js',
+7 verbose install     'npm',
+7 verbose install     'perlin-noise',
+7 verbose install     'simplex-noise',
+7 verbose install     'tone',
+7 verbose install     'web-audio-daw',
+7 verbose install     '@babel/core',
+7 verbose install     '@babel/plugin-transform-runtime',
+7 verbose install     '@babel/preset-env',
+7 verbose install     'babel-jest',
+7 verbose install     'babel-loader',
+7 verbose install     'babel-plugin-transform-class-properties',
+7 verbose install     'buffer-loader',
+7 verbose install     'copy-webpack-plugin',
+7 verbose install     'css-loader',
+7 verbose install     'file-loader',
+7 verbose install     'grunt',
+7 verbose install     'grunt-svgstore',
+7 verbose install     'jest',
+7 verbose install     'mini-css-extract-plugin',
+7 verbose install     'raw-loader',
+7 verbose install     'style-loader',
+7 verbose install     'webpack',
+7 verbose install     'webpack-cli',
+7 verbose install     'webpack-dev-server' ] ]
+8 verbose from cache D:\Dev\cowsim\package.json
+9 info preinstall cowsim@1.0.0
+10 verbose from cache D:\Dev\cowsim\package.json
+11 verbose readDependencies using package.json deps
+12 verbose cache add [ 'animation-frame@^0.3.0', null ]
+13 silly cache add name=undefined spec="animation-frame@^0.3.0" args=["animation-frame@^0.3.0",null]
+14 verbose parsed url { pathname: 'animation-frame@^0.3.0',
+14 verbose parsed url   path: 'animation-frame@^0.3.0',
+14 verbose parsed url   href: 'animation-frame@^0.3.0' }
+15 silly cache add name="animation-frame" spec="^0.3.0" args=["animation-frame","^0.3.0"]
+16 verbose parsed url { pathname: '^0.3.0', path: '^0.3.0', href: '^0.3.0' }
+17 verbose addNamed [ 'animation-frame', '^0.3.0' ]
+18 verbose addNamed [ null, null ]
+19 verbose cache add [ 'bmp-js@^0.1.0', null ]
+20 silly cache add name=undefined spec="bmp-js@^0.1.0" args=["bmp-js@^0.1.0",null]
+21 verbose parsed url { pathname: 'bmp-js@^0.1.0',
+21 verbose parsed url   path: 'bmp-js@^0.1.0',
+21 verbose parsed url   href: 'bmp-js@^0.1.0' }
+22 silly cache add name="bmp-js" spec="^0.1.0" args=["bmp-js","^0.1.0"]
+23 verbose parsed url { pathname: '^0.1.0', path: '^0.1.0', href: '^0.1.0' }
+24 verbose addNamed [ 'bmp-js', '^0.1.0' ]
+25 verbose addNamed [ null, null ]
+26 verbose cache add [ 'npm@^6.14.13', null ]
+27 silly cache add name=undefined spec="npm@^6.14.13" args=["npm@^6.14.13",null]
+28 verbose parsed url { pathname: 'npm@^6.14.13',
+28 verbose parsed url   path: 'npm@^6.14.13',
+28 verbose parsed url   href: 'npm@^6.14.13' }
+29 silly cache add name="npm" spec="^6.14.13" args=["npm","^6.14.13"]
+30 verbose parsed url { pathname: '^6.14.13', path: '^6.14.13', href: '^6.14.13' }
+31 verbose addNamed [ 'npm', '^6.14.13' ]
+32 verbose addNamed [ null, null ]
+33 verbose cache add [ 'perlin-noise@0.0.1', null ]
+34 silly cache add name=undefined spec="perlin-noise@0.0.1" args=["perlin-noise@0.0.1",null]
+35 verbose parsed url { pathname: 'perlin-noise@0.0.1',
+35 verbose parsed url   path: 'perlin-noise@0.0.1',
+35 verbose parsed url   href: 'perlin-noise@0.0.1' }
+36 silly cache add name="perlin-noise" spec="0.0.1" args=["perlin-noise","0.0.1"]
+37 verbose parsed url { pathname: '0.0.1', path: '0.0.1', href: '0.0.1' }
+38 verbose addNamed [ 'perlin-noise', '0.0.1' ]
+39 verbose addNamed [ '0.0.1', '0.0.1' ]
+40 verbose cache add [ 'simplex-noise@^2.4.0', null ]
+41 silly cache add name=undefined spec="simplex-noise@^2.4.0" args=["simplex-noise@^2.4.0",null]
+42 verbose parsed url { pathname: 'simplex-noise@^2.4.0',
+42 verbose parsed url   path: 'simplex-noise@^2.4.0',
+42 verbose parsed url   href: 'simplex-noise@^2.4.0' }
+43 silly cache add name="simplex-noise" spec="^2.4.0" args=["simplex-noise","^2.4.0"]
+44 verbose parsed url { pathname: '^2.4.0', path: '^2.4.0', href: '^2.4.0' }
+45 verbose addNamed [ 'simplex-noise', '^2.4.0' ]
+46 verbose addNamed [ null, null ]
+47 verbose cache add [ 'tone@^13.8.34', null ]
+48 silly cache add name=undefined spec="tone@^13.8.34" args=["tone@^13.8.34",null]
+49 verbose parsed url { pathname: 'tone@^13.8.34',
+49 verbose parsed url   path: 'tone@^13.8.34',
+49 verbose parsed url   href: 'tone@^13.8.34' }
+50 silly cache add name="tone" spec="^13.8.34" args=["tone","^13.8.34"]
+51 verbose parsed url { pathname: '^13.8.34', path: '^13.8.34', href: '^13.8.34' }
+52 verbose addNamed [ 'tone', '^13.8.34' ]
+53 verbose addNamed [ null, null ]
+54 verbose cache add [ 'web-audio-daw@^4.11.0', null ]
+55 silly cache add name=undefined spec="web-audio-daw@^4.11.0" args=["web-audio-daw@^4.11.0",null]
+56 verbose parsed url { pathname: 'web-audio-daw@^4.11.0',
+56 verbose parsed url   path: 'web-audio-daw@^4.11.0',
+56 verbose parsed url   href: 'web-audio-daw@^4.11.0' }
+57 silly cache add name="web-audio-daw" spec="^4.11.0" args=["web-audio-daw","^4.11.0"]
+58 verbose parsed url { pathname: '^4.11.0', path: '^4.11.0', href: '^4.11.0' }
+59 verbose addNamed [ 'web-audio-daw', '^4.11.0' ]
+60 verbose addNamed [ null, null ]
+61 verbose cache add [ '@babel/core@^7.14.5', null ]
+62 silly cache add name=undefined spec="@babel/core@^7.14.5" args=["@babel/core@^7.14.5",null]
+63 verbose parsed url { pathname: '@babel/core@^7.14.5',
+63 verbose parsed url   path: '@babel/core@^7.14.5',
+63 verbose parsed url   href: '@babel/core@^7.14.5' }
+64 silly cache add name="" spec="babel/core@^7.14.5" args=["","babel/core@^7.14.5"]
+65 verbose parsed url { pathname: 'babel/core@^7.14.5',
+65 verbose parsed url   path: 'babel/core@^7.14.5',
+65 verbose parsed url   href: 'babel/core@^7.14.5' }
+66 silly cache add name="babel/core" spec="^7.14.5" args=["babel/core","^7.14.5"]
+67 verbose parsed url { pathname: '^7.14.5', path: '^7.14.5', href: '^7.14.5' }
+68 verbose addNamed [ 'babel/core', '^7.14.5' ]
+69 verbose addNamed [ null, null ]
+70 verbose cache add [ '@babel/plugin-transform-runtime@^7.14.5', null ]
+71 silly cache add name=undefined spec="@babel/plugin-transform-runtime@^7.14.5" args=["@babel/plugin-transform-runtime@^7.14.5",null]
+72 verbose parsed url { pathname: '@babel/plugin-transform-runtime@^7.14.5',
+72 verbose parsed url   path: '@babel/plugin-transform-runtime@^7.14.5',
+72 verbose parsed url   href: '@babel/plugin-transform-runtime@^7.14.5' }
+73 silly cache add name="" spec="babel/plugin-transform-runtime@^7.14.5" args=["","babel/plugin-transform-runtime@^7.14.5"]
+74 verbose parsed url { pathname: 'babel/plugin-transform-runtime@^7.14.5',
+74 verbose parsed url   path: 'babel/plugin-transform-runtime@^7.14.5',
+74 verbose parsed url   href: 'babel/plugin-transform-runtime@^7.14.5' }
+75 silly cache add name="babel/plugin-transform-runtime" spec="^7.14.5" args=["babel/plugin-transform-runtime","^7.14.5"]
+76 verbose parsed url { pathname: '^7.14.5', path: '^7.14.5', href: '^7.14.5' }
+77 verbose addNamed [ 'babel/plugin-transform-runtime', '^7.14.5' ]
+78 verbose addNamed [ null, null ]
+79 verbose cache add [ '@babel/preset-env@^7.14.5', null ]
+80 silly cache add name=undefined spec="@babel/preset-env@^7.14.5" args=["@babel/preset-env@^7.14.5",null]
+81 verbose parsed url { pathname: '@babel/preset-env@^7.14.5',
+81 verbose parsed url   path: '@babel/preset-env@^7.14.5',
+81 verbose parsed url   href: '@babel/preset-env@^7.14.5' }
+82 silly cache add name="" spec="babel/preset-env@^7.14.5" args=["","babel/preset-env@^7.14.5"]
+83 verbose parsed url { pathname: 'babel/preset-env@^7.14.5',
+83 verbose parsed url   path: 'babel/preset-env@^7.14.5',
+83 verbose parsed url   href: 'babel/preset-env@^7.14.5' }
+84 silly cache add name="babel/preset-env" spec="^7.14.5" args=["babel/preset-env","^7.14.5"]
+85 verbose parsed url { pathname: '^7.14.5', path: '^7.14.5', href: '^7.14.5' }
+86 verbose addNamed [ 'babel/preset-env', '^7.14.5' ]
+87 verbose addNamed [ null, null ]
+88 verbose cache add [ 'babel-jest@^25.5.1', null ]
+89 silly cache add name=undefined spec="babel-jest@^25.5.1" args=["babel-jest@^25.5.1",null]
+90 verbose parsed url { pathname: 'babel-jest@^25.5.1',
+90 verbose parsed url   path: 'babel-jest@^25.5.1',
+90 verbose parsed url   href: 'babel-jest@^25.5.1' }
+91 silly cache add name="babel-jest" spec="^25.5.1" args=["babel-jest","^25.5.1"]
+92 verbose parsed url { pathname: '^25.5.1', path: '^25.5.1', href: '^25.5.1' }
+93 verbose addNamed [ 'babel-jest', '^25.5.1' ]
+94 verbose addNamed [ null, null ]
+95 verbose cache add [ 'babel-loader@^8.2.2', null ]
+96 silly cache add name=undefined spec="babel-loader@^8.2.2" args=["babel-loader@^8.2.2",null]
+97 verbose parsed url { pathname: 'babel-loader@^8.2.2',
+97 verbose parsed url   path: 'babel-loader@^8.2.2',
+97 verbose parsed url   href: 'babel-loader@^8.2.2' }
+98 silly cache add name="babel-loader" spec="^8.2.2" args=["babel-loader","^8.2.2"]
+99 verbose parsed url { pathname: '^8.2.2', path: '^8.2.2', href: '^8.2.2' }
+100 verbose addNamed [ 'babel-loader', '^8.2.2' ]
+101 verbose addNamed [ null, null ]
+102 verbose cache add [ 'babel-plugin-transform-class-properties@^6.24.1', null ]
+103 silly cache add name=undefined spec="babel-plugin-transform-class-properties@^6.24.1" args=["babel-plugin-transform-class-properties@^6.24.1",null]
+104 verbose parsed url { pathname: 'babel-plugin-transform-class-properties@^6.24.1',
+104 verbose parsed url   path: 'babel-plugin-transform-class-properties@^6.24.1',
+104 verbose parsed url   href: 'babel-plugin-transform-class-properties@^6.24.1' }
+105 silly cache add name="babel-plugin-transform-class-properties" spec="^6.24.1" args=["babel-plugin-transform-class-properties","^6.24.1"]
+106 verbose parsed url { pathname: '^6.24.1', path: '^6.24.1', href: '^6.24.1' }
+107 verbose addNamed [ 'babel-plugin-transform-class-properties', '^6.24.1' ]
+108 verbose addNamed [ null, null ]
+109 verbose cache add [ 'buffer-loader@^0.1.0', null ]
+110 silly cache add name=undefined spec="buffer-loader@^0.1.0" args=["buffer-loader@^0.1.0",null]
+111 verbose parsed url { pathname: 'buffer-loader@^0.1.0',
+111 verbose parsed url   path: 'buffer-loader@^0.1.0',
+111 verbose parsed url   href: 'buffer-loader@^0.1.0' }
+112 silly cache add name="buffer-loader" spec="^0.1.0" args=["buffer-loader","^0.1.0"]
+113 verbose parsed url { pathname: '^0.1.0', path: '^0.1.0', href: '^0.1.0' }
+114 verbose addNamed [ 'buffer-loader', '^0.1.0' ]
+115 verbose addNamed [ null, null ]
+116 verbose cache add [ 'copy-webpack-plugin@^5.1.2', null ]
+117 silly cache add name=undefined spec="copy-webpack-plugin@^5.1.2" args=["copy-webpack-plugin@^5.1.2",null]
+118 verbose parsed url { pathname: 'copy-webpack-plugin@^5.1.2',
+118 verbose parsed url   path: 'copy-webpack-plugin@^5.1.2',
+118 verbose parsed url   href: 'copy-webpack-plugin@^5.1.2' }
+119 silly cache add name="copy-webpack-plugin" spec="^5.1.2" args=["copy-webpack-plugin","^5.1.2"]
+120 verbose parsed url { pathname: '^5.1.2', path: '^5.1.2', href: '^5.1.2' }
+121 verbose addNamed [ 'copy-webpack-plugin', '^5.1.2' ]
+122 verbose addNamed [ null, null ]
+123 verbose cache add [ 'css-loader@^3.6.0', null ]
+124 silly cache add name=undefined spec="css-loader@^3.6.0" args=["css-loader@^3.6.0",null]
+125 verbose parsed url { pathname: 'css-loader@^3.6.0',
+125 verbose parsed url   path: 'css-loader@^3.6.0',
+125 verbose parsed url   href: 'css-loader@^3.6.0' }
+126 silly cache add name="css-loader" spec="^3.6.0" args=["css-loader","^3.6.0"]
+127 verbose parsed url { pathname: '^3.6.0', path: '^3.6.0', href: '^3.6.0' }
+128 verbose addNamed [ 'css-loader', '^3.6.0' ]
+129 verbose addNamed [ null, null ]
+130 verbose cache add [ 'file-loader@^5.1.0', null ]
+131 silly cache add name=undefined spec="file-loader@^5.1.0" args=["file-loader@^5.1.0",null]
+132 verbose parsed url { pathname: 'file-loader@^5.1.0',
+132 verbose parsed url   path: 'file-loader@^5.1.0',
+132 verbose parsed url   href: 'file-loader@^5.1.0' }
+133 silly cache add name="file-loader" spec="^5.1.0" args=["file-loader","^5.1.0"]
+134 verbose parsed url { pathname: '^5.1.0', path: '^5.1.0', href: '^5.1.0' }
+135 verbose addNamed [ 'file-loader', '^5.1.0' ]
+136 verbose addNamed [ null, null ]
+137 silly lockFile c464801e-animation-frame-0-3-0 animation-frame@^0.3.0
+138 verbose lock animation-frame@^0.3.0 C:\Users\Brian\AppData\Roaming\npm-cache\c464801e-animation-frame-0-3-0.lock
+139 silly lockFile 06df38e1-bmp-js-0-1-0 bmp-js@^0.1.0
+140 verbose lock bmp-js@^0.1.0 C:\Users\Brian\AppData\Roaming\npm-cache\06df38e1-bmp-js-0-1-0.lock
+141 silly lockFile 473fddb1-npm-6-14-13 npm@^6.14.13
+142 verbose lock npm@^6.14.13 C:\Users\Brian\AppData\Roaming\npm-cache\473fddb1-npm-6-14-13.lock
+143 silly lockFile 2000aac4-perlin-noise-0-0-1 perlin-noise@0.0.1
+144 verbose lock perlin-noise@0.0.1 C:\Users\Brian\AppData\Roaming\npm-cache\2000aac4-perlin-noise-0-0-1.lock
+145 silly lockFile 7770da99-simplex-noise-2-4-0 simplex-noise@^2.4.0
+146 verbose lock simplex-noise@^2.4.0 C:\Users\Brian\AppData\Roaming\npm-cache\7770da99-simplex-noise-2-4-0.lock
+147 silly lockFile 47c10479-tone-13-8-34 tone@^13.8.34
+148 verbose lock tone@^13.8.34 C:\Users\Brian\AppData\Roaming\npm-cache\47c10479-tone-13-8-34.lock
+149 silly lockFile e540812c-web-audio-daw-4-11-0 web-audio-daw@^4.11.0
+150 verbose lock web-audio-daw@^4.11.0 C:\Users\Brian\AppData\Roaming\npm-cache\e540812c-web-audio-daw-4-11-0.lock
+151 silly lockFile 420d4b4f-babel-core-7-14-5 babel/core@^7.14.5
+152 verbose lock babel/core@^7.14.5 C:\Users\Brian\AppData\Roaming\npm-cache\420d4b4f-babel-core-7-14-5.lock
+153 silly lockFile 19d67c64--plugin-transform-runtime-7-14-5 babel/plugin-transform-runtime@^7.14.5
+154 verbose lock babel/plugin-transform-runtime@^7.14.5 C:\Users\Brian\AppData\Roaming\npm-cache\19d67c64--plugin-transform-runtime-7-14-5.lock
+155 silly lockFile 1e060699-babel-preset-env-7-14-5 babel/preset-env@^7.14.5
+156 verbose lock babel/preset-env@^7.14.5 C:\Users\Brian\AppData\Roaming\npm-cache\1e060699-babel-preset-env-7-14-5.lock
+157 silly lockFile a0324555-babel-jest-25-5-1 babel-jest@^25.5.1
+158 verbose lock babel-jest@^25.5.1 C:\Users\Brian\AppData\Roaming\npm-cache\a0324555-babel-jest-25-5-1.lock
+159 silly lockFile e4514aec-babel-loader-8-2-2 babel-loader@^8.2.2
+160 verbose lock babel-loader@^8.2.2 C:\Users\Brian\AppData\Roaming\npm-cache\e4514aec-babel-loader-8-2-2.lock
+161 silly lockFile 1efc430d-ransform-class-properties-6-24-1 babel-plugin-transform-class-properties@^6.24.1
+162 verbose lock babel-plugin-transform-class-properties@^6.24.1 C:\Users\Brian\AppData\Roaming\npm-cache\1efc430d-ransform-class-properties-6-24-1.lock
+163 silly lockFile 41f583b1-buffer-loader-0-1-0 buffer-loader@^0.1.0
+164 verbose lock buffer-loader@^0.1.0 C:\Users\Brian\AppData\Roaming\npm-cache\41f583b1-buffer-loader-0-1-0.lock
+165 silly lockFile 5390e844-copy-webpack-plugin-5-1-2 copy-webpack-plugin@^5.1.2
+166 verbose lock copy-webpack-plugin@^5.1.2 C:\Users\Brian\AppData\Roaming\npm-cache\5390e844-copy-webpack-plugin-5-1-2.lock
+167 verbose cache add [ 'grunt@^1.4.1', null ]
+168 silly cache add name=undefined spec="grunt@^1.4.1" args=["grunt@^1.4.1",null]
+169 verbose parsed url { pathname: 'grunt@^1.4.1',
+169 verbose parsed url   path: 'grunt@^1.4.1',
+169 verbose parsed url   href: 'grunt@^1.4.1' }
+170 silly cache add name="grunt" spec="^1.4.1" args=["grunt","^1.4.1"]
+171 verbose parsed url { pathname: '^1.4.1', path: '^1.4.1', href: '^1.4.1' }
+172 verbose addNamed [ 'grunt', '^1.4.1' ]
+173 verbose addNamed [ null, null ]
+174 silly lockFile 2139b900-grunt-1-4-1 grunt@^1.4.1
+175 verbose lock grunt@^1.4.1 C:\Users\Brian\AppData\Roaming\npm-cache\2139b900-grunt-1-4-1.lock
+176 verbose cache add [ 'grunt-svgstore@^2.0.0', null ]
+177 silly cache add name=undefined spec="grunt-svgstore@^2.0.0" args=["grunt-svgstore@^2.0.0",null]
+178 verbose parsed url { pathname: 'grunt-svgstore@^2.0.0',
+178 verbose parsed url   path: 'grunt-svgstore@^2.0.0',
+178 verbose parsed url   href: 'grunt-svgstore@^2.0.0' }
+179 silly cache add name="grunt-svgstore" spec="^2.0.0" args=["grunt-svgstore","^2.0.0"]
+180 verbose parsed url { pathname: '^2.0.0', path: '^2.0.0', href: '^2.0.0' }
+181 verbose addNamed [ 'grunt-svgstore', '^2.0.0' ]
+182 verbose addNamed [ null, null ]
+183 silly lockFile a8bab2bd-grunt-svgstore-2-0-0 grunt-svgstore@^2.0.0
+184 verbose lock grunt-svgstore@^2.0.0 C:\Users\Brian\AppData\Roaming\npm-cache\a8bab2bd-grunt-svgstore-2-0-0.lock
+185 verbose cache add [ 'jest@^25.5.4', null ]
+186 silly cache add name=undefined spec="jest@^25.5.4" args=["jest@^25.5.4",null]
+187 verbose parsed url { pathname: 'jest@^25.5.4',
+187 verbose parsed url   path: 'jest@^25.5.4',
+187 verbose parsed url   href: 'jest@^25.5.4' }
+188 silly cache add name="jest" spec="^25.5.4" args=["jest","^25.5.4"]
+189 verbose parsed url { pathname: '^25.5.4', path: '^25.5.4', href: '^25.5.4' }
+190 verbose addNamed [ 'jest', '^25.5.4' ]
+191 verbose addNamed [ null, null ]
+192 silly lockFile ac68a6a8-jest-25-5-4 jest@^25.5.4
+193 verbose lock jest@^25.5.4 C:\Users\Brian\AppData\Roaming\npm-cache\ac68a6a8-jest-25-5-4.lock
+194 verbose cache add [ 'mini-css-extract-plugin@^0.9.0', null ]
+195 silly cache add name=undefined spec="mini-css-extract-plugin@^0.9.0" args=["mini-css-extract-plugin@^0.9.0",null]
+196 verbose parsed url { pathname: 'mini-css-extract-plugin@^0.9.0',
+196 verbose parsed url   path: 'mini-css-extract-plugin@^0.9.0',
+196 verbose parsed url   href: 'mini-css-extract-plugin@^0.9.0' }
+197 silly cache add name="mini-css-extract-plugin" spec="^0.9.0" args=["mini-css-extract-plugin","^0.9.0"]
+198 verbose parsed url { pathname: '^0.9.0', path: '^0.9.0', href: '^0.9.0' }
+199 verbose addNamed [ 'mini-css-extract-plugin', '^0.9.0' ]
+200 verbose addNamed [ null, null ]
+201 silly lockFile 66f57cde-mini-css-extract-plugin-0-9-0 mini-css-extract-plugin@^0.9.0
+202 verbose lock mini-css-extract-plugin@^0.9.0 C:\Users\Brian\AppData\Roaming\npm-cache\66f57cde-mini-css-extract-plugin-0-9-0.lock
+203 verbose cache add [ 'raw-loader@^4.0.2', null ]
+204 silly cache add name=undefined spec="raw-loader@^4.0.2" args=["raw-loader@^4.0.2",null]
+205 verbose parsed url { pathname: 'raw-loader@^4.0.2',
+205 verbose parsed url   path: 'raw-loader@^4.0.2',
+205 verbose parsed url   href: 'raw-loader@^4.0.2' }
+206 silly cache add name="raw-loader" spec="^4.0.2" args=["raw-loader","^4.0.2"]
+207 verbose parsed url { pathname: '^4.0.2', path: '^4.0.2', href: '^4.0.2' }
+208 verbose addNamed [ 'raw-loader', '^4.0.2' ]
+209 verbose addNamed [ null, null ]
+210 silly lockFile de1f864c-raw-loader-4-0-2 raw-loader@^4.0.2
+211 verbose lock raw-loader@^4.0.2 C:\Users\Brian\AppData\Roaming\npm-cache\de1f864c-raw-loader-4-0-2.lock
+212 verbose cache add [ 'style-loader@^1.3.0', null ]
+213 silly cache add name=undefined spec="style-loader@^1.3.0" args=["style-loader@^1.3.0",null]
+214 verbose parsed url { pathname: 'style-loader@^1.3.0',
+214 verbose parsed url   path: 'style-loader@^1.3.0',
+214 verbose parsed url   href: 'style-loader@^1.3.0' }
+215 silly cache add name="style-loader" spec="^1.3.0" args=["style-loader","^1.3.0"]
+216 verbose parsed url { pathname: '^1.3.0', path: '^1.3.0', href: '^1.3.0' }
+217 verbose addNamed [ 'style-loader', '^1.3.0' ]
+218 verbose addNamed [ null, null ]
+219 silly lockFile 186b1622-style-loader-1-3-0 style-loader@^1.3.0
+220 verbose lock style-loader@^1.3.0 C:\Users\Brian\AppData\Roaming\npm-cache\186b1622-style-loader-1-3-0.lock
+221 verbose cache add [ 'webpack@^4.46.0', null ]
+222 silly cache add name=undefined spec="webpack@^4.46.0" args=["webpack@^4.46.0",null]
+223 verbose parsed url { pathname: 'webpack@^4.46.0',
+223 verbose parsed url   path: 'webpack@^4.46.0',
+223 verbose parsed url   href: 'webpack@^4.46.0' }
+224 silly cache add name="webpack" spec="^4.46.0" args=["webpack","^4.46.0"]
+225 verbose parsed url { pathname: '^4.46.0', path: '^4.46.0', href: '^4.46.0' }
+226 verbose addNamed [ 'webpack', '^4.46.0' ]
+227 verbose addNamed [ null, null ]
+228 silly lockFile 4b634d31-webpack-4-46-0 webpack@^4.46.0
+229 verbose lock webpack@^4.46.0 C:\Users\Brian\AppData\Roaming\npm-cache\4b634d31-webpack-4-46-0.lock
+230 verbose cache add [ 'webpack-cli@^3.3.12', null ]
+231 silly cache add name=undefined spec="webpack-cli@^3.3.12" args=["webpack-cli@^3.3.12",null]
+232 verbose parsed url { pathname: 'webpack-cli@^3.3.12',
+232 verbose parsed url   path: 'webpack-cli@^3.3.12',
+232 verbose parsed url   href: 'webpack-cli@^3.3.12' }
+233 silly cache add name="webpack-cli" spec="^3.3.12" args=["webpack-cli","^3.3.12"]
+234 verbose parsed url { pathname: '^3.3.12', path: '^3.3.12', href: '^3.3.12' }
+235 verbose addNamed [ 'webpack-cli', '^3.3.12' ]
+236 verbose addNamed [ null, null ]
+237 silly lockFile 5b98365d-webpack-cli-3-3-12 webpack-cli@^3.3.12
+238 verbose lock webpack-cli@^3.3.12 C:\Users\Brian\AppData\Roaming\npm-cache\5b98365d-webpack-cli-3-3-12.lock
+239 verbose cache add [ 'webpack-dev-server@^3.11.2', null ]
+240 silly cache add name=undefined spec="webpack-dev-server@^3.11.2" args=["webpack-dev-server@^3.11.2",null]
+241 verbose parsed url { pathname: 'webpack-dev-server@^3.11.2',
+241 verbose parsed url   path: 'webpack-dev-server@^3.11.2',
+241 verbose parsed url   href: 'webpack-dev-server@^3.11.2' }
+242 silly cache add name="webpack-dev-server" spec="^3.11.2" args=["webpack-dev-server","^3.11.2"]
+243 verbose parsed url { pathname: '^3.11.2', path: '^3.11.2', href: '^3.11.2' }
+244 verbose addNamed [ 'webpack-dev-server', '^3.11.2' ]
+245 verbose addNamed [ null, null ]
+246 silly lockFile 6ea22847-webpack-dev-server-3-11-2 webpack-dev-server@^3.11.2
+247 verbose lock webpack-dev-server@^3.11.2 C:\Users\Brian\AppData\Roaming\npm-cache\6ea22847-webpack-dev-server-3-11-2.lock
+248 silly lockFile f82ac5b0-css-loader-3-6-0 css-loader@^3.6.0
+249 verbose lock css-loader@^3.6.0 C:\Users\Brian\AppData\Roaming\npm-cache\f82ac5b0-css-loader-3-6-0.lock
+250 silly lockFile a9226b34-file-loader-5-1-0 file-loader@^5.1.0
+251 verbose lock file-loader@^5.1.0 C:\Users\Brian\AppData\Roaming\npm-cache\a9226b34-file-loader-5-1-0.lock
+252 info addNameTag [ 'animation-frame', '^0.3.0' ]
+253 info addNameTag [ 'bmp-js', '^0.1.0' ]
+254 info addNameTag [ 'npm', '^6.14.13' ]
+255 info addNameTag [ 'simplex-noise', '^2.4.0' ]
+256 info addNameTag [ 'tone', '^13.8.34' ]
+257 info addNameTag [ 'web-audio-daw', '^4.11.0' ]
+258 info addNameTag [ 'babel/core', '^7.14.5' ]
+259 info addNameTag [ 'babel/plugin-transform-runtime', '^7.14.5' ]
+260 info addNameTag [ 'babel/preset-env', '^7.14.5' ]
+261 info addNameTag [ 'babel-jest', '^25.5.1' ]
+262 info addNameTag [ 'babel-loader', '^8.2.2' ]
+263 info addNameTag [ 'babel-plugin-transform-class-properties', '^6.24.1' ]
+264 info addNameTag [ 'buffer-loader', '^0.1.0' ]
+265 info addNameTag [ 'copy-webpack-plugin', '^5.1.2' ]
+266 info addNameTag [ 'grunt', '^1.4.1' ]
+267 info addNameTag [ 'grunt-svgstore', '^2.0.0' ]
+268 info addNameTag [ 'jest', '^25.5.4' ]
+269 info addNameTag [ 'mini-css-extract-plugin', '^0.9.0' ]
+270 info addNameTag [ 'raw-loader', '^4.0.2' ]
+271 info addNameTag [ 'style-loader', '^1.3.0' ]
+272 info addNameTag [ 'webpack', '^4.46.0' ]
+273 info addNameTag [ 'webpack-cli', '^3.3.12' ]
+274 info addNameTag [ 'webpack-dev-server', '^3.11.2' ]
+275 info addNameTag [ 'css-loader', '^3.6.0' ]
+276 info addNameTag [ 'file-loader', '^5.1.0' ]
+277 verbose url raw animation-frame
+278 verbose url resolving [ 'https://registry.npmjs.org/', './animation-frame' ]
+279 verbose url resolved https://registry.npmjs.org/animation-frame
+280 info trying registry request attempt 1 at 11:32:36
+281 http GET https://registry.npmjs.org/animation-frame
+282 verbose url raw bmp-js
+283 verbose url resolving [ 'https://registry.npmjs.org/', './bmp-js' ]
+284 verbose url resolved https://registry.npmjs.org/bmp-js
+285 info trying registry request attempt 1 at 11:32:36
+286 http GET https://registry.npmjs.org/bmp-js
+287 verbose url raw npm
+288 verbose url resolving [ 'https://registry.npmjs.org/', './npm' ]
+289 verbose url resolved https://registry.npmjs.org/npm
+290 info trying registry request attempt 1 at 11:32:36
+291 http GET https://registry.npmjs.org/npm
+292 verbose url raw perlin-noise/0.0.1
+293 verbose url resolving [ 'https://registry.npmjs.org/', './perlin-noise/0.0.1' ]
+294 verbose url resolved https://registry.npmjs.org/perlin-noise/0.0.1
+295 info trying registry request attempt 1 at 11:32:36
+296 http GET https://registry.npmjs.org/perlin-noise/0.0.1
+297 verbose url raw simplex-noise
+298 verbose url resolving [ 'https://registry.npmjs.org/', './simplex-noise' ]
+299 verbose url resolved https://registry.npmjs.org/simplex-noise
+300 info trying registry request attempt 1 at 11:32:36
+301 http GET https://registry.npmjs.org/simplex-noise
+302 verbose url raw tone
+303 verbose url resolving [ 'https://registry.npmjs.org/', './tone' ]
+304 verbose url resolved https://registry.npmjs.org/tone
+305 info trying registry request attempt 1 at 11:32:36
+306 http GET https://registry.npmjs.org/tone
+307 verbose url raw web-audio-daw
+308 verbose url resolving [ 'https://registry.npmjs.org/', './web-audio-daw' ]
+309 verbose url resolved https://registry.npmjs.org/web-audio-daw
+310 info trying registry request attempt 1 at 11:32:36
+311 http GET https://registry.npmjs.org/web-audio-daw
+312 verbose url raw babel/core
+313 verbose url resolving [ 'https://registry.npmjs.org/', './babel/core' ]
+314 verbose url resolved https://registry.npmjs.org/babel/core
+315 info trying registry request attempt 1 at 11:32:36
+316 http GET https://registry.npmjs.org/babel/core
+317 verbose url raw babel/plugin-transform-runtime
+318 verbose url resolving [ 'https://registry.npmjs.org/',
+318 verbose url resolving   './babel/plugin-transform-runtime' ]
+319 verbose url resolved https://registry.npmjs.org/babel/plugin-transform-runtime
+320 info trying registry request attempt 1 at 11:32:36
+321 http GET https://registry.npmjs.org/babel/plugin-transform-runtime
+322 verbose url raw babel/preset-env
+323 verbose url resolving [ 'https://registry.npmjs.org/', './babel/preset-env' ]
+324 verbose url resolved https://registry.npmjs.org/babel/preset-env
+325 info trying registry request attempt 1 at 11:32:36
+326 http GET https://registry.npmjs.org/babel/preset-env
+327 verbose url raw babel-jest
+328 verbose url resolving [ 'https://registry.npmjs.org/', './babel-jest' ]
+329 verbose url resolved https://registry.npmjs.org/babel-jest
+330 info trying registry request attempt 1 at 11:32:36
+331 http GET https://registry.npmjs.org/babel-jest
+332 verbose url raw babel-loader
+333 verbose url resolving [ 'https://registry.npmjs.org/', './babel-loader' ]
+334 verbose url resolved https://registry.npmjs.org/babel-loader
+335 info trying registry request attempt 1 at 11:32:36
+336 http GET https://registry.npmjs.org/babel-loader
+337 verbose url raw babel-plugin-transform-class-properties
+338 verbose url resolving [ 'https://registry.npmjs.org/',
+338 verbose url resolving   './babel-plugin-transform-class-properties' ]
+339 verbose url resolved https://registry.npmjs.org/babel-plugin-transform-class-properties
+340 info trying registry request attempt 1 at 11:32:36
+341 http GET https://registry.npmjs.org/babel-plugin-transform-class-properties
+342 verbose url raw buffer-loader
+343 verbose url resolving [ 'https://registry.npmjs.org/', './buffer-loader' ]
+344 verbose url resolved https://registry.npmjs.org/buffer-loader
+345 info trying registry request attempt 1 at 11:32:36
+346 http GET https://registry.npmjs.org/buffer-loader
+347 verbose url raw copy-webpack-plugin
+348 verbose url resolving [ 'https://registry.npmjs.org/', './copy-webpack-plugin' ]
+349 verbose url resolved https://registry.npmjs.org/copy-webpack-plugin
+350 info trying registry request attempt 1 at 11:32:36
+351 http GET https://registry.npmjs.org/copy-webpack-plugin
+352 verbose url raw grunt
+353 verbose url resolving [ 'https://registry.npmjs.org/', './grunt' ]
+354 verbose url resolved https://registry.npmjs.org/grunt
+355 info trying registry request attempt 1 at 11:32:36
+356 http GET https://registry.npmjs.org/grunt
+357 verbose url raw grunt-svgstore
+358 verbose url resolving [ 'https://registry.npmjs.org/', './grunt-svgstore' ]
+359 verbose url resolved https://registry.npmjs.org/grunt-svgstore
+360 info trying registry request attempt 1 at 11:32:36
+361 http GET https://registry.npmjs.org/grunt-svgstore
+362 verbose url raw jest
+363 verbose url resolving [ 'https://registry.npmjs.org/', './jest' ]
+364 verbose url resolved https://registry.npmjs.org/jest
+365 info trying registry request attempt 1 at 11:32:36
+366 http GET https://registry.npmjs.org/jest
+367 verbose url raw mini-css-extract-plugin
+368 verbose url resolving [ 'https://registry.npmjs.org/', './mini-css-extract-plugin' ]
+369 verbose url resolved https://registry.npmjs.org/mini-css-extract-plugin
+370 info trying registry request attempt 1 at 11:32:36
+371 http GET https://registry.npmjs.org/mini-css-extract-plugin
+372 verbose url raw raw-loader
+373 verbose url resolving [ 'https://registry.npmjs.org/', './raw-loader' ]
+374 verbose url resolved https://registry.npmjs.org/raw-loader
+375 info trying registry request attempt 1 at 11:32:36
+376 http GET https://registry.npmjs.org/raw-loader
+377 verbose url raw style-loader
+378 verbose url resolving [ 'https://registry.npmjs.org/', './style-loader' ]
+379 verbose url resolved https://registry.npmjs.org/style-loader
+380 info trying registry request attempt 1 at 11:32:36
+381 http GET https://registry.npmjs.org/style-loader
+382 verbose url raw webpack
+383 verbose url resolving [ 'https://registry.npmjs.org/', './webpack' ]
+384 verbose url resolved https://registry.npmjs.org/webpack
+385 info trying registry request attempt 1 at 11:32:36
+386 http GET https://registry.npmjs.org/webpack
+387 verbose url raw webpack-cli
+388 verbose url resolving [ 'https://registry.npmjs.org/', './webpack-cli' ]
+389 verbose url resolved https://registry.npmjs.org/webpack-cli
+390 info trying registry request attempt 1 at 11:32:36
+391 http GET https://registry.npmjs.org/webpack-cli
+392 verbose url raw webpack-dev-server
+393 verbose url resolving [ 'https://registry.npmjs.org/', './webpack-dev-server' ]
+394 verbose url resolved https://registry.npmjs.org/webpack-dev-server
+395 info trying registry request attempt 1 at 11:32:36
+396 http GET https://registry.npmjs.org/webpack-dev-server
+397 verbose url raw css-loader
+398 verbose url resolving [ 'https://registry.npmjs.org/', './css-loader' ]
+399 verbose url resolved https://registry.npmjs.org/css-loader
+400 info trying registry request attempt 1 at 11:32:36
+401 http GET https://registry.npmjs.org/css-loader
+402 verbose url raw file-loader
+403 verbose url resolving [ 'https://registry.npmjs.org/', './file-loader' ]
+404 verbose url resolved https://registry.npmjs.org/file-loader
+405 info trying registry request attempt 1 at 11:32:36
+406 http GET https://registry.npmjs.org/file-loader
+407 silly lockFile 7770da99-simplex-noise-2-4-0 simplex-noise@^2.4.0
+408 error Error: SSL Error: CERT_UNTRUSTED
+408 error     at ClientRequest.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\request\main.js:525:26)
+408 error     at ClientRequest.g (events.js:192:14)
+408 error     at ClientRequest.EventEmitter.emit (events.js:96:17)
+408 error     at HTTPParser.parserOnIncomingClient [as onIncoming] (http.js:1462:7)
+408 error     at HTTPParser.parserOnHeadersComplete [as onHeadersComplete] (http.js:111:23)
+408 error     at CleartextStream.socketOnData [as ondata] (http.js:1367:20)
+408 error     at CleartextStream.CryptoStream._push (tls.js:526:27)
+408 error     at SecurePair.cycle (tls.js:880:20)
+408 error     at EncryptedStream.CryptoStream.write (tls.js:267:13)
+408 error     at Socket.ondata (stream.js:38:26)
+409 error If you need help, you may report this log at:
+409 error     <http://github.com/isaacs/npm/issues>
+409 error or email it to:
+409 error     <npm-@googlegroups.com>
+410 error System Windows_NT 6.2.9200
+411 error command "C:\\Program Files\\nodejs\\\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "i"
+412 error cwd D:\Dev\cowsim
+413 error node -v v0.8.16
+414 error npm -v 1.1.69
+415 error code ESSL
+416 verbose exit [ 1, true ]
