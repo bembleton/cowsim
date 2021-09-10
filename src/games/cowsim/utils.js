@@ -228,3 +228,26 @@ Array.prototype.filter2 = function filter2 (predicate) {
 
   return this;
 }
+
+// 32 characters
+const hashChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+/** 1 to 6 characters, uppercase alphanumeric, excluding 0, 1, I, and O */
+export const stringToHash = (str) => {
+  let hash = 0;
+  for (let c=str.length-1; c>=0; c--) {
+    hash = hash << 5;
+    hash += hashChars.indexOf(str[c]); // 0-31
+  }
+  return hash;
+}
+
+export const hashToString = (hash) => {
+  let str = "";
+  hash &= 0x3fffffff; // 30 bits, 6x 5-bit characters.
+  while (hash > 0) {
+    str += hashChars[hash & 0x1f];
+    hash = hash >>> 5;
+  }
+  return str.padStart(6, hashChars[0]);
+}

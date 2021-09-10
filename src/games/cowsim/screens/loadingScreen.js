@@ -8,6 +8,7 @@ import Link from '../link';
 import { fillBlocks, getBlock, fillWithMetaTiles, dialog, SubPixels } from '../utils';
 import sprites from '../data/sprites';
 import { palettes } from '../data/colors';
+import { Sprite } from '../../../spriteManager';
 
 const { dir } = Link;
 
@@ -48,6 +49,9 @@ const grays               = [BLACK, 0x2D, 0x10, 0x20];
 export default class LoadingScreen {
   constructor (game) {
     this.game = game;
+
+    this.selectedMenuItem = 0;
+    this.menuSprite = new Sprite({ index: sprites.heart, x: 80, y: 104, palette: 1 });
   }
 
   load () {
@@ -60,14 +64,14 @@ export default class LoadingScreen {
         y: 0
     };
     
-    setBgPalette(0, 0x07, BLACK, 0x17, 0x27); // title
-    setBgPalette(1, BLACK, 0x11, 0x21, 0x31); // blues
+    setBgPalette(0, BLACK, BLACK, 0x17, 0x27); // title
+    setBgPalette(1, BLACK, BLACK, 0x21, WHITE); // blues
     setBgPalette(2, BLACK, 0x07, 0x17, 0x27); // oranges
     setBgPalette(3, BLACK, 0x0b, 0x1a, 0x2a); // greens
 
     //setSpritePalette(0, BLACK, 0x06, 0x27, 0x12); // blue link
     setSpritePalette(0, palettes.greenTanBrown); // green link
-    setSpritePalette(1, redOrangeGreen); // flower 1
+    setSpritePalette(1, palettes.redGoldWhite); // flower 1
     setSpritePalette(2, yellowLavenderGreen); // flower 2
     setSpritePalette(3, grays); // moon
 
@@ -78,17 +82,22 @@ export default class LoadingScreen {
     fillBlocks(0, 0, 16, 10, BLANK, 1);
     
     // add the title
-    dialog(9, 7, `THE EPIC OF
+    dialog(9, 5, `THE EPIC OF
 
-    C O W S I M
-
-    PRESS START`, 2);
+    C O W S I M`, 0);
     
+    this.buttonStates = {
+      [buttons.SELECT]: false,
+      [buttons.START]: isPressed(buttons.START),
+    };
+
+    this.drawMenu();
     this.drawGround();
 
     // time of day
-    this.timeOfDay = 0;
+    this.timeOfDay = 4095;
     this.moon = spriteManager.requestSprite();
+    this.updateTimeOfDay();
     
     //this.drawFlowers();
 
@@ -109,12 +118,11 @@ export default class LoadingScreen {
         framecount: 256,
         update: (frame) => this.updateLink(frame)
     });
-
-    this.startPressed = isPressed(buttons.START);
   }
 
   unload () {
     Link.remove(this.link);
+    this.menuSprite.dispose();
     spriteManager.clearSprites();
   }
 
@@ -176,14 +184,38 @@ export default class LoadingScreen {
     Link.draw(link);
   }
 
-  update (time) {
-    const { game, linkAnimation, moonAnimation } = this;
+  drawMenu() {
+    text(12, 13, 'START', 1);
+    text(12, 15, 'SET SEED', 1);
+    
+    this.selectedMenuItem = 0;
+    this.menuSprite.draw();
+  }
 
-    if (isPressed(buttons.START) && !this.startPressed) {
-      game.loadScreen(game.screens.world);
+  setSeletectedMenuItem(item) {
+    this.selectedMenuItem = item;
+    this.menuSprite.update({ x:80, y: 104 + item*16 });
+  }
+
+  update (time) {
+    const { game, linkAnimation, moonAnimation, selectedMenuItem } = this;
+
+    const selectPressed = isPressed(buttons.SELECT);
+    if (selectPressed && !this.buttonStates[buttons.SELECT]) {
+      this.setSeletectedMenuItem((selectedMenuItem+1) % 2);
+    }
+    this.buttonStates[buttons.SELECT] = selectPressed;
+
+    if (isPressed(buttons.START) && !this.buttonStates[buttons.START]) {
+      const screen = [
+        this.game.screens.world,
+        this.game.screens.enterSeed
+      ][selectedMenuItem]
+      this.setSeletectedMenuItem(0);
+      game.loadScreen(screen);
       return;
     }
-    this.startPressed = isPressed(buttons.START);
+    this.buttonStates[buttons.START] = isPressed(buttons.START);
 
     if (linkAnimation) {
         linkAnimation.update(time);
@@ -191,7 +223,7 @@ export default class LoadingScreen {
 
     this.bunnies.forEach(b => b.update());
     
-    this.updateTimeOfDay();
+    //this.updateTimeOfDay();
   }
 }
 

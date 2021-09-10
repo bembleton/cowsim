@@ -87,7 +87,7 @@ class SpriteManager {
 
         if (priority) {
           const bg = ppu.getPixel(dx, dy);
-          if (bg !== ppu.getCommonBackground) continue;
+          if (bg !== ppu.getCommonBackground()) continue;
         }
 
         // check sprite table for pixel value

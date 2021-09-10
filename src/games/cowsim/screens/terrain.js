@@ -21,11 +21,8 @@ export const randy = new Randy(0);
 
 export const setSeed = function (seed) {
   baseSeed = seed;
-  console.log(`Seed: ${seed}`);
   randy.reset(seed);
-  // todo seed the noise function, too
-  const randomFn = randy.next.bind(randy);
-  simplex = new SimplexNoise(randomFn);
+  simplex = new SimplexNoise(() => randy.next());
 };
 
 const noise2d = function (x, y) {
@@ -72,10 +69,7 @@ const noise = (x, y) => {
 let area_randomizer = null;
 const getAreaRandomizer = (posx, posy) => {
   const seed = baseSeed + posx + posy*mapWidth;
-  const r = new Randy(seed);
-  // throw away the first 5 values
-  for (let i=0; i<5; i++) r.next();
-  return r;
+  return new Randy(seed); // basically free
 }
 
 /*

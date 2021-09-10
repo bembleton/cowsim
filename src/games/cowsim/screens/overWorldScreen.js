@@ -39,6 +39,16 @@ const {
   setScroll,
 } = ppu;
 
+
+const creaturesByElevation = {
+  0: [], // water
+  1: [], // grass
+  2: [], // grass
+  3: [], // grass
+  4: [], // sand
+  5: [], // rock 
+}
+
 export default class OverworldScreen {
   constructor (game) {
     this.game = game;
@@ -271,7 +281,9 @@ export default class OverworldScreen {
     const { position: { x: posx, y: posy }, recentBoards } = this;
 
     const board = this.getBoardId();
-    const { enemies = randInt(3,7) } = recentBoards.find(b => b.board === board) || {};
+    const { enemies = randInt(6) } = recentBoards.find(b => b.board === board) || {};
+    if (enemies === 0) return;
+
     const cols = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
     for (let i=0; i<enemies; i++) {
       const xi = randInt(cols.length);

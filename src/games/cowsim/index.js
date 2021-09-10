@@ -11,6 +11,9 @@ import OverworldScreen from './screens/overWorldScreen';
 import Hud from './screens/hud';
 import PauseMenu from './screens/pauseMenu';
 import GameOverScreen from './screens/gameOverScreen';
+import { Randy } from '../../random';
+import { hashToString, stringToHash } from './utils';
+import SetSeedScreen from './screens/setSeedScreen';
 
 const {
   HORIZONTAL,
@@ -31,7 +34,9 @@ class Cowsim {
   async init() {
     console.log('Resetting the game');
 
-    setSeed(Math.floor(Math.random()*999999999));
+    const hash = new Randy(Date.now()).nextInt() & 0x3fffffff; // 30 bits
+    const seed = hashToString(hash);
+    this.setSeed(seed);
 
     // load tile sheets
     await loadBitmap(tileSheet, setBackgroundData);
@@ -49,6 +54,7 @@ class Cowsim {
 
     this.screens = {
       title: new LoadingScreen(this),
+      enterSeed: new SetSeedScreen(this),
       world: new OverworldScreen(this),
       pause: new PauseMenu(this),
       zelda: new ZeldaScreen(this),
@@ -56,6 +62,13 @@ class Cowsim {
     };
 
     this.loadScreen(this.screens.title);
+  }
+
+  setSeed(seed) {
+    console.log(`Setting seed to "${seed}"`)
+    this.seed = seed;
+    const hash = stringToHash(seed);
+    setSeed(hash);
   }
 
   // implements Game.update

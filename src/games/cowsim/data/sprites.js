@@ -50,6 +50,7 @@ export default {
   death_blink: [0x5d, 0x4d],
   sword_splash: 0x4e,
   magic_splash: 0x4f,
+  white_square: 0x62,
 
   // weapons
   weapon: 0x40,
