@@ -52,6 +52,7 @@ const hasAnalogStickEquivalent = (button) => {
 
 /**
  * Checks keyboard and gamepad inputs
+ * This only detects if the button is currently pressed and does not know if it was pressed in a previous frame.
  * @param {*} button 
  */
 const isPressed = (button) => {
@@ -61,5 +62,13 @@ const isPressed = (button) => {
   return keystate[key] || touchstate[key] || gamepadPressed(input) || hasAnalogStickEquivalent(button);
 };
 
+const getButtonState = () => {
+  const state = {};
+  for (const button in buttons) {
+    state[button] = isPressed(button);
+  }
+  return state;
+}
+
 // handle gamepad 
-export { isPressed, buttons };
+export { isPressed, buttons, getButtonState };
