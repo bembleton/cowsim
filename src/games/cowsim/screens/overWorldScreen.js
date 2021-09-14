@@ -7,7 +7,7 @@ import { palettes } from '../data/colors';
 import SPRITES from '../data/sprites';
 import { Link } from '../link';
 import { pixelToTile, SubPixels } from '../utils';
-import { setSeed, drawArea, elevation, isSolid, isWater, isDesert, isGrass, randomPosition, getAreaTopLeft } from './terrain';
+//import { setSeed, drawArea, elevation, isSolid, isWater, isDesert, isGrass, randomPosition, getAreaTopLeft } from './terrain';
 import Hud from './hud';
 import { MetaSprite } from '../../../spriteManager';
 import { Rupee } from '../rupee';
@@ -27,6 +27,8 @@ import { Moblin } from '../moblin';
 import { woodenSword } from '../sword';
 import { Chest } from '../chest';
 import { MeleeObject, ObjectManager } from '../objectManager';
+import { Terrain } from '../terrain';
+import WorldGenerator, { World } from '../worldGenerator';
 
 const {
   HORIZONTAL,
@@ -53,9 +55,10 @@ export default class OverworldScreen {
   constructor (game) {
     this.game = game;
 
-    this.hud = new Hud();
     this.player = {};
     this.position = {};
+    
+    this.hud = new Hud(game);
 
     this.mapIndicator = {
       sprite: null,
@@ -101,6 +104,12 @@ export default class OverworldScreen {
   }
 
   load () {
+    const { game } = this;
+    const { terrain, startingLocation } = game; 
+    this.terrain = terrain;
+
+    this.hud.load();
+
     enableCommonBackground(false);
     this.setBgPalettes();
 
@@ -113,13 +122,15 @@ export default class OverworldScreen {
     setMirroring(HORIZONTAL);
 
     // start in top-left corner?
-    const pos = this.findStartingLocation();
+    const pos = startingLocation; //this.findStartingLocation();
     console.log(`starting position: ${pos.x}, ${pos.y}`)
-    const { x, y } = getAreaTopLeft(pos.x, pos.y);
+    const { x, y } = terrain.getAreaTopLeft(pos.x, pos.y);
     console.log(`area topleft: ${x}, ${y}`)
-    drawArea(x, y, 0, 3);
+    
+    
+    terrain.drawArea(x, y, 0, 3);
     this.setPosition(x, y);
-    this.hud.load();
+    
     //this.hud.setItemB({ sprite: SPRITES.bomb, palette: 2 });
 
     this.scroll = {
@@ -174,12 +185,34 @@ export default class OverworldScreen {
     this.recentBoards = [];
     this.treasures = {};
     
-    const { x: tilex, y: tiley } = this.findAvailableScreenTile();
-    const startingWeapon = this.dropWeapon(0, 0, woodenSword);
-    this.spawnTreasure(tilex, tiley, startingWeapon);
+    const startingArea = World.getAreaId(pos.x, pos.y);
+    this.spawnAreaMapEntity(startingArea);
+    // const { type, x, y, ...rest } = mapEntities[startingArea];
+    // const { x: tilex, y: tiley } = this.findAvailableScreenTile();
+    // const startingWeapon = this.dropWeapon(0, 0, woodenSword);
+    // this.spawnTreasure(tilex, tiley, startingWeapon);
 
     this.loading = true;
     this.loadingProgress = 120;
+  }
+
+  spawnAreaMapEntity(areaId) {
+    const entity = this.game.mapEntities[areaId];
+    if (!entity) return;
+
+    const { type, x, y } = entity;
+    const { x: tilex, y: tiley } = this.worldToTile(x, y);
+
+    switch (type) {
+      case 'Chest': {
+        // todo: handle contents
+        // const { contents } = entity;
+        const item = this.dropWeapon(0, 0, woodenSword);
+        this.spawnTreasure(tilex, tiley, item);
+      }
+      // case 'Dungeon'
+      // case 'Cave'
+    }
   }
 
   setBgPalettes() {
@@ -216,22 +249,35 @@ export default class OverworldScreen {
 
     const progress = this.loadingProgress;
     const loading = progress > 0;
+    const isFirstVisibleLine = y === (loading ? progress : 0);
+    const firstNonProgressLine = loading && y === progress;
 
     if (y < progress || y > 240-progress) {
+      // draw black
       setScroll(0, 32-y);
       setMirroring(HORIZONTAL);
-    } else
-    // draw hud
-    if (y === 0 || loading && y < 8) {
-      // draw one row of black tiles from the bottom of the hud
-      // to mask the top part of the minimap
-      setScroll(0, 32);
+      return;
+    }
+
+    // set the correct palette for the first visible line of the hud and world
+    if (isFirstVisibleLine && y < 48) {
+      if (y < 8) {
+        // draw one row of black tiles from the bottom of the hud
+        // to mask the top part of the minimap
+        setScroll(0, 32);
+      } else {
+        // first line between 8 and 48
+        // set scroll-y to -8 to center the hud
+        setScroll(0, -8);
+      }
       setMirroring(HORIZONTAL);
       this.hud.setPalettes();
-    } else if (y === 8 || loading && y < 48) {
+    }
+    else if (y === 8) {
       // set scroll-y to -8 to center the hud
       setScroll(0, -8);
-    } else if (y === 48 || loading && y > 48) {
+    }
+    else if (isFirstVisibleLine || y === 48) {
       // set the scroll and mirror mode back to normal
       setMirroring(this.mirroring);
       setScroll(this.scroll.x, this.scroll.y);
@@ -252,24 +298,25 @@ export default class OverworldScreen {
     this.mirroring = mode;
   }
 
-  findStartingLocation () {
-    while (true) {
-      let pos = randomPosition();
-      let e = elevation(pos.x, pos.y);
-      if (isGrass(e)) return pos;
-    }
-  }
+  // findStartingLocation () {
+  //   const { terrain } = this;
+  //   while (true) {
+  //     let pos = terrain.randomPosition();
+  //     let e = terrain.elevation(pos.x, pos.y);
+  //     if (Terrain.isGrass(e)) return pos;
+  //   }
+  // }
 
   findAvailableScreenTile () {
-    const { position: { x: posx, y: posy } } = this;
+    const { terrain, position: { x: posx, y: posy } } = this;
 
     const cols = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
     for (let i=0; i<10; i++) {
       const xi = randInt(cols.length);
       const x = cols[xi] + posx;
       const y = randInt(1, 11) + posy;
-      const e = elevation(x, y);
-      if (!isWater(e) && !isSolid(e)) {
+      const e = terrain.elevation(x, y);
+      if (!Terrain.isWater(e) && !Terrain.isSolid(e)) {
         return this.worldToTile(x, y);
       }
     }
@@ -278,7 +325,7 @@ export default class OverworldScreen {
   }
 
   spawnCreatures () {
-    const { position: { x: posx, y: posy }, recentBoards } = this;
+    const { terrain, position: { x: posx, y: posy }, recentBoards } = this;
 
     const board = this.getBoardId();
     const { enemies = randInt(6) } = recentBoards.find(b => b.board === board) || {};
@@ -289,9 +336,9 @@ export default class OverworldScreen {
       const xi = randInt(cols.length);
       const x = cols[xi] + posx;
       const y = randInt(1, 11) + posy;
-      const e = elevation(x, y);
-      if (!isWater(e) && !isSolid(e)) {
-        cols.splice(xi, 1);
+      const e = terrain.elevation(x, y);
+      if (!Terrain.isWater(e) && !Terrain.isSolid(e)) {
+        cols.splice(xi, 1); // avoid placing enemies in the same column
         const { x: px, y: py } = this.worldToScreen({x, y});
         this.spawnCreature(px, py)
       }
@@ -694,7 +741,7 @@ export default class OverworldScreen {
   }
 
   tryMoveLink() {
-    const { link, scrolling, player } = this;
+    const { terrain, link, scrolling, player } = this;
     const  { drowning, stunned } = link;
     
     if (scrolling) return;
@@ -719,7 +766,7 @@ export default class OverworldScreen {
     // collisions
     const e1 = this.screenToElevation(x + e1x, y + e1y);
     const e2 = this.screenToElevation(x + e2x, y + e2y);
-    if (isSolid(e1) || isSolid(e2)) {
+    if (Terrain.isSolid(e1) || Terrain.isSolid(e2)) {
       // push back to a tile edge?
       return;
     }
@@ -739,16 +786,16 @@ export default class OverworldScreen {
     const right = link.pos.addPixels(15, 8).toPixels();
     const { x: leftx, y: lefty } = this.screenToWorld(left); // world tile
     const { x: rightx, y: righty } = this.screenToWorld(right); // world tile
-    const lefte = elevation(leftx, lefty);
-    const righte = elevation(rightx, righty);
-    const swimming = isWater(lefte) && isWater(righte);
+    const lefte = terrain.elevation(leftx, lefty);
+    const righte = terrain.elevation(rightx, righty);
+    const swimming = Terrain.isWater(lefte) && Terrain.isWater(righte);
     if (link.swimming != swimming) {
       player.staminaClock = 0;
     }
     link.swimming = swimming;
 
     // check climate
-    this.shimmer.enabled = isDesert(lefte);
+    this.shimmer.enabled = Terrain.isDesert(lefte);
 
     // scroll at the edge of the screen
     this.checkScreenWrap();
@@ -756,7 +803,7 @@ export default class OverworldScreen {
 
   getBoardId() {
     const { position } = this;
-    return (position.x / 16) + (position.y / 12) * 16;
+    return World.getAreaId(position.x, position.y);
   }
 
   checkScreenWrap() {
@@ -897,35 +944,35 @@ export default class OverworldScreen {
   }
 
   scrollDown () {
-    const { position } = this;
+    const { terrain, position } = this;
     const { x: posx, y: posy } = position;
     
     this.setMirrorMode(HORIZONTAL);
     // load next screen below
-    drawArea(posx, posy + 12, 0, 15);
+    terrain.drawArea(posx, posy + 12, 0, 15);
     this.setPosition(posx, posy + 12);
     this.scrolling = 'down';
   }
 
   scrollRight () {
-    const { position } = this;
+    const { terrain, position } = this;
     const { x: posx, y: posy } = position;
     
     this.setMirrorMode(VERTICAL);
     // load next screen to the right
-    drawArea(posx + 16, posy, 16, 3);
+    terrain.drawArea(posx + 16, posy, 16, 3);
     this.setPosition(posx + 16, posy);
     this.scrolling = 'right';
   }
 
   scrollUp () {
-    const { position } = this;
+    const { terrain, position } = this;
     const { x: posx, y: posy } = position;
 
     this.setMirrorMode(HORIZONTAL);
     // copy current screen to the top portion of the lower page
     // todo: instead of rerendering, just copy nametable and attributes
-    drawArea(posx, posy, 0, 15);
+    terrain.drawArea(posx, posy, 0, 15);
     
     // set view to lower page
     this.scroll.y = 12*16;
@@ -933,24 +980,24 @@ export default class OverworldScreen {
 
     // load next screen above
     // could optimize by drawing rows as we scroll?
-    drawArea(posx, posy - 12, 0, 3);
+    terrain.drawArea(posx, posy - 12, 0, 3);
     this.setPosition(posx, posy - 12);
     this.scrolling = 'up';
   }
 
   scrollLeft () {
-    const { position } = this;
+    const { terrain, position } = this;
     const { x: posx, y: posy } = position;
 
     this.setMirrorMode(VERTICAL);
     // copy current screen to the right
-    drawArea(posx, posy, 16, 3);
+    terrain.drawArea(posx, posy, 16, 3);
     this.scroll.x = 16*16;
     setScroll(256, 0);
 
     // load next screen on the left
     // could optimize by drawing rows as we scroll?
-    drawArea(posx - 16, posy, 0, 3);
+    terrain.drawArea(posx - 16, posy, 0, 3);
     this.setPosition(posx - 16, posy);
     this.scrolling = 'left';
   }
@@ -960,7 +1007,7 @@ export default class OverworldScreen {
     this.setMirrorMode(HORIZONTAL);
     if (this.scroll.x > 0 || this.scroll.y > 0) {
       // copy to first nametable
-      drawArea(this.position.x, this.position.y, 0, 3);
+      this.terrain.drawArea(this.position.x, this.position.y, 0, 3);
       this.scroll.x = 0;
       this.scroll.y = 0;
       this.setMirrorMode(HORIZONTAL);
@@ -1027,13 +1074,13 @@ export default class OverworldScreen {
   /** gets elevation at a pixel coordinate */
   screenToElevation(x, y) {
     const { x: posx, y: posy } = this.screenToWorld({ x, y });
-    return elevation(posx, posy);
+    return this.terrain.elevation(posx, posy);
   }
 
   isPassableTile(tilex, tiley, game) {
     const { x: wx, y: wy } = this.tileToWorld(tilex, tiley);
-    const e = elevation(wx, wy);
-    return !isWater(e) && !isSolid(e);
+    const e = this.terrain.elevation(wx, wy);
+    return !Terrain.isWater(e) && !Terrain.isSolid(e);
   }
 
 }

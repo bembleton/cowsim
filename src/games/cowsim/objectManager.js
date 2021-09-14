@@ -1,6 +1,6 @@
 import { bbox } from "../../boundingBox";
 import { SubPixels } from "./utils";
-import { setSeed, drawArea, elevation, isSolid, isWater, isDesert, isGrass, randomPosition, getAreaTopLeft } from './screens/terrain';
+import { Terrain } from "./terrain";
 
 export class ObjectManager {
   constructor() {
@@ -134,8 +134,8 @@ export class Projectile extends GameObject {
       // blocked by trees and rocks. are any projectiles?
       // maybe float over trees but not rocks?
       const w = game.screenToWorld({x, y});
-      const e = elevation(w.x, w.y);
-      if (isSolid(e)) {
+      const e = game.terrain.elevation(w.x, w.y);
+      if (Terrain.isSolid(e)) {
         this.dispose();
         return;
       }

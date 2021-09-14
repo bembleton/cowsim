@@ -51,6 +51,10 @@ export class Randy {
     const n = Squirrel3(this.position++, this.seed);
     return max !== undefined ? (n % max) : n;
   }
+
+  valueFor(x, y) {
+    return Squirrel3(x + y*1010747, this.seed) / 0xffffffff;
+  }
 }
 
 /** Non-seeded random functions */

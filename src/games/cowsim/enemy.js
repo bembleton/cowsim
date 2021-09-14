@@ -29,6 +29,27 @@ const dropChances = {
   D: 0.41
 };
 
+// each map screen uses 4 bits to describe which enemies to load
+// screens with water will always spawn a zola unless it's a fairy screen
+const enemyGroups = {
+  0: 'octoroks_red',
+  1: 'tektites_red',
+  2: 'levers_and_peahats',
+  3: 'octoroks_red_and_blue',
+  4: 'levers_blue',
+  5: 'levers_red',
+  6: 'moblins_black',
+  7: 'moblins_red_and_black',
+  8: 'peahats',
+  9: 'peahats_and_lynels',
+  10: 'lynels_red',
+  11: 'ghost', // custom
+  12: 'lynels_blue',
+  13: 'tektites_blue',
+  14: 'none',  // custom
+  15: 'custom' // based on screen type
+};
+
 export class Enemy {
   static state = {
     idle: 0,

@@ -44,7 +44,13 @@ export class Link {
   }
   getBbox() {
     const { x, y } = this.pos.toPixels();
-    return new bbox(x, y, 16, 16);
+    const height = 15;
+    // todo: account for animation differences?
+    if (this.direction === Direction.up || this.direction === Direction.down) {
+      return new bbox(x+2, y+1, 12, 15);
+    } else {
+      return new bbox(x+1, y+1, 14, 15);
+    }
   }
   draw() {
     const {

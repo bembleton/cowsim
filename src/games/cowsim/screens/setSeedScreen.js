@@ -1,11 +1,11 @@
 import { colors } from '../data/colors';
 import SPRITES from '../data/sprites';
-import { fillBlocks, getBlock, fillWithMetaTiles, dialog, SubPixels } from '../utils';
+import { fillBlocks, dialog, hashToString, stringToHash } from '../utils';
 import ppu from '~/ppu';
 import text from '~/text';
-import { isPressed, buttons, getButtonState } from '~/controller';
+import { buttons, getButtonState } from '~/controller';
 import { Sprite } from '../../../spriteManager';
-import { choice } from '../../../random';
+import { Randy } from '../../../random';
 
 const BLACK = colors.black;
 const WHITE = colors.white;
@@ -53,7 +53,8 @@ export default class SetSeedScreen {
 
     this.drawMenu();
     this.selectMenuItem(0);
-    this.setSeed(this.game.seed);
+    const hash = hashToString(this.game.seed); // convert to a hash code
+    this.setSeed(hash);
     this.advanceSelectedChar(0);
 
     this.buttonState = getButtonState();
@@ -85,10 +86,10 @@ export default class SetSeedScreen {
     this.seedFocus.draw();
   }
   
-  setSeed(seed) {
-    this.seed = seed;
-    text(10, 6, seed.padEnd(6, ' ').split('').join(' '));
-    const length = seed.length < 6 ? 80 + seed.length : seed.length-1;
+  setSeed(hash) {
+    this.seed = hash;
+    text(10, 6, hash.padEnd(6, ' ').split('').join(' '));
+    const length = hash.length < 6 ? 80 + hash.length : hash.length-1;
     this.seedFocus.update({ x: 80 + length*8 * 2, y: 48 });
   }
 
@@ -101,6 +102,7 @@ export default class SetSeedScreen {
 
   advanceSelectedChar(offset) {
     this.selectedChar = (this.selectedChar + offset) % 32;
+    if (this.selectedChar < 0) this.selectedChar += 32;
     const x = 64 + (this.selectedChar % 8) * 16;
     const y = 144 + (this.selectedChar >> 3) * 16;
     this.keyboardFocus.update({ x, y });
@@ -124,16 +126,13 @@ export default class SetSeedScreen {
   }
 
   randomizeSeed() {
-    let seed = '';
-    const letters = keyboardChars.split('');
-    for(let i=0; i<6; i++) {
-      seed += choice(letters);
-    }
+    const seed = new Randy().nextInt() & 0x3fffffff;
     this.setSeed(seed);
   }
 
   save() {
-    this.game.setSeed(this.seed);
+    const seed = stringToHash(this.seed.padEnd(6, ' '));
+    this.game.setSeed(seed);
     this.game.loadScreen(this.game.screens.title);
   }
 

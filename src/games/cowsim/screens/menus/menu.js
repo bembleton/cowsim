@@ -6,7 +6,7 @@ import { randInt, Randy } from '~/random';
 import { palettes } from '../../data/colors';
 import Link from '../../link';
 import { drawTile, fillBlocks, drawMetaTile, SubPixels } from '../../utils';
-import { setSeed, drawArea, elevation, isSolid, isWater, isDesert } from '../terrain';
+//import { setSeed, drawArea, elevation, isSolid, isWater, isDesert } from '../terrain';
 import Hud from '../hud';
 const { dir } = Link;
 

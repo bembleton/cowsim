@@ -35,7 +35,7 @@ const blueRedWhite = [black, blue, red, white];
 
 // terrain palettes
 const grassAndWater = [lightgreen, darkgreen, blue, lightblue];
-const grassAndDirt = [lightgreen, darkgreen, tan, brown];
+const grassAndDirt = [lightgreen, darkgreen, tan, 0x26];
 const grays = [tan, black, darkgray, lightgray];
 
 const blacks1 = [black, black, black, black];

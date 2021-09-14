@@ -3,8 +3,6 @@ import tileSheet from '~/assets/background.bmp';
 import spriteSheet from '~/assets/sprites2.bmp';
 import itemsSheet from '~/assets/items.bmp';
 import ppu from '~/ppu';
-import { setSeed } from './screens/terrain';
-
 import LoadingScreen from './screens/loadingScreen';
 import ZeldaScreen from './screens/zeldaScreen';
 import OverworldScreen from './screens/overWorldScreen';
@@ -14,6 +12,8 @@ import GameOverScreen from './screens/gameOverScreen';
 import { Randy } from '../../random';
 import { hashToString, stringToHash } from './utils';
 import SetSeedScreen from './screens/setSeedScreen';
+import { Terrain } from './terrain';
+import WorldGenerator from './worldGenerator';
 
 const {
   HORIZONTAL,
@@ -34,8 +34,7 @@ class Cowsim {
   async init() {
     console.log('Resetting the game');
 
-    const hash = new Randy(Date.now()).nextInt() & 0x3fffffff; // 30 bits
-    const seed = hashToString(hash);
+    const seed = new Randy().nextInt() & 0x3fffffff; // 30 bits
     this.setSeed(seed);
 
     // load tile sheets
@@ -50,7 +49,7 @@ class Cowsim {
     
     await loadBitmapInto(itemsSheet, this.spriteSheets.items);
     
-    this.hud = new Hud();
+    //this.hud = new Hud(this.terrain);
 
     this.screens = {
       title: new LoadingScreen(this),
@@ -65,15 +64,19 @@ class Cowsim {
   }
 
   setSeed(seed) {
-    console.log(`Setting seed to "${seed}"`)
+    const hash = hashToString(seed);
+    console.log(`Setting seed to "${hash}" = ${seed}`);
     this.seed = seed;
-    const hash = stringToHash(seed);
-    setSeed(hash);
+
+    const { terrain, startingLocation, mapEntities } = WorldGenerator.generate(seed);
+    this.terrain = terrain;
+    this.startingLocation = startingLocation;
+    this.mapEntities = mapEntities;
   }
 
   // implements Game.update
   update() {
-    this.currentScreen.update();
+    this.currentScreen && this.currentScreen.update();
   }
 
   onScanline(y) {

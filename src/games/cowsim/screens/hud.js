@@ -6,7 +6,6 @@ import SPRITES from '../data/sprites';
 import { colors, palettes } from '../data/colors';
 import tiles from '../data/tiles';
 import { drawTile, fillBlocks } from '../utils';
-import * as terrain from './terrain';
 import { MetaSprite, Sprite } from '../../../spriteManager';
 
 const {
@@ -68,7 +67,7 @@ const drawStamina = (amount, maxAmount) => {
   }
 };
 
-const renderMinimapToTiles = ({ screenPosition, scale }) => {
+const renderMinimapToTiles = ({ screenPosition, scale, terrain }) => {
   const { x, y } = screenPosition;
   terrain.drawMinimap(x + 8, y + 6, scale);
 };
@@ -78,13 +77,15 @@ const itemB_px = 22*8;
 const itemA_px = 26*8;
 
 export default class Hud {
-  constructor() {
+  constructor(game) {
+    this.game = game;
     this.map = {
       screenPosition: {
         x: 0,
         y: 0
       },
-      scale: 2
+      scale: 2,
+      terrain: null
     };
     this.sprites = {
       bomb: null,
@@ -99,7 +100,6 @@ export default class Hud {
       y: 8 + 32/2 - 3,
       visible: true
     };
-
     
     this.hudAnimation = new Animation({
       duration: 700,
@@ -108,7 +108,8 @@ export default class Hud {
   }
 
   load() {
-    const { sprites } = this;
+    const { sprites, map, game } = this;
+    map.terrain = game.terrain;
 
     /** Draw the static hud content */
     fillBlocks(0, 0, 16, 3, tiles.blank, 3);

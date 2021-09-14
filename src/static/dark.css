@@ -32,6 +32,13 @@ h1 {
   image-rendering: crisp-edges;
 }
 
+#mapCanvas {
+  width: 256px;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
 .controls {
   margin: 16px;
   justify-items: center;
