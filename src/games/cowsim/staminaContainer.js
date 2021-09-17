@@ -7,7 +7,8 @@ export class StaminaContainer extends Drop {
     super(x, y, {
       sprite: SPRITES.potion_large,
       palette: 0,
-      duration: null
+      duration: null,
+      floating: false
     });
   }
 
@@ -20,5 +21,6 @@ export class StaminaContainer extends Drop {
 
   onCollision(player) {
     player.maxStamina = Math.min(player.maxStamina + 4, 32);
+    this.dispose();
   }
 }

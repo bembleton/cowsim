@@ -9,11 +9,13 @@ export class HeartContainer extends Drop {
       palette: 1,
       height: 16,
       mirrorX: true,
-      duration: null
+      duration: null,
+      floating: false
     });
   }
 
   onCollision(player) {
     player.maxHearts = Math.min(player.maxHearts + 1, 16);
+    this.dispose();
   }
 }

@@ -1,3 +1,5 @@
+const mirrorX = true;
+const mirrorY = true;
 
 export default {
   // link
@@ -58,6 +60,12 @@ export default {
   banana_peel: 0x53,
   secondary_item: 0x44,
   arrow: 0x45,
+  // arrow: {
+  //   up: { tile: 0x45, height: 2 },
+  //   right: { 
+  //     tiles: [{tile:0x56}, {tile:0x46, x:8}]
+  //   }
+  // },
 
   plants: [0x80, 0x81, 0x82, 0x83],
   moon: 0x90,
@@ -81,8 +89,32 @@ export default {
       right: [0xa4, 0xa6]
     },
     octorok: {
-      down: [0xa8, 0xaa],
-      right: [0xac, 0xae]
+      down: [
+        { tile:0xa8, height:2, mirrorX },
+        { tile:0xa9, height:2, mirrorX },
+      ],
+      right: [
+        { tile:0xaa, width:2, mirrorY },
+        { tile:0xba, width:2, mirrorY },
+      ]
     }
-  }
+  },
 };
+
+/*
+sprite data
+{
+  [dir]: tile | Array<tile> | Array<{sprite}> | {sprite}
+}
+
+sprite
+{
+  tile: int | tiles: Array<sprite>,
+  height = 8,
+  width = 8,
+  mirrorX = false,
+  mirrorY = false,
+  offsetX = 0,
+  offsetY = 0
+}
+*/

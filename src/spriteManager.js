@@ -8,6 +8,7 @@ import {
 } from './spriteAttributes';
 import ppu from './ppu';
 import { copyBitmap } from './bitmapLoader';
+import { Direction } from './games/cowsim/direction';
 
 // 64 sprites, 4 bytes each
 /*
@@ -174,6 +175,7 @@ export class Sprite extends SpriteBase {
     if (this.index !== undefined) return;
     this.index = spriteManager.requestSprite();
     this.rendered = true;
+    this.disposed = false;
     this.update();
   }
 
@@ -191,6 +193,7 @@ export class Sprite extends SpriteBase {
     if (this.index !== undefined) {
       spriteManager.clearSprite(this.index);
       this.rendered = false;
+      this.disposed = true;
       this.index = undefined;
     }
   }
@@ -204,36 +207,53 @@ const removeUndefinedProps = (obj) => {
 };
 
 export class MetaSprite extends SpriteBase {
-  constructor({ x = 0, y = 0, sprite, palette, flipX, flipY, priority, width = 1, height = 1, mirrorX = false, mirrorY = false } = {}) {
+  constructor({ x = 0, y = 0, tile, tiles, sprite, palette, flipX, flipY, priority, width = 1, height = 1, mirrorX = false, mirrorY = false } = {}) {
     super();
     this.rendered = false;
     this.sprites = [];
     Object.assign(this, { x, y, palette, flipX, flipY, priority });
-    if (sprite !== undefined) {
+
+    if (tiles !== undefined) {
+      for (tile of tiles) {
+        const {tile:index, x:offsetx=0, y:offsety=0, ...rest} = tile;
+        this.add(new Sprite({ index, ...rest}), offsetx, offsety)
+      }
+      // does it make sense to allow mirroring with custom tile sets?
+      // how do?
+    }
+
+    // sprite is deprecated. use tile instead
+    if (sprite !== undefined) tile = sprite;
+    if (tile !== undefined) {
       for (let j=0; j<height; j++)
       for (let i=0; i<width; i++) {
-        this.add(sprite + i + j*16, i*8, j*8);
+        this.add(tile + i + j*16, i*8, j*8);
       }
     }
+
     if (mirrorX) {
       // 16x8, reflected left-right
-      this.add(new Sprite({ index: sprite, flipX: true }), 8, 0);
+      this.add(new Sprite({ index: tile, flipX: true }), 8, 0);
     }
     if (mirrorX && height === 2) {
       // 16x16, reflected left-right
-      this.add(new Sprite({ index: sprite + 16, flipX: true }), 8, 8);
+      this.add(new Sprite({ index: tile + 16, flipX: true }), 8, 8);
     }
     if (mirrorY) {
       // 8x16, reflected up-down
-      this.add(new Sprite({ index: sprite, flipY: true }), 0, 8);
+      this.add(new Sprite({ index: tile, flipY: true }), 0, 8);
     }
     if (mirrorY && width === 2) {
       // 16x16, reflected up-down
-      this.add(new Sprite({ index: sprite + 1, flipY: true }), 8, 8);
+      this.add(new Sprite({ index: tile + 1, flipY: true }), 8, 8);
     }
     if (mirrorX && mirrorY) {
       // 16x16, rflected in both directions
-      this.add(new Sprite({ index: sprite, flipX: true, flipY: true }), 8, 8);
+      this.add(new Sprite({ index: tile, flipX: true, flipY: true }), 8, 8);
+    }
+
+    if (flipX || flipY) {
+      this.update({ flipX, flipY });
     }
   }
 
@@ -249,6 +269,18 @@ export class MetaSprite extends SpriteBase {
       .add(leftSprite, 0, 0)
       .add(rightSprite, 8, 0)
       .update({ flipX, flipY });
+  }
+
+  static fromData(spriteData, direction) {
+    const flipped = spriteData[direction] === undefined;
+    const data = !flipped ? spriteData[direction] : spriteData[Direction.flipped[direction]];
+    // data is one of
+    // tile | Array<tile> | Array<{sprite}> | {sprite}
+    const flipY = flipped && Direction.isVertical(direction);
+    const flipX = flipped && !Direction.isVertical(direction);
+    
+    const options = {...data, flipX, flipY};
+    return new MetaSprite(options);
   }
 
   add(sprite, x, y) {
@@ -320,6 +352,7 @@ export class MetaSprite extends SpriteBase {
   draw() {
     if (this.rendered) return;
     this.rendered = true;
+    this.disposed = false;
     this.sprites.forEach(x => x.draw());
     return this;
   }
@@ -327,5 +360,6 @@ export class MetaSprite extends SpriteBase {
     if (!this.rendered) return;
     this.sprites.forEach(x => x.dispose());
     this.rendered = false;
+    this.disposed = true;
   }
 }

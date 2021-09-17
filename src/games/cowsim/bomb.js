@@ -2,6 +2,7 @@ import SPRITES from "./data/sprites";
 import { Drop } from "./drop";
 
 export class Bomb extends Drop {
+  
   constructor(x, y) {
     const sprite = SPRITES.bomb;
     super(x, y, { sprite, palette: 2 });
@@ -13,5 +14,6 @@ export class Bomb extends Drop {
     if (!player.itemB) {
       player.itemB = 'bombs';
     }
+    this.dispose();
   }
 }

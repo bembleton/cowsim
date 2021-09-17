@@ -1,9 +1,10 @@
 import { choice, rand, randInt } from "../../random";
 import { MetaSprite } from "../../spriteManager";
+import { ArrowObject } from "./ArrowObject";
 import SPRITES from './data/sprites';
 import { Direction } from "./direction";
 import { Enemy } from "./enemy";
-import { pixelToTile } from "./utils";
+import { pixelToTile, SubPixels } from "./utils";
 
 export class Moblin extends Enemy {
   static speed = 12;
@@ -23,12 +24,38 @@ export class Moblin extends Enemy {
     this.canBeKnockedBack = true;
   }
 
+  idle() {
+    const { dir, pos, state } = this;
+    if (state !== Enemy.state.idle) {
+      this.state = Enemy.state.idle;
+      this.stateTimer = 64;
+
+    }
+    if (this.stateTimer === 0) {
+      this.state = Enemy.state.moving;
+    }
+  }
+
   updateState(game, player) {
     const { dir, pos, state } = this;
     
     if (state === Enemy.state.idle) {
+      if (this.stateTimer === 32) {
+        // shoot an arrow
+        const { x, y } = this.pos.toPixels();
+        const arrow = new ArrowObject({
+          x: x+8,
+          y: y+8,
+          isFriendly: false,
+          damage: this.meleeDamage,
+          direction: dir,
+          palette: 1
+        });
+        arrow.draw();
+        game.objectManager.projectiles.push(arrow)
+      }
       if (this.stateTimer === 0) {
-        this.setNextState(game, player);
+        this.state = Enemy.state.moving;
       }
       // keep idling
       return;
@@ -45,10 +72,8 @@ export class Moblin extends Enemy {
     }
 
     if (state === Enemy.state.moving || state === Enemy.state.knockedback) {
-      
-      const dx = dir === Direction.left ? -speed : dir === Direction.right ? speed : 0;
-      const dy = dir === Direction.up ? -speed : dir === Direction.down ? speed : 0;
-      this.pos = pos.add(dx, dy);
+      const velocity = SubPixels.fromDirection(dir, speed);
+      this.pos = pos.add(velocity);
       const { x, y } = this.pos.toPixels();
       const onGrid = (y % 16) === 0 && (x % 16) === 0;
       if (onGrid) {
@@ -69,17 +94,10 @@ export class Moblin extends Enemy {
     */
 
 
-    if (state === Enemy.state.idle) {
-      if (stateTimer) return;
-      this.state = Enemy.state.moving;
-      this.dir = nextDirs && choice(nextDirs) || this.dir;
-      return
-    };
-
     if (state === Enemy.state.knockedback) {
       if (!stateTimer) {
         this.state = Enemy.state.idle;
-        this.stateTimer = randInt(0, 16);
+        this.stateTimer = 16;
         return;
       }
       if (!canKeepMoving) {
@@ -88,11 +106,11 @@ export class Moblin extends Enemy {
     }
 
     if (state === Enemy.state.moving) {
-      if (canKeepMoving && rand() < 0.80) return;
-      this.dir = nextDirs && choice(nextDirs) || this.dir;
+      if (canKeepMoving && rand() < 0.80) return; // keep moving
+      this.dir = nextDirs && choice(nextDirs) || this.dir; // pick a new direction
       if (rand() < 0.50) {
-        this.state = Enemy.state.idle;
-        this.stateTimer = randInt(64, 128);
+        this.state = Enemy.state.idle; // pause
+        this.stateTimer = 64;
       }
       return;
     }

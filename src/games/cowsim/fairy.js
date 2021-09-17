@@ -16,8 +16,7 @@ export class Fairy extends Drop {
   constructor(x, y) {
     super(x, y, {
       sprite: SPRITES.fairy[0],
-      palette: 1,
-      floating: false
+      palette: 1
     });
 
     this.pos = SubPixels.fromPixels(x, y);
@@ -66,5 +65,6 @@ export class Fairy extends Drop {
 
   onCollision(player) {
     player.health = Math.min(player.health + 12, player.maxHearts*4);
+    this.dispose();
   }
 }

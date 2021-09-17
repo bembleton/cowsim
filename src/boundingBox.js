@@ -8,10 +8,14 @@ export class bbox {
 
   contains(x, y) {
     if (x instanceof bbox) return this.containsBbox(x);
-    return (this.x <= x)
-      && (x < this.x + this.width)
-      && (this.y <= y)
-      && (y < this.y + this.height);
+    if (x.x !== undefined && x.y !== undefined) return this.containsPoint(x); // point
+    return this.containsPoint(x, y);
+  }
+  containsPoint(point) {
+    return (this.x <= point.x)
+      && (point.x < this.x + this.width)
+      && (this.y <= point.y)
+      && (point.y < this.y + this.height);
   }
   containsBbox(bbox) {
     const a = this;

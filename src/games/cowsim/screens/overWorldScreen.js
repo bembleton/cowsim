@@ -26,7 +26,9 @@ import { Direction } from '../direction';
 import { Moblin } from '../moblin';
 import { woodenSword } from '../sword';
 import { Chest } from '../chest';
-import { MeleeObject, ObjectManager } from '../objectManager';
+import { ObjectManager } from '../objectManager';
+import { MeleeObject } from "../MeleeObject";
+import { SwordBeam } from "../SwordBeam";
 import { Terrain } from '../terrain';
 import WorldGenerator, { World } from '../worldGenerator';
 
@@ -172,6 +174,7 @@ export default class OverworldScreen {
     };
     
     this.playerMeleeObject = null;
+    this.playerProjectile = null;
 
     const link = new Link();
     const { x: px, y: py } = this.worldToScreen(pos);
@@ -712,7 +715,7 @@ export default class OverworldScreen {
 
     if (!this.playerMeleeObject || this.playerMeleeObject.disposed) {
       // make a new sprite
-      const horiz = direction === Direction.left || direction === Direction.right;
+      const horiz = Direction.isHorizontal(direction);
       const sprite1 = horiz ? SPRITES.weapon+17 : SPRITES.weapon;
       const sprite2 = horiz ? SPRITES.weapon+1 : SPRITES.weapon+16;
       const flipX = direction === Direction.left;
@@ -733,6 +736,16 @@ export default class OverworldScreen {
       
       this.objectManager.projectiles.push(this.playerMeleeObject);
       this.playerMeleeObject.draw();
+
+      if (this.player.health === this.player.maxHearts*4) {
+        // sword beam
+        if (!this.playerProjectile || this.playerProjectile.disposed) {
+          this.playerProjectile = new SwordBeam({ x, y, direction, damage });
+      
+          this.objectManager.projectiles.push(this.playerProjectile);
+          this.playerProjectile.draw();
+        }
+      }
 
     } else {
       // update pos

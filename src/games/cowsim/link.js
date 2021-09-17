@@ -93,66 +93,66 @@ export class Link {
     // }
   }
 
-  drawWeapon() {
-    const {
-      pos, direction, attackFrame, weaponSprite
-    } = this;
-    const { x: posx, y: posy } = pos.toPixels();
+  // drawWeapon() {
+  //   const {
+  //     pos, direction, attackFrame, weaponSprite
+  //   } = this;
+  //   const { x: posx, y: posy } = pos.toPixels();
 
-    let flipX = false;
-    let flipY = false;
-    // extends out in 3 frames
-    let x, y, x2, y2;
-    const offset = (attackFrame < 4) ? 3 : 12;
-    const priority = false;
-    //const sprite = direction === Direction.down || direction === Direction.up ? SPRITES.weapon : SPRITES.weapon+1;
-    let sprite, sprite2;
-    // const offset =
-    //   frame < 4 ? 3 :
-    //   frame < 20 ? 12 :
-    //   frame < 23 ? (23-frame)*3 :
-    //   3;
+  //   let flipX = false;
+  //   let flipY = false;
+  //   // extends out in 3 frames
+  //   let x, y, x2, y2;
+  //   const offset = (attackFrame < 4) ? 3 : 12;
+  //   const priority = false;
+  //   //const sprite = direction === Direction.down || direction === Direction.up ? SPRITES.weapon : SPRITES.weapon+1;
+  //   let sprite, sprite2;
+  //   // const offset =
+  //   //   frame < 4 ? 3 :
+  //   //   frame < 20 ? 12 :
+  //   //   frame < 23 ? (23-frame)*3 :
+  //   //   3;
 
-    switch (direction) {
-      case Direction.up:
-        x = posx + 3;
-        y = posy - offset;
-        x2 = x;
-        y2 = y+8;
-        sprite = SPRITES.weapon;
-        sprite2 = SPRITES.weapon+16;
-        break;
-      case Direction.down:
-        x = posx + 5;
-        y = posy + offset;
-        x2 = x;
-        y2 = y+8;
-        flipY = true;
-        sprite = SPRITES.weapon+16;
-        sprite2 = SPRITES.weapon;
-        break;
-      case Direction.right:
-        x = posx + offset;
-        y = posy + 6;
-        x2 = x+8;
-        y2 = y;
-        sprite = SPRITES.weapon+17;
-        sprite2 = SPRITES.weapon+1;
-        break;
-      case Direction.left:
-        x = posx - offset;
-        y = posy + 6;
-        x2 = x+8;
-        y2 = y;
-        flipX = true;
-        sprite = SPRITES.weapon+1;
-        sprite2 = SPRITES.weapon+17;
-        break;
-    }
+  //   switch (direction) {
+  //     case Direction.up:
+  //       x = posx + 3;
+  //       y = posy - offset;
+  //       x2 = x;
+  //       y2 = y+8;
+  //       sprite = SPRITES.weapon;
+  //       sprite2 = SPRITES.weapon+16;
+  //       break;
+  //     case Direction.down:
+  //       x = posx + 5;
+  //       y = posy + offset;
+  //       x2 = x;
+  //       y2 = y+8;
+  //       flipY = true;
+  //       sprite = SPRITES.weapon+16;
+  //       sprite2 = SPRITES.weapon;
+  //       break;
+  //     case Direction.right:
+  //       x = posx + offset;
+  //       y = posy + 6;
+  //       x2 = x+8;
+  //       y2 = y;
+  //       sprite = SPRITES.weapon+17;
+  //       sprite2 = SPRITES.weapon+1;
+  //       break;
+  //     case Direction.left:
+  //       x = posx - offset;
+  //       y = posy + 6;
+  //       x2 = x+8;
+  //       y2 = y;
+  //       flipX = true;
+  //       sprite = SPRITES.weapon+1;
+  //       sprite2 = SPRITES.weapon+17;
+  //       break;
+  //   }
 
-    weaponSprite.sprites[0].update({ index: sprite, x, y, flipX, flipY, priority });
-    weaponSprite.sprites[1].update({ index: sprite2, x: x2, y: y2, flipX, flipY, priority });
-  }
+  //   weaponSprite.sprites[0].update({ index: sprite, x, y, flipX, flipY, priority });
+  //   weaponSprite.sprites[1].update({ index: sprite2, x: x2, y: y2, flipX, flipY, priority });
+  // }
 
   /** select a 2x2 sprite with flipping
    * this doesnt compose partial sprites
@@ -166,7 +166,7 @@ export class Link {
     const singleFrame = !sprites.length;
     const sprite = singleFrame ? sprites : sprites[animationFrame];
     
-    const vertical = (dir === Direction.up || dir === Direction.down);
+    const vertical = Direction.isVertical(dir);
     const flipX = (!vertical && !hasDirection) || (vertical && singleFrame && animationFrame === 1);
     const flipY = (vertical && !hasDirection) || (!vertical && singleFrame && animationFrame === 1);
   

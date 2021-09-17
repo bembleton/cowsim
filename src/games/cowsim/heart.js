@@ -21,5 +21,6 @@ export class Heart extends Drop {
 
   onCollision(player) {
     player.health = Math.min(player.health + 4, player.maxHearts*4);
+    this.dispose();
   }
 }

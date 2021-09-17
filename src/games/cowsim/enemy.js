@@ -52,11 +52,11 @@ const enemyGroups = {
 
 export class Enemy {
   static state = {
-    idle: 0,
-    moving: 1,
-    knockedback: 2,
-    stunned: 3,
-    dead: 4
+    idle: 'idle',
+    moving: 'moving',
+    knockedback: 'knockedback',
+    stunned: 'stunned',
+    dead: 'dead'
   };
 
   constructor(x, y, dir, sprite, spriteData, palette, health, meleeDamage, dropGroup) {
@@ -198,14 +198,15 @@ export class Enemy {
   }
 
   static getSpriteFromState(spriteData, dir, frame) {
-    const sprites = spriteData[dir] || spriteData[Direction.flipped[dir]];
+    const flipped = spriteData[dir] === undefined;
+    const sprites = !flipped ? spriteData[dir] : spriteData[Direction.flipped[dir]];
     const singleFrame = !sprites.length;
     const even = frameIndex(frame, 16); // 0 or 1
     const sprite = singleFrame ? sprites : sprites[even];
     
-    const vertical = (dir === Direction.up || dir === Direction.down);
-    const flipX = (!vertical && !spriteData[dir]) || (vertical && singleFrame && even);
-    const flipY = (vertical && !spriteData[dir]) || (!vertical && singleFrame && even);
+    const vertical = Direction.isVertical(dir);
+    const flipX = (!vertical && flipped) || (vertical && singleFrame && even);
+    const flipY = (vertical && flipped) || (!vertical && singleFrame && even);
   
     return { sprite, flipX, flipY };
   }

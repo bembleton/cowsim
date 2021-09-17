@@ -12,5 +12,6 @@ export class StaminaVial extends Drop {
 
   onCollision(player) {
     player.health = Math.min(player.stamina + 4, player.maxStamina);
+    this.dispose();
   }
 }

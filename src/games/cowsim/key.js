@@ -6,11 +6,13 @@ export class Key extends Drop {
     super(x, y, {
       sprite: SPRITES.key,
       palette: 1,
-      duration: null
+      duration: null,
+      floating: false
     });
   }
 
   onCollision(player) {
     player.keys = Math.min(player.keys + 1, 16);
+    this.dispose();
   }
 }

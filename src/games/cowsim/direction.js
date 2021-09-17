@@ -11,6 +11,6 @@ export class Direction {
     right: 'left'
   }
 
-  static isVertical = (dir) => dir === this.up || dir === this.down;
-  static isHorizontal = (dir) => !this.isVertical(dir);
+  static isVertical = (dir) => dir === Direction.up || dir === Direction.down;
+  static isHorizontal = (dir) => !Direction.isVertical(dir);
 }

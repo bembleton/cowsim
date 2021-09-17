@@ -283,12 +283,6 @@ export class Terrain {
       }
     }
     return n;
-    // const oceanSize = 16;
-    // const dx = Math.max(0, mapWidth/2 - Math.abs(mapWidth/2 - x));
-    // const dy = Math.max(0, mapHeight/2 - Math.abs(mapHeight/2 - y));
-    // if (dx < oceanSize) n *= dx/oceanSize;
-    // if (dy < oceanSize) n *= dy/oceanSize;
-    // return Math.floor(n * 6);
   }
 
   // make this better
@@ -362,7 +356,8 @@ export class Terrain {
     for (let y=0; y<96; y++)
     for (let x=0; x<128; x++) {
       const idx = (BYTES_PER_ROW * y) + (x * BYTES_PER_PIXEL);
-      const e = this.elevation(x*2, y*2);
+      let e = this.elevation(x*2, y*2);
+      if (e === 6) e = 2; // trees are really at elevation 2
       const color = e == 2 
         ? idx%5 == 0 ? 0x666666 : 0x005200
         : map_colors[e];

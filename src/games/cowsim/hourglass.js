@@ -6,11 +6,13 @@ export class Hourglass extends Drop {
   constructor(x, y) {
     super(x, y, {
       sprite: SPRITES.hourglass,
-      palette: 1
+      palette: 1,
+      floating: false
     });
   }
 
   onCollision(player, screen) {
     screen.freezeTime();
+    this.dispose();
   }
 }

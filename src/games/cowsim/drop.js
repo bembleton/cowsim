@@ -29,6 +29,12 @@ export function getRandomWeapon() {
 const float_table = [0,-1,-1,0,1,1];
 
 export class Drop {
+  static Collisions = {
+    Player: 1,
+    Sword: 2,
+    Boomerang: 4,
+    Arrow: 8
+  };
 
   constructor(x, y, options) {
     const { sprite, palette, duration = 240, height = 16, width = 8, mirrorX, mirrorY, floating = true } = options;
@@ -40,7 +46,6 @@ export class Drop {
     this.disposed = false;
     this.floating = floating;
     this.float_count = 0;
-    this.disposeOnCollision = true;
 
     if (sprite instanceof SpriteBase) {
       this.sprite = sprite;
@@ -94,6 +99,7 @@ export class Drop {
     this.disposed = true;
   }
 
+  // abstract
   onCollision(player, game) {
   }
 

@@ -23,6 +23,7 @@ export class Rupee extends Drop {
 
   onCollision(player) {
     player.rupees = Math.min(player.rupees + this.value, 255);
+    this.dispose();
   }
 }
 export class Rupee5 extends Rupee {

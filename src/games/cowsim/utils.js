@@ -174,6 +174,10 @@ export class SubPixels {
     return new SubPixels(this.x - x, this.y - y);
   }
 
+  mul(scalar) {
+    return new SubPixels(this.x*scalar, this.y*scalar);
+  }
+
   addPixels(x, y) {
     return new SubPixels(this.x + (x<<4), this.y + (y<<4));
   }
@@ -197,6 +201,13 @@ export class SubPixels {
     } else {
       return this.y < 0 ? Direction.up : Direction.down;
     }
+  }
+
+  static fromDirection(direction, value = 1) {
+    if (direction === Direction.up) return new SubPixels(0, -value);
+    else if (direction === Direction.down) return new SubPixels(0, value);
+    else if (direction === Direction.left) return new SubPixels(-value, 0);
+    return new SubPixels(value, 0);
   }
 }
 

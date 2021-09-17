@@ -18,7 +18,8 @@ export class Chest extends Drop {
       palette: 0,
       height: 16,
       mirrorX: true,
-      duration: null
+      duration: null,
+      floating: false
     });
 
     this.lidSprite = new MetaSprite({
