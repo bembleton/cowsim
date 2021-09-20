@@ -19,3 +19,10 @@ PauseMenu
     Quest
   load - scroll into view - show current screen
   SELECT - switch to next menu screen
+
+TASKS
+- octoroks
+- moblin projectiles
+- sword power attack
+- sword beams
+- bombs

@@ -3,12 +3,14 @@ import ppu from '~/ppu';
 import text from '~/text';
 import { isPressed, buttons } from '~/controller';
 import Animation from '~/animation';
-import { randInt, randBool, choice } from '~/random';
+import { rand, randInt, randBool, choice } from '~/random';
 import Link from '../link';
 import { fillBlocks, getBlock, fillWithMetaTiles, dialog, SubPixels } from '../utils';
 import sprites from '../data/sprites';
 import { palettes } from '../data/colors';
 import { Sprite } from '../../../spriteManager';
+import { apu, Duration, Duty, Envelope, NoiseSound, Note, PulseSound, Vibrato } from '../../../sound';
+import { Music } from '../music';
 
 const { dir } = Link;
 
@@ -118,12 +120,15 @@ export default class LoadingScreen {
         framecount: 256,
         update: (frame) => this.updateLink(frame)
     });
+
+    Music.Theme.play();
   }
 
   unload () {
     Link.remove(this.link);
     this.menuSprite.dispose();
     spriteManager.clearSprites();
+    Music.Theme.stop();
   }
 
   drawGround () {
@@ -222,8 +227,6 @@ export default class LoadingScreen {
     }
 
     this.bunnies.forEach(b => b.update());
-    
-    //this.updateTimeOfDay();
   }
 }
 
@@ -249,6 +252,7 @@ class Bunny {
           state = 'jumping';
           dxx = randBool() ? -4 : 4;
           frame = 0;
+          
         }
         idx = sprites.bunny_sit;
         break;
@@ -265,6 +269,10 @@ class Bunny {
           if (yy > (9*16+8)<<3) {
             yy = (9*16+8)<<3;
             state = 'idle';
+            // apu.pulse2.setVolume(randInt(4, 6)/16);
+            // apu.pulse2.setDuty(Duty.OneQuarter);
+            // apu.pulse2.setEnvelope({ attack: 0, decay: 1, sustain: 0.1 });
+            // apu.pulse2.play(randInt(150,200), 6);
           }
           idx = dyy <= 0 ? sprites.bunny_jump : sprites.bunny_stand;
         }

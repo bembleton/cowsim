@@ -1,38 +1,57 @@
 const keystate = {};
 let debug = false;
 
-
-
 document.addEventListener('keydown', (event) => {
-  const { key, keyCode } = event;
-  if (keys.hasOwnProperty(key)) event.preventDefault();
+  const { code, key } = event;
+  if (keyCodes.hasOwnProperty(code) || keys.hasOwnProperty(key)) event.preventDefault();
   else return;
 
-  if (keystate[key]) return;
-  keystate[key] = true;
-  if (key === '`') debug = !debug;
-  if (debug) console.log(`keydown: ${key}`);
+  const keyCode = keys[key] || keyCodes[code];  // try key first and fallback to the physical Key
+  keystate[keyCode] = true;
+  
 }, false);
 
 document.addEventListener('keyup', (event) => {
-  const { key, keyCode } = event;
-  if (keys.hasOwnProperty(key)) event.preventDefault();
+  const { code, key } = event;
+  if (keyCodes.hasOwnProperty(code) || keys.hasOwnProperty(key)) event.preventDefault();
   else return;
-  event.preventDefault();
-  if (keystate[key] === false) return;
-  keystate[key] = false;
-  if (debug) console.log(`keyup: ${key}`);
+
+  const keyCode = keys[key] || keyCodes[code];  // try key first and fallback to the physical Key
+  keystate[keyCode] = false;
 }, false);
 
+/** KeyboardEvent.key should map to the printed character it produces,
+ * or the effect it has for control and navigation.
+ * 
+ * This might not work on mac keyboards? */
 const keys = {
   ArrowUp: 'ArrowUp',
   ArrowLeft: 'ArrowLeft',
   ArrowRight: 'ArrowRight',
   ArrowDown: 'ArrowDown',
   z: 'z',
+  Z: 'z',
   x: 'x',
+  X: 'x',
   a: 'a',
-  s: 's'
+  A: 'a',
+  s: 's',
+  S: 's',
+  "`": 'Tilde'
+}
+
+/** KeyboardEvent.code are physical layout codes and not representative of the imprinted key
+ * The codes below are only for qwerty keyboards. =[
+ */
+const keyCodes = {
+  KeyA: 'a',
+  KeyS: 's',
+  KeyZ: 'z',
+  KeyX: 'x',
+  ArrowUp: 'ArrowUp',
+  ArrowLeft: 'ArrowLeft',
+  ArrowRight: 'ArrowRight',
+  ArrowDown: 'ArrowDown',
 }
 
 const UP = 'ArrowUp';

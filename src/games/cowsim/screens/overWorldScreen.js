@@ -31,6 +31,7 @@ import { MeleeObject } from "../MeleeObject";
 import { SwordBeam } from "../SwordBeam";
 import { Terrain } from '../terrain';
 import WorldGenerator, { World } from '../worldGenerator';
+import { Music } from '../music';
 
 const {
   HORIZONTAL,
@@ -244,7 +245,7 @@ export default class OverworldScreen {
   }
 
   unload () {
-
+    Music.Theme.stop();
   }
 
   onScanline (y) {
@@ -293,6 +294,11 @@ export default class OverworldScreen {
       const amount = ((count > 127 ? count : 0)/maxCount) * maxAmount;
       const dx = Math.floor(Math.sin( Math.PI * 2 *(y + frame) / 32 ) * amount);
       setScroll(this.scroll.x + dx, this.scroll.y);
+    }
+
+    if (progress === 0 && this.loading) {
+      this.loading = false;
+      Music.Theme.play();
     }
   }
 
@@ -471,6 +477,10 @@ export default class OverworldScreen {
     }
 
     if (this.loadingProgress > 0) this.loadingProgress -= 2;
+    else if (this.loading) {
+      this.loading = false;
+      Music.Theme.play();
+    }
 
     if (scrolling) {
       this.doScroll();
@@ -623,6 +633,8 @@ export default class OverworldScreen {
     link.dead = false;
     link.dying = true;
     this.objectManager.clear();
+    Music.Theme.stop();
+    // death jingle
   }
 
   showGameOver() {
@@ -632,6 +644,8 @@ export default class OverworldScreen {
   /** not scrolling, not dying */
   checkInputs() {
     const { link, player } = this;
+
+    if (this.loading) return;
 
     if (isPressed(buttons.START)) {
       // open menu

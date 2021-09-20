@@ -62,7 +62,7 @@ const _randy = new Randy();
 export const rand = () => _randy.next();
 export const randInt = (maxOrMin, max) => {
   if (max !== undefined) {
-    return (_randy.nextInt() - maxOrMin) % max;
+    return (_randy.nextInt() % (max-maxOrMin)) + maxOrMin;
   }
   return _randy.nextInt() % maxOrMin;
 }

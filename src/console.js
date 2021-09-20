@@ -2,7 +2,7 @@ import AnimationFrame from 'animation-frame';
 import ppu from './ppu';
 import Display from './display';
 import spriteManager from './spriteManager';
-import * as sound from './sound';
+import { apu } from './sound';
 
 const {
   HORIZONTAL,
@@ -41,6 +41,7 @@ export default class Console {
     // if the game should not run continuously
     this.paused = false;
     this.on = false;
+    this.muted = true;
 
     const handleVisibilityChange = () => {
       if (document[hidden]) {
@@ -72,10 +73,15 @@ export default class Console {
     this.on = ~this.on;
 
     if (this.on) {
+      if (!this.muted) {
+        await apu.connect();
+      }
       await this.reset();
       
     } else {
       await this.reset();
+  
+      apu.disconnect();
     }
   }
 
@@ -151,7 +157,10 @@ export default class Console {
 
     this.animationFrame && this.frameId && this.animationFrame.cancel(this.frameId);
     this.frameId = this.animationFrame.request(tick);
-    sound.enable();
+    
+    if (!this.muted) {
+      apu.connect();
+    }
   }
 
   // stop stepping every frame (either paused or not visible)
@@ -159,13 +168,14 @@ export default class Console {
     const { animationFrame, frameId } = this;
     animationFrame && frameId && animationFrame.cancel(frameId);
     this.frameId = null;
-    sound.disable();
+    apu.disconnect();
   }
 
   // advance one frame
   step() {
     if (this.game) {
       this.game.update();
+      apu.update();
     }
     this.draw();
   }
@@ -197,8 +207,14 @@ export default class Console {
     display.draw();
   }
 
+  toggleMute() {
+    this.muted = !this.muted;
+    if (!this.muted) { apu.connect(); }
+    else { apu.disconnect(); }
+  }
+
   setVolume(volume) {
-    sound.setVolume(volume);
+    apu.setVolume(volume);
   }
 }
 

@@ -59,13 +59,13 @@ export default {
   boomerang: [0x42, 0x43, 0x52],
   banana_peel: 0x53,
   secondary_item: 0x44,
-  arrow: 0x45,
-  // arrow: {
-  //   up: { tile: 0x45, height: 2 },
-  //   right: { 
-  //     tiles: [{tile:0x56}, {tile:0x46, x:8}]
-  //   }
-  // },
+  //arrow: 0x45,
+  arrow: {
+    up: { tile: 0x45, height: 2 },
+    right: { 
+      tiles: [{tile:0x56}, {tile:0x46, x:8}]
+    }
+  },
 
   plants: [0x80, 0x81, 0x82, 0x83],
   moon: 0x90,

@@ -214,8 +214,8 @@ export class MetaSprite extends SpriteBase {
     Object.assign(this, { x, y, palette, flipX, flipY, priority });
 
     if (tiles !== undefined) {
-      for (tile of tiles) {
-        const {tile:index, x:offsetx=0, y:offsety=0, ...rest} = tile;
+      for (const t of tiles) {
+        const {tile:index, x:offsetx=0, y:offsety=0, ...rest} = t;
         this.add(new Sprite({ index, ...rest}), offsetx, offsety)
       }
       // does it make sense to allow mirroring with custom tile sets?
@@ -271,7 +271,7 @@ export class MetaSprite extends SpriteBase {
       .update({ flipX, flipY });
   }
 
-  static fromData(spriteData, direction) {
+  static fromData(spriteData, direction, options) {
     const flipped = spriteData[direction] === undefined;
     const data = !flipped ? spriteData[direction] : spriteData[Direction.flipped[direction]];
     // data is one of
@@ -279,8 +279,7 @@ export class MetaSprite extends SpriteBase {
     const flipY = flipped && Direction.isVertical(direction);
     const flipX = flipped && !Direction.isVertical(direction);
     
-    const options = {...data, flipX, flipY};
-    return new MetaSprite(options);
+    return new MetaSprite({...data, flipX, flipY, ...options});
   }
 
   add(sprite, x, y) {
