@@ -49,6 +49,12 @@ h1 {
   gap: 4px;
 }
 
+.controls .volume {
+  display: inline-grid;
+  grid-template-columns: auto min-content;
+  gap: 4px;
+}
+
 .controls label {
   line-height: 1.5rem;
 }
