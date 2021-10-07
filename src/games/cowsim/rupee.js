@@ -1,5 +1,6 @@
 import SPRITES from "./data/sprites";
 import { Drop } from "./drop";
+import { Sfx } from "./sound";
 import { frameIndex } from "./utils";
 
 export class Rupee extends Drop {
@@ -21,8 +22,9 @@ export class Rupee extends Drop {
     this.updateSprite({ palette });
   }
 
-  onCollision(player) {
+  onCollision(player, game) {
     player.rupees = Math.min(player.rupees + this.value, 255);
+    game.soundEngine.play(Sfx.coin); // to do: play sound per dollar
     this.dispose();
   }
 }

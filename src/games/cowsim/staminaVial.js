@@ -1,5 +1,6 @@
 import SPRITES from "./data/sprites";
 import { Drop } from "./drop";
+import { Sfx } from "./sound";
 
 export class StaminaVial extends Drop {
   constructor(x, y) {
@@ -10,8 +11,9 @@ export class StaminaVial extends Drop {
     });
   }
 
-  onCollision(player) {
-    player.health = Math.min(player.stamina + 4, player.maxStamina);
+  onCollision(player, game) {
+    player.stamina = Math.min(player.stamina + 4, player.maxStamina);
+    game.soundEngine.play(Sfx.heart);
     this.dispose();
   }
 }

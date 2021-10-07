@@ -9,8 +9,12 @@ import { fillBlocks, getBlock, fillWithMetaTiles, dialog, SubPixels } from '../u
 import sprites from '../data/sprites';
 import { palettes } from '../data/colors';
 import { Sprite } from '../../../spriteManager';
-import { apu, Duration, Duty, Envelope, NoiseSound, Note, PulseSound, Vibrato } from '../../../sound';
-import { Music } from '../music';
+import { Sfx, Songs } from '../sound';
+import sounddata from '../../../music/zelda.txt';
+import { GameScreen } from './screen';
+
+//import { apu, Duration, Duty, Envelope, NoiseSequence, Note,PulseSequence, Vibrato } from '../../../sound';
+//import { Music } from '../music';
 
 const { dir } = Link;
 
@@ -48,12 +52,19 @@ const yellowLavenderGreen = [BLACK, 0x37, 0x23, 0x09];
 const redOrangeGreen      = [BLACK, 0x15, 0x26, 0x19];
 const grays               = [BLACK, 0x2D, 0x10, 0x20];
 
-export default class LoadingScreen {
+export default class LoadingScreen extends GameScreen {
   constructor (game) {
-    this.game = game;
+    super(game);
 
     this.selectedMenuItem = 0;
-    this.menuSprite = new Sprite({ index: sprites.heart, x: 80, y: 104, palette: 1 });
+    this.menuSprite = new Sprite({ index: sprites.heart, x: 80, y: 96, palette: 1 });
+    this.soundEngine = game.soundEngine;
+
+    this.menu = [
+      {label:'START', screen: 'world'},
+      {label:'SET SEED', screen: 'enterSeed'},
+      {label: 'MUSIC', screen: 'music'}
+    ]
   }
 
   load () {
@@ -88,13 +99,14 @@ export default class LoadingScreen {
 
     C O W S I M`, 0);
     
-    this.buttonStates = {
-      [buttons.SELECT]: false,
-      [buttons.START]: isPressed(buttons.START),
-    };
-
+    this.selectedMenuItem = 0;
     this.drawMenu();
+    this.selectedMenuItem = 0;
+    this.menuSprite.update({ x:80, y: 96 });
+    this.menuSprite.draw();
     this.drawGround();
+
+    this.updateButtonStates();
 
     // time of day
     this.timeOfDay = 4095;
@@ -121,14 +133,15 @@ export default class LoadingScreen {
         update: (frame) => this.updateLink(frame)
     });
 
-    Music.Theme.play();
+    this.soundEngine.load(sounddata);
+    this.soundEngine.play(Songs.title, true);
   }
 
   unload () {
     Link.remove(this.link);
     this.menuSprite.dispose();
     spriteManager.clearSprites();
-    Music.Theme.stop();
+    this.soundEngine.clear();
   }
 
   drawGround () {
@@ -190,38 +203,45 @@ export default class LoadingScreen {
   }
 
   drawMenu() {
-    text(12, 13, 'START', 1);
-    text(12, 15, 'SET SEED', 1);
-    
-    this.selectedMenuItem = 0;
-    this.menuSprite.draw();
+    for (let i=0; i<this.menu.length; i++) {
+      // 96,96
+      text(12, 12+i*2, this.menu[i].label);
+    }
   }
 
   setSeletectedMenuItem(item) {
     this.selectedMenuItem = item;
-    this.menuSprite.update({ x:80, y: 104 + item*16 });
+    this.menuSprite.update({ x:80, y: 96 + item*16 });
+    this.game.soundEngine.play(Sfx.coin);
   }
 
   update (time) {
-    const { game, linkAnimation, moonAnimation, selectedMenuItem } = this;
+    const { game, linkAnimation, moonAnimation, selectedMenuItem, menu } = this;
 
-    const selectPressed = isPressed(buttons.SELECT);
-    if (selectPressed && !this.buttonStates[buttons.SELECT]) {
-      this.setSeletectedMenuItem((selectedMenuItem+1) % 2);
+    this.updateButtonStates();
+
+    if (this.wasPressed(buttons.SELECT)) {
+      this.setSeletectedMenuItem((selectedMenuItem+1) % menu.length);
     }
-    this.buttonStates[buttons.SELECT] = selectPressed;
 
-    if (isPressed(buttons.START) && !this.buttonStates[buttons.START]) {
-      const screen = [
-        this.game.screens.world,
-        this.game.screens.enterSeed
-      ][selectedMenuItem]
-      this.setSeletectedMenuItem(0);
-      game.loadScreen(screen);
+    if (this.wasPressed(buttons.UP)) {
+      if (selectedMenuItem > 0) {
+        this.setSeletectedMenuItem(selectedMenuItem - 1);
+      }
+    }
+
+    if (this.wasPressed(buttons.DOWN)) {
+      if (selectedMenuItem < menu.length - 1) {
+        this.setSeletectedMenuItem(selectedMenuItem + 1);
+      }
+    }
+
+    if (this.wasReleased(buttons.START) || this.wasReleased(buttons.A)) {
+      const screen = menu[selectedMenuItem].screen
+      game.loadScreen(game.screens[screen]);
       return;
     }
-    this.buttonStates[buttons.START] = isPressed(buttons.START);
-
+    
     if (linkAnimation) {
         linkAnimation.update(time);
     }
@@ -237,6 +257,7 @@ class Bunny {
     this.state = 'idle';
     this.palette = palette;
     this.sprite = spriteManager.requestSprite();
+    //this.bunnySound = new NoiseSequence(apu.noise, [6, 5], { gain: 0.2, envelope: Envelope.Decay });
   }
 
   unload() {
@@ -252,7 +273,6 @@ class Bunny {
           state = 'jumping';
           dxx = randBool() ? -4 : 4;
           frame = 0;
-          
         }
         idx = sprites.bunny_sit;
         break;
@@ -273,6 +293,8 @@ class Bunny {
             // apu.pulse2.setDuty(Duty.OneQuarter);
             // apu.pulse2.setEnvelope({ attack: 0, decay: 1, sustain: 0.1 });
             // apu.pulse2.play(randInt(150,200), 6);
+            
+            //this.bunnySound.play();
           }
           idx = dyy <= 0 ? sprites.bunny_jump : sprites.bunny_stand;
         }

@@ -47,10 +47,22 @@
           <path d="M -30.541 240.918 L 502.226 240.918 L 501.883 248.653 L -30.884 248.653 L -30.541 240.918 Z" style="stroke-linejoin: round; stroke: rgb(0, 0, 0); stroke-linecap: round; stroke-width: 24px;" transform="matrix(0.712346, 0.701829, -0.701829, 0.712346, 239.589293, -94.987078)"></path>
         </g>
       </symbol>
+      <symbol viewBox="0 0 1000 1000" id="icon-fs">
+        <title>fullscreen</title>
+        <g>
+          <path d="M885,80c21,0,35,14,35,35v770c0,21-14,35-35,35H115c-21,0-35-14-35-35V115c0-21,14-35,35-35H885 M885,10H115C55.5,10,10,55.5,10,115v770c0,59.5,45.5,105,105,105h770c59.5,0,105-45.5,105-105V115C990,55.5,944.5,10,885,10L885,10z"/>
+          <path d="M570,185l87.5,87.5L535,395l70,70l122.5-122.5L815,430V185H570z M395,535L272.5,657.5L185,570v245h245l-87.5-87.5L465,605L395,535z"/>
+        </g>
+      </symbol>
     </svg>
     <main>
       <h1>CowSim</h1>
-      <canvas id="canvas" width="256" height="240"></canvas>
+      <div>
+        <canvas id="canvas" width="256" height="240"></canvas>
+        <!-- <button type="button" id="fullscreen" class="borderless">
+          <svg viewBox="0 0 100 100" class="icon"><use xlink:href="#icon-fs"></use></svg>
+        </button> -->
+      </div>
       <div class="controls">
         <button type="button" id="btnPower">POWER</button>
         <button type="button" id="btnReset">RESET</button>
@@ -62,7 +74,7 @@
         </button>
         <label for="#silderVolume">VOLUME</label>
         <div class="volume">
-          <input type="range" min="0" max="1" value="0.1" step="0.01" class="slider" id="sliderVolume">
+          <input type="range" min="0" max="1" value="0.8" step="0.01" class="slider" id="sliderVolume">
           <button type="button" id="btnMute" class="borderless">
             <svg viewBox="0 0 100 100" class="icon"><use xlink:href="#mute"></use></svg>
           </button>

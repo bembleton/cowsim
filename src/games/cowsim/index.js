@@ -14,6 +14,8 @@ import { hashToString, stringToHash } from './utils';
 import SetSeedScreen from './screens/setSeedScreen';
 import { Terrain } from './terrain';
 import WorldGenerator from './worldGenerator';
+import { SoundEngine } from '../../soundEngine';
+import MusicScreen from './screens/musicScreen';
 
 const {
   HORIZONTAL,
@@ -48,8 +50,7 @@ class Cowsim {
     };
     
     await loadBitmapInto(itemsSheet, this.spriteSheets.items);
-    
-    //this.hud = new Hud(this.terrain);
+    this.soundEngine = new SoundEngine();
 
     this.screens = {
       title: new LoadingScreen(this),
@@ -57,7 +58,8 @@ class Cowsim {
       world: new OverworldScreen(this),
       pause: new PauseMenu(this),
       zelda: new ZeldaScreen(this),
-      gameOver: new GameOverScreen(this)
+      gameOver: new GameOverScreen(this),
+      music: new MusicScreen(this)
     };
 
     this.loadScreen(this.screens.title);
@@ -76,7 +78,9 @@ class Cowsim {
 
   // implements Game.update
   update() {
+    this.soundEngine.silence();
     this.currentScreen && this.currentScreen.update();
+    this.soundEngine.update();
   }
 
   onScanline(y) {

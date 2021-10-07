@@ -1,5 +1,6 @@
 import SPRITES from "./data/sprites";
 import { Drop } from "./drop";
+import { Sfx } from "./sound";
 
 export class Hourglass extends Drop {
 
@@ -11,8 +12,9 @@ export class Hourglass extends Drop {
     });
   }
 
-  onCollision(player, screen) {
-    screen.freezeTime();
+  onCollision(player, game) {
+    game.soundEngine.play(Sfx.itemCollect);
+    game.freezeTime(); // todo: play clock sound
     this.dispose();
   }
 }

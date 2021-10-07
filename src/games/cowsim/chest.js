@@ -1,6 +1,7 @@
 import { MetaSprite } from "../../spriteManager";
 import SPRITES from "./data/sprites";
 import { Drop } from "./drop";
+import { Sfx } from "./sound";
 import { frameIndex, SubPixels } from "./utils";
 
 export class Chest extends Drop {
@@ -31,6 +32,7 @@ export class Chest extends Drop {
 
     this.disposeOnCollision = false;
     this.opened = false;
+    this.openingTimer = 0;
     this.contents = contents;
     this.contentsPos = SubPixels.fromPixels(x+4, y);
   }
@@ -47,6 +49,15 @@ export class Chest extends Drop {
 
   update(canMove, game) {
     const { contentsDxdy, contentsPos, contents, opened } = this;
+    if (this.openingTimer) {
+      this.openingTimer--;
+      if (this.openingTimer === 0) {
+        this.drawContents();
+        this.open();
+        // start music again
+        game.startMusic(160);
+      }
+    }
     if (!opened || !contents) return;
     
     if (contentsDxdy.y >= 20) {
@@ -72,9 +83,7 @@ export class Chest extends Drop {
     this.lidSprite.draw();
   }
 
-  onCollision(player, game) {
-    if (this.opened) return;
-
+  drawContents() {
     this.lidSprite.dispose();
     
     // spawn the contents and toss it out
@@ -85,7 +94,16 @@ export class Chest extends Drop {
     const dx = x < 128 ? 8 : -8;
     this.contentsDxdy = new SubPixels(dx, -20);
     contents.draw();
+  }
 
-    this.open();
+  onCollision(player, game) {
+    if (this.opened || this.openingTimer) return;
+
+    // stop music
+    game.soundEngine.stop();
+    game.soundEngine.play(Sfx.chest);
+    // wait for the fanfare
+    this.openingTimer = 356;
+    //this.open();
   }
 }

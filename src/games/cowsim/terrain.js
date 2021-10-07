@@ -49,15 +49,41 @@ const screenHeight = 12; // tiles
 const mapWidth = screenWidth * 16;  // 256 tiles
 const mapHeight = screenHeight * 16; // 192 tiles
 
+const elevation2Biome = (e) => {
+  switch (e) {
+    case 0: return 0; // water
+    case 1:
+    case 3: return 1; // plains
+    case 2:
+    case 6: return 2; // forest
+    case 4: return 3; // desert
+    default: return 4; // mountains
+  }
+}
+
 class Area {
   /** Constructs a new area elevation cache for an area at posx, posy */
   constructor(posx, posy, seed, terrain) {
     // area based randomizer
     this.randomizer = new Randy(seed + posx + posy*mapWidth);
+    const biomeCounts = [0,0,0,0,0];
     this.elevations = [];
     for (let y=-1; y<13; y++)
     for (let x=-1; x<17; x++) {
-      this.elevations[(y+1)*18 + (x+1)] = terrain.elevation(posx + x, posy + y);
+      const elevation = terrain.elevation(posx + x, posy + y);
+      this.elevations[(y+1)*18 + (x+1)] = elevation;
+      biomeCounts[elevation2Biome(elevation)] += 1;
+    }
+    // water is more important
+    biomeCounts[0] *= 2;
+    console.log(`biomes: ${biomeCounts}`);
+    let max = 0;
+    this.biome = 0;
+    for (let i=0; i<5; i++) {
+      if (biomeCounts[i] > max) {
+        this.biome = i;
+        max = biomeCounts[i];
+      }
     }
   }
   
@@ -279,14 +305,14 @@ export class Terrain {
     let n = this.noise(x, y);
     if (n === 2) {
       if (this.randomizer.valueFor(x, y) < 0.15) {
-        return 6;
+        return 6; // tree
       }
     }
     return n;
   }
 
   // make this better
-  static isWater = (e) => e === 0;
+  static isWater = (e) => e === 0; //differentiate ocean and lakes?
   static isDesert = (e) => e === 4;
   static isSolid = (e) => e >= 5; // rocks, trees
   static isGrass = (e) => e > 0 && e < 4;
@@ -301,8 +327,16 @@ export class Terrain {
 
   // draws map area with top-left terrain position (posx,posy) into nametable at (namex,namey)
   drawArea(posx, posy, tilex, tiley) {
+    // todo: cache area
     const area = new Area(posx, posy, this.baseSeed, this);
     area.draw(tilex, tiley);
+  }
+
+  /** Calculates the  biome for a given position */
+  getBiome(posx, posy) {
+    // todo: cache area
+    const area = new Area(posx, posy, this.baseSeed, this);
+    return area.biome;
   }
 
   /** draws the current terrain elevation to the hud minimap */

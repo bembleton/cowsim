@@ -3,6 +3,7 @@ import ppu from './ppu';
 import Display from './display';
 import spriteManager from './spriteManager';
 import { apu } from './sound';
+import { getButtonState } from './controller';
 
 const {
   HORIZONTAL,
@@ -41,7 +42,8 @@ export default class Console {
     // if the game should not run continuously
     this.paused = false;
     this.on = false;
-    this.muted = true;
+    this.muted = false;
+    this.apu = apu;
 
     const handleVisibilityChange = () => {
       if (document[hidden]) {
@@ -173,11 +175,22 @@ export default class Console {
 
   // advance one frame
   step() {
+    this.checkInput();
     if (this.game) {
       this.game.update();
       apu.update();
     }
     this.draw();
+  }
+
+  checkInput() {
+    if (apu.canConnect) return;
+    if (Object.values(getButtonState()).some(x => x)) {
+      apu.canConnect = true;
+      if (!this.muted) {
+        apu.connect();
+      }
+    }
   }
 
   // draw the current frame

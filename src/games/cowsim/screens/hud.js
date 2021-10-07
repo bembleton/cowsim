@@ -7,6 +7,7 @@ import { colors, palettes } from '../data/colors';
 import tiles from '../data/tiles';
 import { drawTile, fillBlocks } from '../utils';
 import { MetaSprite, Sprite } from '../../../spriteManager';
+import { Sfx } from '../sound';
 
 const {
   setNametable,
@@ -236,8 +237,9 @@ export default class Hud {
       arrows
     } = player;
 
-    this.frame = (this.frame+1) % 2;
-    if (this.frame === 0) {
+    this.frame = (this.frame+1) % 16;
+    
+    if ((this.frame % 2) === 0) {
       this.rupeeCount += Math.sign(rupees - rupeeCount);
     }
     drawCounts(this.rupeeCount, keys, bombs);

@@ -11,7 +11,7 @@ import { pixelToTile, SubPixels } from '../utils';
 import Hud from './hud';
 import { MetaSprite } from '../../../spriteManager';
 import { Rupee } from '../rupee';
-import { Bomb } from '../bomb';
+import { Bomb, BombObject } from '../bomb';
 import { Inventory } from '../inventory';
 import { Heart } from '../heart';
 import { Fairy } from '../fairy';
@@ -31,7 +31,7 @@ import { MeleeObject } from "../MeleeObject";
 import { SwordBeam } from "../SwordBeam";
 import { Terrain } from '../terrain';
 import WorldGenerator, { World } from '../worldGenerator';
-import { Music } from '../music';
+import { Sfx, Songs } from '../sound';
 
 const {
   HORIZONTAL,
@@ -71,6 +71,7 @@ export default class OverworldScreen {
     };
 
     this.objectManager = new ObjectManager();
+    this.soundEngine = game.soundEngine;
 
     // support for 2 dynamic 8x16 sprites
     this.treasureDropSprites = [
@@ -133,7 +134,8 @@ export default class OverworldScreen {
     
     terrain.drawArea(x, y, 0, 3);
     this.setPosition(x, y);
-    
+    this.checkForOcean();
+
     //this.hud.setItemB({ sprite: SPRITES.bomb, palette: 2 });
 
     this.scroll = {
@@ -166,12 +168,14 @@ export default class OverworldScreen {
       bombs: 0,
       maxBombs: 8,
       itemA: null, // sword
-      itemB: null, // 
+      itemB: null, // { type, sprite, palette }
+      itemTimer: 0, // delay before using again
       inventory: new Inventory(),
-      hurtTimer: 0,
+      hurtTimer: 0, // delay before taking more damage
       dead: false,
       equipWeapon: this.equipWeapon.bind(this),
-      takeDamage: this.takeDamage.bind(this)
+      takeDamage: this.takeDamage.bind(this),
+      equipItem: this.equipItem.bind(this)
     };
     
     this.playerMeleeObject = null;
@@ -188,7 +192,8 @@ export default class OverworldScreen {
 
     this.recentBoards = [];
     this.treasures = {};
-    
+    this.resetKillCounter();
+
     const startingArea = World.getAreaId(pos.x, pos.y);
     this.spawnAreaMapEntity(startingArea);
     // const { type, x, y, ...rest } = mapEntities[startingArea];
@@ -198,6 +203,18 @@ export default class OverworldScreen {
 
     this.loading = true;
     this.loadingProgress = 120;
+  }
+
+  resetKillCounter() {
+    this.killCounter = 0;
+    this.forceDrop = false;
+    console.debug(`KillCounter Reset`);
+  }
+
+  incrementKillCounter() {
+    this.killCounter++;
+    this.forceDrop = this.killCounter > 10;
+    console.debug(`KillCounter: ${this.killCounter}.${this.forceDrop ? ' forceDrop: set' : ''}`);
   }
 
   spawnAreaMapEntity(areaId) {
@@ -245,7 +262,7 @@ export default class OverworldScreen {
   }
 
   unload () {
-    Music.Theme.stop();
+    this.soundEngine.clear();
   }
 
   onScanline (y) {
@@ -295,11 +312,6 @@ export default class OverworldScreen {
       const dx = Math.floor(Math.sin( Math.PI * 2 *(y + frame) / 32 ) * amount);
       setScroll(this.scroll.x + dx, this.scroll.y);
     }
-
-    if (progress === 0 && this.loading) {
-      this.loading = false;
-      Music.Theme.play();
-    }
   }
 
   setMirrorMode(mode) {
@@ -333,6 +345,21 @@ export default class OverworldScreen {
     return null;
   }
 
+  checkForOcean() {
+    const biome = this.terrain.getBiome(this.position.x, this.position.y);
+    const name = {
+      0: 'ocean',
+      1: 'plains',
+      2: 'forest',
+      3: 'desert',
+      4: 'mountains'
+    }[biome];
+    console.log(`biome: ${name}`);
+    if (name === 'ocean') {
+      this.game.soundEngine.play(Sfx.ocean, true);
+    }
+  }
+
   spawnCreatures () {
     const { terrain, position: { x: posx, y: posy }, recentBoards } = this;
 
@@ -356,7 +383,7 @@ export default class OverworldScreen {
 
   spawnCreature (px, py) {
     const type = choice('moblin');
-    console.log(`spawning a ${type} at ${px}, ${py}`)
+    // console.log(`spawning a ${type} at ${px}, ${py}`)
 
     let creature;
     switch (type) {
@@ -427,6 +454,9 @@ export default class OverworldScreen {
     console.log('spawning a', drop);
     drop.draw();
     this.objectManager.drops.push(drop);
+    if (drop instanceof Fairy) {
+      this.soundEngine.play(Sfx.fairy);
+    }
   }
 
   dropWeapon (px, py, weapon = null) {
@@ -457,6 +487,11 @@ export default class OverworldScreen {
     this.hud.setItemA(weapon)
   }
 
+  equipItem(item) {
+    this.player.itemB = item.type;
+    this.hud.setItemB(item);
+  }
+
   freezeTime () {
     this.stasisCounter = 255;
   }
@@ -478,8 +513,9 @@ export default class OverworldScreen {
 
     if (this.loadingProgress > 0) this.loadingProgress -= 2;
     else if (this.loading) {
+      // finished fading in
       this.loading = false;
-      Music.Theme.play();
+      this.startMusic();
     }
 
     if (scrolling) {
@@ -534,6 +570,10 @@ export default class OverworldScreen {
         this.playerMeleeObject && this.playerMeleeObject.dispose();
         link.canAttack = true; // todo: cooldown
       }
+    }
+
+    if (player.itemTimer) {
+      this.updateItem();
     }
 
     if (!dying && !scrolling) {
@@ -622,7 +662,14 @@ export default class OverworldScreen {
     if (player.health < 0) player.health = 0;
     if (player.health === 0) {
       this.die();
+    } else {
+      this.soundEngine.play(Sfx.hurt);
+      if (player.health <= 4) {
+        this.soundEngine.play(Sfx.heartBeat, true);
+      }
     }
+
+    this.resetKillCounter();
   }
 
   die() {
@@ -633,12 +680,20 @@ export default class OverworldScreen {
     link.dead = false;
     link.dying = true;
     this.objectManager.clear();
-    Music.Theme.stop();
+    this.soundEngine.clear();
     // death jingle
+    this.soundEngine.play(Sfx.death);
   }
 
   showGameOver() {
     this.game.loadScreen(this.game.screens.gameOver);
+  }
+
+  startMusic(delay) {
+    this.soundEngine.play(Songs.overworld, true);
+    if (delay) {
+      this.soundEngine.songs[Songs.overworld].pause(delay);
+    }
   }
 
   /** not scrolling, not dying */
@@ -658,27 +713,12 @@ export default class OverworldScreen {
     }
 
     if (isPressed(buttons.A) && link.canAttack && this.player.weapon) {
-      // if not attacking, and attackFrame == 0,
-      // start powering up the attackFrame while A is pressed,
-      // until attackFrame is X,
-      // then set attacking to true,
-      // and start counting attackFrame down
-
-      /*
-      canAttack | attacking | attackFrame | then
-      false     | false     | 0
-      false     | false     | >0          | attackFrame--
-      true      | --        | <64 & A     | attackFrame++
-      true      | --        | >0 & !A     | canAttack=false
-      
       if (!link.attacking) {
-        // draw new weapon sprite
-        this.drawWeapon();
-      } else {
-        // update weapon sprite offset
+        this.soundEngine.play(Sfx.sword);
       }
-      */
+
       link.attacking = true;
+      
       if (link.attackFrame < 64) {
         link.attackFrame++;
       }
@@ -690,6 +730,10 @@ export default class OverworldScreen {
     }
 
     if (link.attacking) return;
+
+    if (isPressed(buttons.B)) {
+      this.useItem();
+    }
     
     if (isPressed(buttons.UP)) {
       if (link.direction === (link.direction = Direction.up)) {
@@ -710,6 +754,42 @@ export default class OverworldScreen {
     }
 
     
+  }
+
+  useItem() {
+    const { player, link } = this;
+    const { itemTimer } = this;
+    if (player.itemTimer > 0) return; // wait to use it again
+    switch (player.itemB) {
+      case 'bombs':
+        if (player.bombs === 0) return;
+        player.bombs--;
+        player.itemTimer = 64; // place once a second
+        link.direction
+
+        // place a bomb in front of the player
+        const pos = link.pos.toPixels();
+        const { x, y } = SubPixels.fromDirection(link.direction, 16).add(pos).add(8, 8);
+        const bomb = new BombObject({ x, y });
+        bomb.draw();
+        this.objectManager.projectiles.push(bomb);
+        this.soundEngine.play(Sfx.bomb);
+        break;
+      case 'boomerang':
+
+    }
+  }
+
+  updateItem() {
+    if (this.player.itemTimer === 0) return;
+    switch (this.player.itemB) {
+      case 'bombs':
+        this.player.itemTimer--;
+        break;
+      case 'boomerang':
+        // wait for boomerang to return
+        break;
+    }
   }
 
   /** draws SPRITES.weapon using link's direction and position */
@@ -876,6 +956,9 @@ export default class OverworldScreen {
 
     // clear creatures and drops
     this.objectManager.clear();
+
+    // stop the ocean sound if it's playing
+    this.game.soundEngine.stop(Sfx.ocean);
   }
   
   coerceLink() {
@@ -1042,6 +1125,10 @@ export default class OverworldScreen {
 
     this.spawnCreatures();
     this.spawnTreasures();
+
+    // ocean?
+    console.log(`loaded screen: (${this.position.x/16}, ${this.position.y/12})`);
+    this.checkForOcean();
   }
 
   /**

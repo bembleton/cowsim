@@ -1,6 +1,7 @@
 import { randInt } from "../../random";
 import SPRITES from "./data/sprites";
 import { Drop } from "./drop";
+import { Sfx } from "./sound";
 import { frameIndex, SubPixels } from "./utils";
 
 const turn_table = [4,8,9,10,6,2,1,0];
@@ -63,8 +64,10 @@ export class Fairy extends Drop {
     return pos.toPixels();
   }
 
-  onCollision(player) {
+  onCollision(player, game) {
     player.health = Math.min(player.health + 12, player.maxHearts*4);
+    game.soundEngine.stop(Sfx.heartBeat);
+    game.soundEngine.play(Sfx.itemCollect);
     this.dispose();
   }
 }

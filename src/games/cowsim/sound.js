@@ -1,0 +1,31 @@
+export const Songs = {
+  title: 0,
+  overworld: 1,
+  dungeon: 2,
+};
+export const Sfx = {
+  sword: 3,
+  boomerang: 4,
+  magic: 5,
+  arrow: 6,
+  bomb: 7,
+  bombExplode: 8,
+  flame: 9,
+  heart: 10,
+  coin: 11,
+  fairy: 12,
+  itemCollect: 12,
+  stun: 13,
+  shieldDeflect: 14,
+  heartBeat: 15,
+  kill: 16,
+  itemGet: 17,
+  secret: 18,
+  whistle: 19,
+  death: 20,
+  ocean: 21,
+  stairs: 22,
+  hurt: 23,
+  wasted: 24,
+  chest: 25
+};

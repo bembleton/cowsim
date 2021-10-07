@@ -1,5 +1,6 @@
 import SPRITES from "./data/sprites";
 import { Drop } from "./drop";
+import { Sfx } from "./sound";
 import { frameIndex } from "./utils";
 
 export class Heart extends Drop {
@@ -19,8 +20,10 @@ export class Heart extends Drop {
     this.updateSprite({ palette });
   }
 
-  onCollision(player) {
+  onCollision(player, game) {
     player.health = Math.min(player.health + 4, player.maxHearts*4);
+    game.soundEngine.stop(Sfx.heartBeat);
+    game.soundEngine.play(Sfx.heart);
     this.dispose();
   }
 }

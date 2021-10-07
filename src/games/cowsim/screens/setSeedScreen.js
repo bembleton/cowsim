@@ -6,6 +6,8 @@ import text from '~/text';
 import { buttons, getButtonState } from '~/controller';
 import { Sprite } from '../../../spriteManager';
 import { Randy } from '../../../random';
+import { Sfx } from '../sound';
+import { GameScreen } from './screen';
 
 const BLACK = colors.black;
 const WHITE = colors.white;
@@ -25,15 +27,21 @@ const menuItemLocations = {
 
 const keyboardChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-export default class SetSeedScreen {
+export default class SetSeedScreen extends GameScreen {
   constructor (game) {
-    this.game = game;
+    super(game);
     this.selectedMenuItem = 0;
     this.selectedChar = 0;
     this.menuSprite = new Sprite({ index: SPRITES.heart, x: 0, y: 0, palette: 0 });
     this.keyboardFocus = new Sprite({ index: SPRITES.white_square, x: 0, y: 0, palette: 1, priority: true });
     this.seedFocus = new Sprite({ index: SPRITES.white_square, x: 0, y: 0, palette: 1, priority: true });
     this.seed = '';
+
+    this.menu = [
+      { x:56, y:48 },
+      { x:56, y:80, label: 'RANDOMIZE' },
+      { x:56, y:96, label: 'SAVE' }
+    ]
   }
 
   load () {
@@ -95,9 +103,10 @@ export default class SetSeedScreen {
 
   selectMenuItem(item) {
     this.selectedMenuItem = item;
-    const { x, y } = menuItemLocations[item];
+    const { x, y } = this.menu[item];
     this.menuSprite.update({ x, y });
     this.frame = 64;
+    
   }
 
   advanceSelectedChar(offset) {
@@ -107,6 +116,7 @@ export default class SetSeedScreen {
     const y = 144 + (this.selectedChar >> 3) * 16;
     this.keyboardFocus.update({ x, y });
     this.frame = 64;
+    this.game.soundEngine.play(Sfx.coin);
   }
 
   enterSelectedChar() {
@@ -115,6 +125,7 @@ export default class SetSeedScreen {
       this.setSeed(seed);
     }
     this.frame = 64;
+    this.game.soundEngine.play(Sfx.bomb);
   }
 
   eraseChar() {
@@ -123,11 +134,13 @@ export default class SetSeedScreen {
       this.setSeed(seed);
     }
     this.frame = 64;
+    this.game.soundEngine.play(Sfx.sword);
   }
 
   randomizeSeed() {
-    const seed = new Randy().nextInt() & 0x3fffffff;
-    this.setSeed(seed);
+    const hash = new Randy().nextInt() & 0x3fffffff;
+    this.setSeed(hashToString(hash));
+    this.game.soundEngine.play(Sfx.itemCollect);
   }
 
   save() {
@@ -144,17 +157,24 @@ export default class SetSeedScreen {
     const focusColor = ((this.frame < 32) || (this.selectedMenuItem !== 0)) ? BLACK : 0x22;
     ppu.setSpritePalette(1, BLACK, BLACK, BLACK, focusColor);
 
-    this.previousButtonState = this.buttonState;
-    this.buttonState = getButtonState();
+    this.updateButtonStates();
 
     if (this.wasPressed(buttons.SELECT)) {
-      this.selectMenuItem((selectedMenuItem+1) % 3)
+      this.selectMenuItem((selectedMenuItem+1) % 3);
+      this.game.soundEngine.play(Sfx.coin);
     }
 
     else if (this.wasPressed(buttons.START)) {
       switch (selectedMenuItem) {
         case 0: break;
         case 1: this.randomizeSeed(); break;
+        case 2: break;
+      }
+    }
+
+    // only exit menu after releasing the save button
+    else if (this.wasReleased(buttons.START) || this.wasReleased(buttons.A)) {
+      switch (selectedMenuItem) {
         case 2: this.save(); break;
       }
     }
@@ -163,7 +183,7 @@ export default class SetSeedScreen {
       switch (selectedMenuItem) {
         case 0: this.enterSelectedChar(); break;
         case 1: this.randomizeSeed(); break;
-        case 2: this.save(); break;
+        case 2: break;
       }
     }
 

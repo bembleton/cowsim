@@ -40,6 +40,10 @@ module.exports = {
                     name: 'sprites/[name].[ext]',
                     publicPath: '../'
                 }
+            },
+            {
+              test: /.txt$/i,
+              use: 'raw-loader'
             }
         ],
     },

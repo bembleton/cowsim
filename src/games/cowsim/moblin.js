@@ -24,12 +24,25 @@ export class Moblin extends Enemy {
     this.canBeKnockedBack = true;
   }
 
-  idle() {
+  idle(game, player, time = 64) {
     const { dir, pos, state } = this;
     if (state !== Enemy.state.idle) {
       this.state = Enemy.state.idle;
-      this.stateTimer = 64;
-
+      this.stateTimer = time;
+    }
+    if (this.stateTimer === 32) {
+      // shoot an arrow
+      const { x, y } = this.pos.toPixels();
+      const arrow = new ArrowObject({
+        x: x+8,
+        y: y+8,
+        isFriendly: false,
+        damage: this.meleeDamage,
+        direction: dir,
+        palette: 1
+      });
+      arrow.draw();
+      game.objectManager.projectiles.push(arrow)
     }
     if (this.stateTimer === 0) {
       this.state = Enemy.state.moving;
@@ -37,82 +50,52 @@ export class Moblin extends Enemy {
   }
 
   updateState(game, player) {
-    const { dir, pos, state } = this;
-    
-    if (state === Enemy.state.idle) {
-      if (this.stateTimer === 32) {
-        // shoot an arrow
-        const { x, y } = this.pos.toPixels();
-        const arrow = new ArrowObject({
-          x: x+8,
-          y: y+8,
-          isFriendly: false,
-          damage: this.meleeDamage,
-          direction: dir,
-          palette: 1
-        });
-        arrow.draw();
-        game.objectManager.projectiles.push(arrow)
-      }
-      if (this.stateTimer === 0) {
-        this.state = Enemy.state.moving;
-      }
-      // keep idling
-      return;
-    }
+    switch (this.state) {
+      case Enemy.state.idle:
+        this.idle(game, player);
+        break;
 
+      case Enemy.state.knockedback:
+      case Enemy.state.moving:
+        this.move(game, player);
+        break;
+    }
+  }
+
+  move(game, player) {
+    const { dir, pos, state } = this;
     let speed = Moblin.speed;
     if (state === Enemy.state.knockedback) {
       // maintain direction, but move backwards a lot faster
       if (this.stateTimer === 0) {
-        this.setNextState(game, player);
+        this.idle(16);
         return;
       }
       speed = -32;
     }
 
-    if (state === Enemy.state.moving || state === Enemy.state.knockedback) {
-      const velocity = SubPixels.fromDirection(dir, speed);
-      this.pos = pos.add(velocity);
-      const { x, y } = this.pos.toPixels();
-      const onGrid = (y % 16) === 0 && (x % 16) === 0;
-      if (onGrid) {
-        this.setNextState(game, player);
+    const velocity = SubPixels.fromDirection(dir, speed);
+    this.pos = pos.add(velocity);
+    const { x, y } = this.pos.toPixels();
+    const onGrid = (y % 16) === 0 && (x % 16) === 0;
+    if (onGrid) {
+      const nextDirs = this.getNextDirs(game);
+    
+      if (state === Enemy.state.knockedback) {
+        const canKeepMoving = nextDirs.includes(Direction.flipped[dir]);
+        if (!canKeepMoving) {
+          this.idle(game, player, 16);
+          return;
+        }
+      } else {
+        const canKeepMoving = nextDirs.includes(dir);
+        if (canKeepMoving && rand() < 0.80) return; // keep moving
+        this.dir = nextDirs && choice(nextDirs) || this.dir; // pick a new direction
+        if (rand() < 0.50) {
+          this.idle(game, player);
+          return;
+        }
       }
-    }
-  }
-
-  setNextState(game, player) {
-    const { dir, state, stateTimer } = this;
-    const nextDirs = this.getNextDirs(game);
-    const canKeepMoving = nextDirs.includes(dir);
-
-    /*
-      idle: 32 frames
-      range attack
-      move
-    */
-
-
-    if (state === Enemy.state.knockedback) {
-      if (!stateTimer) {
-        this.state = Enemy.state.idle;
-        this.stateTimer = 16;
-        return;
-      }
-      if (!canKeepMoving) {
-        this.state = Enemy.state.idle;
-      }
-    }
-
-    if (state === Enemy.state.moving) {
-      if (canKeepMoving && rand() < 0.80) return; // keep moving
-      this.dir = nextDirs && choice(nextDirs) || this.dir; // pick a new direction
-      if (rand() < 0.50) {
-        this.state = Enemy.state.idle; // pause
-        this.stateTimer = 64;
-      }
-      return;
     }
   }
 

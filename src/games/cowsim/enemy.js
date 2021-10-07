@@ -5,6 +5,7 @@ import SPRITES from './data/sprites';
 import { MetaSprite } from "../../spriteManager";
 import drops from './drops';
 import { choice, rand } from "../../random";
+import { Sfx } from "./sound";
 
 const dropsById = {
   0: drops.Rupee,
@@ -17,10 +18,11 @@ const dropsById = {
   7: drops.Hourglass
 };
 const dropTables = {
-  A: [0,0,0,0,5,5,3,3,3,4],
-  B: [0,0,0,5,3,3,6,6,6,7],
+  A: [0,0,5,5,5,3,3,3,4,4],
+  B: [6,6,6,5,3,3,6,6,6,7], //[0,0,0,5,3,3,6,6,6,7]
   C: [0,0,0,0,5,3,3,1,1,7],
-  D: [0,0,3,3,3,3,5,2,4,4]
+  D: [0,0,3,3,3,3,5,2,4,4],
+  forced: [4,4,6,6,6,2]
 };
 const dropChances = {
   A: 0.31,
@@ -86,7 +88,6 @@ export class Enemy {
   update(canMove, game, player) {
     this.frame = (this.frame+1) % 256;
     if (this.damageTimer > 0) this.damageTimer--;
-    // todo: flash when damaged?
 
     if (this.state === Enemy.state.dead) {
       // drop something
@@ -136,14 +137,21 @@ export class Enemy {
   //abstract
   spawnDrop(game) {
     // drop table
-    const { pos, dropGroup } = this;
-    const chance = dropChances[dropGroup] || 0;
-    console.log(`chance to drop: ${chance}`);
-    const roll = rand();
-    console.log(`roll: ${roll}`);
-    if (roll > chance) return;
+    let dropGroup = this.dropGroup;
 
-    const { x, y } = pos.toPixels();
+    if (!game.forceDrop) {
+      const chance = dropChances[dropGroup] || 0;
+      const roll = rand();
+      console.log(`Rolling for drop: ${roll} / ${chance}`);
+      if (roll > chance) return;
+      
+    } else {
+      console.debug(`Forced drop...`);
+      dropGroup = 'forced';
+      game.resetKillCounter();
+    }
+
+    const { x, y } = this.pos.toPixels();
     const dropClass = dropsById[ choice(dropTables[dropGroup]) ];
     const drop = new dropClass(x, y);
     game.spawnDrop(drop);
@@ -162,11 +170,14 @@ export class Enemy {
     this.health -= damage;
     if (this.health <= 0)  {
       this.die();
+      game.soundEngine.play(Sfx.kill);
+      game.incrementKillCounter();
     } else {
       // dont take damage again for 48 frames
       this.damageTimer = 48;
       if (this.canBeKnockedBack) {
-        this.knockback(fromPos)
+        this.knockback(fromPos);
+        game.soundEngine.play(Sfx.stun);
       }
     }
   }
@@ -185,6 +196,7 @@ export class Enemy {
     this.pos = SubPixels.fromPixels(x & ~1, y & ~1); // align to the nearest even pixel
     this.state = Enemy.state.knockedback;
     this.stateTimer = 16;
+
   }
   die() {
     //poof

@@ -3,8 +3,10 @@ import SPRITES from '../data/sprites';
 import { fillBlocks, getBlock, fillWithMetaTiles, dialog, SubPixels } from '../utils';
 import ppu from '~/ppu';
 import text from '~/text';
-import { isPressed, buttons } from '~/controller';
+import { buttons } from '~/controller';
 import { Sprite } from '../../../spriteManager';
+import { GameScreen } from './screen';
+import { Sfx } from '../sound';
 
 const BLACK = colors.black;
 const WHITE = colors.white;
@@ -15,11 +17,17 @@ const DARKGRAY = colors.darkgray;
 
 const BLANK = 0x30;
 
-export default class GameOverScreen {
+export default class GameOverScreen extends GameScreen {
   constructor (game) {
-    this.game = game;
+    super(game);
+    
     this.selectedMenuItem = 0;
     this.menuSprite = new Sprite({ index: SPRITES.heart, x: 100, y: 160, palette: 0 });
+
+    this.menu = [
+      {label: 'RETRY', screen: 'world'},
+      {label: 'QUIT', screen: 'title'},
+    ]
   }
 
   load () {
@@ -49,10 +57,6 @@ export default class GameOverScreen {
     // fade YOU DIED in over 3 seconds
     // show menu after 2 seconds
     this.frame = 192;
-    this.buttonStates = {
-      [buttons.SELECT]: false,
-      [buttons.START]: false,
-    };
   }
 
   unload () {
@@ -60,18 +64,27 @@ export default class GameOverScreen {
   }
 
   drawMenu() {
-    text(14, 20, 'RETRY', 1);
-    text(14, 22, 'QUIT', 1);
+    for (let i=0; i<this.menu.length; i++) {
+      text(14, 20+i*2, this.menu[i].label, 1);
+    }
+    
     for (let j=0; j<2; j++)
     for (let i=0; i<3; i++) {
       ppu.setAttribute(7+i, 10+j, 1);
     }
     this.selectedMenuItem = 0;
+    this.menuSprite.update({ x:100, y: 160 + this.selectedMenuItem*16 });
     this.menuSprite.draw();
   }
 
+  select(i) {
+    this.selectedMenuItem = i;
+    this.menuSprite.update({ x:100, y: 160 + i*16 });
+    this.game.soundEngine.play(Sfx.coin);
+  }
+
   update() {
-    const { game, selectedMenuItem } = this;
+    const { game, selectedMenuItem, menu } = this;
 
     if (this.frame) {
       const frame = --this.frame;
@@ -95,20 +108,27 @@ export default class GameOverScreen {
       }
     }
 
-    const selectPressed = isPressed(buttons.SELECT);
+    this.updateButtonStates();
 
-    if (selectPressed && !this.buttonStates[buttons.SELECT]) {
-      this.selectedMenuItem = (selectedMenuItem+1) % 2;
-      this.menuSprite.update({ x:100, y: 160 + this.selectedMenuItem*16 });
+    if (this.wasPressed(buttons.SELECT)) {
+      this.select((selectedMenuItem+1) % menu.length);
     }
-    this.buttonStates[buttons.SELECT] = selectPressed;
 
-    if (isPressed(buttons.START)) {
-      const screen = [
-        this.game.screens.world,
-        this.game.screens.title
-      ][selectedMenuItem]
-      game.loadScreen(screen);
+    if (this.wasPressed(buttons.UP)) {
+      if (selectedMenuItem > 0) {
+        this.select(selectedMenuItem - 1);
+      }
+    }
+
+    if (this.wasPressed(buttons.DOWN)) {
+      if (selectedMenuItem < menu.length - 1) {
+        this.select(selectedMenuItem + 1);
+      }
+    }
+
+    if (this.wasReleased(buttons.START) || this.wasReleased(buttons.A)) {
+      const screen = this.menu[this.selectedMenuItem].screen;
+      game.loadScreen(this.game.screens[screen]);
     }
   }
 }
