@@ -61,6 +61,12 @@ export default class Console {
     window.setInterval(() => {
       document.getElementById('fps').innerText = "FPS: " + Math.floor(this.fps);
     }, 1000);
+
+    // listen for user input to activate the web audio api
+    document.addEventListener('keydown', (event) => {
+      this.enableAPU();
+      
+    }, false);
   }
 
   // loads a cartridge/game instance
@@ -175,7 +181,6 @@ export default class Console {
 
   // advance one frame
   step() {
-    this.checkInput();
     if (this.game) {
       this.game.update();
       apu.update();
@@ -183,13 +188,11 @@ export default class Console {
     this.draw();
   }
 
-  checkInput() {
+  enableAPU() {
     if (apu.canConnect) return;
-    if (Object.values(getButtonState()).some(x => x)) {
-      apu.canConnect = true;
-      if (!this.muted) {
-        apu.connect();
-      }
+    apu.canConnect = true;
+    if (!this.muted) {
+      apu.connect();
     }
   }
 

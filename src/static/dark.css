@@ -32,12 +32,33 @@ h1 {
   image-rendering: crisp-edges;
 }
 
+#canvas.borderless {
+  border: none;
+}
+
 #mapCanvas {
   display: none;
   width: 256px;
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+.row-wide {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%
+}
+
+.column-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .controls {
@@ -88,6 +109,19 @@ h1 {
 .controls button svg.icon {
   height: 18px;
   fill: black;
+}
+
+.instructions {
+  display: flex;
+  flex-direction: column;
+  margin: 16px;
+}
+
+.instructions h3 {
+  margin: 0 0 15px;
+}
+.labelrow .label {
+  padding-right: 30px;
 }
 
 .slider {

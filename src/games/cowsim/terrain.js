@@ -47,19 +47,27 @@ const {
 const screenWidth = 16;  // tiles
 const screenHeight = 12; // tiles
 const mapWidth = screenWidth * 16;  // 256 tiles
-const mapHeight = screenHeight * 16; // 192 tiles
+const mapHeight = screenHeight * 16; // 192 tiles // 49,152 total tiles
+
+export const Biome = {
+  water: 0,
+  plains: 1,
+  forest: 2,
+  desert: 3,
+  mountains: 4
+};
 
 const elevation2Biome = (e) => {
   switch (e) {
-    case 0: return 0; // water
+    case 0: return Biome.water;
     case 1:
-    case 3: return 1; // plains
+    case 3: return Biome.plains;
     case 2:
-    case 6: return 2; // forest
-    case 4: return 3; // desert
-    default: return 4; // mountains
+    case 6: return Biome.forest;
+    case 4: return Biome.desert;
+    default: return Biome.mountains;
   }
-}
+};
 
 class Area {
   /** Constructs a new area elevation cache for an area at posx, posy */
@@ -67,6 +75,7 @@ class Area {
     // area based randomizer
     this.randomizer = new Randy(seed + posx + posy*mapWidth);
     const biomeCounts = [0,0,0,0,0];
+    // elevation cache
     this.elevations = [];
     for (let y=-1; y<13; y++)
     for (let x=-1; x<17; x++) {
@@ -74,17 +83,19 @@ class Area {
       this.elevations[(y+1)*18 + (x+1)] = elevation;
       biomeCounts[elevation2Biome(elevation)] += 1;
     }
-    // water is more important
-    biomeCounts[0] *= 2;
-    console.log(`biomes: ${biomeCounts}`);
+    this.biomeStats = biomeCounts;
     let max = 0;
     this.biome = 0;
     for (let i=0; i<5; i++) {
-      if (biomeCounts[i] > max) {
+      // water is more important
+      const count = i === 0 ? biomeCounts[i]*2 : biomeCounts[i];
+      if (count > max) {
         this.biome = i;
-        max = biomeCounts[i];
+        max = count;
       }
     }
+    
+    //console.debug(`biome: (${posx},${posy}): ${this.biome} from ${biomeCounts}`);
   }
   
   /** Gets the elevation for the x,y position of the Area */
@@ -264,6 +275,8 @@ export class Terrain {
     this.baseSeed = seed;
     this.randomizer = new Randy(seed + 0x2DE5E5);
     this.simplex = new SimplexNoise(() => this.randomizer.next());
+    this.biomes = this.computeBiomes(); // 16x16 array indexed by area id
+
     // gets a randy instance for a specific map area
     // used to add deterministic terrain variations
     //this.area_randomizer = null;
@@ -309,6 +322,20 @@ export class Terrain {
       }
     }
     return n;
+  }
+
+  computeBiomes() {
+    // biome cache
+    const biomes = [];
+
+    for (let y=0; y<16; y++)
+    for (let x=0; x<16; x++) {
+      const id = x + 16*y;
+      const area = new Area(x*16, y*12, this.baseSeed, this);
+      biomes[id] = area.biome;
+    }
+
+    return biomes;
   }
 
   // make this better

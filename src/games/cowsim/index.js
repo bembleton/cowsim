@@ -4,15 +4,12 @@ import spriteSheet from '~/assets/sprites2.bmp';
 import itemsSheet from '~/assets/items.bmp';
 import ppu from '~/ppu';
 import LoadingScreen from './screens/loadingScreen';
-import ZeldaScreen from './screens/zeldaScreen';
 import OverworldScreen from './screens/overWorldScreen';
-import Hud from './screens/hud';
 import PauseMenu from './screens/pauseMenu';
 import GameOverScreen from './screens/gameOverScreen';
 import { Randy } from '../../random';
-import { hashToString, stringToHash } from './utils';
+import { hashToString } from './utils';
 import SetSeedScreen from './screens/setSeedScreen';
-import { Terrain } from './terrain';
 import WorldGenerator from './worldGenerator';
 import { SoundEngine } from '../../soundEngine';
 import MusicScreen from './screens/musicScreen';
@@ -57,7 +54,6 @@ class Cowsim {
       enterSeed: new SetSeedScreen(this),
       world: new OverworldScreen(this),
       pause: new PauseMenu(this),
-      zelda: new ZeldaScreen(this),
       gameOver: new GameOverScreen(this),
       music: new MusicScreen(this)
     };

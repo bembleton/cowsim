@@ -17,6 +17,19 @@ document.addEventListener('keyup', (event) => {
   else return;
 
   const keyCode = keys[key] || keyCodes[code];  // try key first and fallback to the physical Key
+
+  if (keyCode === 'f') {
+    // toggle fullscreen mode
+    const canvas = document.getElementById('canvas');
+    if (!document.fullscreenElement) {
+      canvas.className = 'borderless';
+      canvas.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+      canvas.className = '';
+    }
+  }
+
   keystate[keyCode] = false;
 }, false);
 
@@ -37,7 +50,9 @@ const keys = {
   A: 'a',
   s: 's',
   S: 's',
-  "`": 'Tilde'
+  "`": 'Tilde',
+  F: 'f',
+  f: 'f'
 }
 
 /** KeyboardEvent.code are physical layout codes and not representative of the imprinted key

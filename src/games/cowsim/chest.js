@@ -1,4 +1,4 @@
-import { MetaSprite } from "../../spriteManager";
+import { MetaSprite, Sprite } from "../../spriteManager";
 import SPRITES from "./data/sprites";
 import { Drop } from "./drop";
 import { Sfx } from "./sound";
@@ -52,10 +52,14 @@ export class Chest extends Drop {
     if (this.openingTimer) {
       this.openingTimer--;
       if (this.openingTimer === 0) {
+        this.particles.forEach(x => x.dispose());
+        this.particles = null;
         this.drawContents();
         this.open();
         // start music again
         game.startMusic(160);
+      } else {
+        this.drawParticles();
       }
     }
     if (!opened || !contents) return;
@@ -96,6 +100,26 @@ export class Chest extends Drop {
     contents.draw();
   }
 
+  drawParticles() {
+    // 356 frames  =[
+    
+    // center
+    const x = this.bbox.x + 8;
+    const y = this.bbox.y + 8;
+    
+    const distance = this.openingTimer / (360 / 24) + 0; // 24-0
+    
+    for (let i=0; i<4; i++) {
+      const step = (this.openingTimer + i*12) % 61; // 60-0
+      const offset = Math.floor(step/60 * distance);
+      const tile = (offset % 6) < 4 ? 0x4d : 0x4c;
+      const palette = ((this.openingTimer + i) / 7) % 4;
+      const px = (i & 0x01) === 0 ? x-offset-8 : x+offset;
+      const py = (i & 0x02) === 0 ? y-offset-8 : y+offset;
+      this.particles[i].update({ x: px, y: py, palette, index: tile })
+    }
+  }
+
   onCollision(player, game) {
     if (this.opened || this.openingTimer) return;
 
@@ -104,6 +128,15 @@ export class Chest extends Drop {
     game.soundEngine.play(Sfx.chest);
     // wait for the fanfare
     this.openingTimer = 356;
-    //this.open();
+    const flipX = true;
+    const flipY = true;
+
+    this.particles = [
+      new Sprite({ x:0, y:240, index: 0x4d }),
+      new Sprite({ x:0, y:240, index: 0x4d, flipX }),
+      new Sprite({ x:0, y:240, index: 0x4d, flipY }),
+      new Sprite({ x:0, y:240, index: 0x4d, flipX, flipY }),
+    ];
+    this.particles.forEach(x => x.draw());
   }
 }

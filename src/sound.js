@@ -746,6 +746,7 @@ export class Apu {
     if (this.connecting || !this.canConnect) return;
     
     if (!this.context) {
+      console.log(`APU Connecting`);
       this.connecting = true;
       const context = new (window.AudioContext || window.webkitAudioContext)();
       await context.audioWorklet.addModule('apu-service.js');
@@ -758,6 +759,7 @@ export class Apu {
     if (!this.connected) {
       this.mixer.connect(this.context.destination);
       this.connected = true;
+      console.log(`APU Connected`);
     }
   }
 
