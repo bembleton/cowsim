@@ -73,7 +73,7 @@ export class Link {
     const dir = drowning ? Direction.down : direction;
   
     // step is animationFrame 0 or 1
-    const animationFrame = (moving || swimming || drowning) ? frameIndex(frame, 16, 2) : 0;
+    const animationFrame = (moving || swimming || drowning) ? frameIndex(frame, 8, 2) : 0;
     
     const palette = hurt ? frameIndex(frame, 2, 4) : this.palette;
     const { sprite, flipX, flipY } = this.getSpriteFromState(dir, animationFrame);

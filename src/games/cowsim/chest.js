@@ -101,12 +101,11 @@ export class Chest extends Drop {
   }
 
   drawParticles() {
-    // 356 frames  =[
-    
     // center
     const x = this.bbox.x + 8;
     const y = this.bbox.y + 8;
     
+    // 356 frames
     const distance = this.openingTimer / (360 / 24) + 0; // 24-0
     
     for (let i=0; i<4; i++) {

@@ -6,8 +6,6 @@ const screenHeight = 12; // tiles tall
 const mapWidth = screenWidth * 16;  // 256 tiles // 16 screens wide
 const mapHeight = screenHeight * 16; // 192 tiles // 16 screens tall
 
-
-
 export class World {
   /** gets a unique id for a world position, normalized to an area */
   static getAreaId(posx, posy) {

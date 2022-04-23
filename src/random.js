@@ -90,3 +90,25 @@ export const getRareItem = (arry, chance = undefined) => {
   // find the first item that has a cumulative rarity higher than the random chance
   return arry.find(x => x.chance >= chance);
 }
+
+class LFSR {
+  constructor() {
+    this.values = [2,0,0,0,0,0,0];
+  }
+  update() {
+    const values = this.values;
+    const a = values[0] & 2;
+    const b = values[1] & 2;
+    let c = (a ^ b) >> 1;
+    for (let i=0; i<values.length; i++) {
+      c = this.shift(i, c);
+    }
+  }
+  shift(i, c) {
+    const values = this.values;
+    const value = values[i];
+    const out = value & 1;
+    values[i] = (value >> 1) + (c << 7);
+    return out;
+  }
+}

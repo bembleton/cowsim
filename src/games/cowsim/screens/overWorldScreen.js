@@ -29,9 +29,12 @@ import { Chest } from '../chest';
 import { ObjectManager } from '../objectManager';
 import { MeleeObject } from "../MeleeObject";
 import { SwordBeam } from "../SwordBeam";
-import { Terrain } from '../terrain';
+import { Biome, Terrain } from '../terrain';
 import WorldGenerator, { World } from '../worldGenerator';
 import { Sfx, Songs } from '../sound';
+import { createEnemy, getEnemiesForBiome } from '../enemies';
+import { AttackHelper } from './AttackHelper';
+import { GameScreen } from './screen';
 
 const {
   HORIZONTAL,
@@ -54,14 +57,17 @@ const creaturesByElevation = {
   5: [], // rock 
 }
 
-export default class OverworldScreen {
+
+export default class OverworldScreen extends GameScreen {
   constructor (game) {
-    this.game = game;
+    super(game);
 
     this.player = {};
     this.position = {};
     
     this.hud = new Hud(game);
+
+    this.attackHelper = new AttackHelper();
 
     this.mapIndicator = {
       sprite: null,
@@ -149,16 +155,19 @@ export default class OverworldScreen {
     this.frame = 0;
     this.stasisCounter = 0;
 
+    // reset player state on load?
+    // todo: player state should come from local storage
     this.player = {
       maxHearts: 3,
       health: 3*4,
       maxStamina: 3*4,
       stamina: 12,
       staminaClock: 0,
-      staminaRates: {
+      staminaRates: { // frames per tick. less is faster
         recharge: 120,
         dash: 30,
-        swim: 60
+        swim: 60,
+        chargingSlash: 30
       },
       speedWalking: 20,
       speedDash: 32,
@@ -172,6 +181,8 @@ export default class OverworldScreen {
       itemTimer: 0, // delay before using again
       inventory: new Inventory(),
       hurtTimer: 0, // delay before taking more damage
+      //attackTimer: 0,
+      //attackState: Attack.ready,
       dead: false,
       equipWeapon: this.equipWeapon.bind(this),
       takeDamage: this.takeDamage.bind(this),
@@ -189,6 +200,8 @@ export default class OverworldScreen {
     this.link = link;
 
     link.draw();
+
+    this.attackHelper.load();
 
     this.recentBoards = [];
     this.treasures = {};
@@ -241,9 +254,11 @@ export default class OverworldScreen {
       const level = this.gameOverTimer>>4;
       this.setBgGameOverPalettes(level);
     } else {
-      setBgPalette(0, palettes.grassAndWater);
-      setBgPalette(1, palettes.grassAndDirt);
-      setBgPalette(2, palettes.grays);
+      setBgPalette(0, palettes.grassAndWater); // LGREEN, DGREEN, BLUE, LBLUE
+      setBgPalette(1, palettes.grassAndDirt); // LGREEN, DGREEN, TAN, PINK
+      setBgPalette(2, palettes.grays);  // TAN, BLACK, DGRAY, LGRAY
+      // reserved
+      // BLACK, X, X, WHITE  dialog box
     }
   }
 
@@ -263,6 +278,7 @@ export default class OverworldScreen {
 
   unload () {
     this.soundEngine.clear();
+    this.attackHelper.unload();
   }
 
   onScanline (y) {
@@ -319,15 +335,6 @@ export default class OverworldScreen {
     this.mirroring = mode;
   }
 
-  // findStartingLocation () {
-  //   const { terrain } = this;
-  //   while (true) {
-  //     let pos = terrain.randomPosition();
-  //     let e = terrain.elevation(pos.x, pos.y);
-  //     if (Terrain.isGrass(e)) return pos;
-  //   }
-  // }
-
   findAvailableScreenTile () {
     const { terrain, position: { x: posx, y: posy } } = this;
 
@@ -345,17 +352,14 @@ export default class OverworldScreen {
     return null;
   }
 
+  getBiome() {
+    return this.terrain.getBiome(World.getAreaId(this.position.x, this.position.y))
+  }
+
   checkForOcean() {
-    const biome = this.terrain.getBiome(this.position.x, this.position.y);
-    const name = {
-      0: 'ocean',
-      1: 'plains',
-      2: 'forest',
-      3: 'desert',
-      4: 'mountains'
-    }[biome];
-    console.log(`biome: ${name}`);
-    if (name === 'ocean') {
+    const biome = this.getBiome();
+    
+    if (biome === Biome.water) {
       this.game.soundEngine.play(Sfx.ocean, true);
     }
   }
@@ -368,6 +372,11 @@ export default class OverworldScreen {
     if (enemies === 0) return;
 
     const cols = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+    const areaId = World.getAreaId(posx, posy);
+    const biome = this.terrain.getBiome(areaId);
+    const enemyTypes = getEnemiesForBiome(biome);
+    if (enemyTypes.length === 0) return;
+
     for (let i=0; i<enemies; i++) {
       const xi = randInt(cols.length);
       const x = cols[xi] + posx;
@@ -376,21 +385,14 @@ export default class OverworldScreen {
       if (!Terrain.isWater(e) && !Terrain.isSolid(e)) {
         cols.splice(xi, 1); // avoid placing enemies in the same column
         const { x: px, y: py } = this.worldToScreen({x, y});
-        this.spawnCreature(px, py)
+        const { type, palette } = choice(enemyTypes);
+        this.spawnCreature(px, py, type, palette);
       }
     }
   }
 
-  spawnCreature (px, py) {
-    const type = choice('moblin');
-    // console.log(`spawning a ${type} at ${px}, ${py}`)
-
-    let creature;
-    switch (type) {
-      case 'moblin':
-        creature = new Moblin(px, py, { dir: Direction.down, palette: choice(1,2,3) });
-        break;
-    }
+  spawnCreature (px, py, type, palette) {
+    const creature = createEnemy(type, px, py, { palette });
     creature.draw();
     this.objectManager.creatures.push(creature);
   }
@@ -499,6 +501,8 @@ export default class OverworldScreen {
   update () {
     const { hud, scrolling, player, position, shimmer, frame, stasisCounter } = this;
     
+    this.updateButtonStates();
+
     if (player.dead) {
       if (this.gameOverTimer) {
         this.gameOverTimer--;
@@ -529,12 +533,6 @@ export default class OverworldScreen {
     
     this.updateLink();
     this.objectManager.update(this);
-    //this.updateCreatures();
-    //this.updateDrops();
-    // projectiles
-    // enemies
-    // drops
-    // weapon
 
     hud.update(player);
     shimmer.update();
@@ -561,17 +559,6 @@ export default class OverworldScreen {
     link.lastDirection = direction;
     link.palette = stasisCounter > 0 ? stasisCounter % 4 : 0;
 
-    // attack state
-    if (!link.canAttack && link.attacking) {
-      if (link.attackFrame > 0) {
-        link.attackFrame--;
-      } else {
-        link.attacking = false;
-        this.playerMeleeObject && this.playerMeleeObject.dispose();
-        link.canAttack = true; // todo: cooldown
-      }
-    }
-
     if (player.itemTimer) {
       this.updateItem();
     }
@@ -591,9 +578,9 @@ export default class OverworldScreen {
     }
     
     link.draw();
-    if (link.attacking) {
-      this.drawWeapon();
-    }
+    // if (link.attacking) {
+    //   this.drawWeapon();
+    // }
   }
 
   removeLink() {
@@ -618,12 +605,17 @@ export default class OverworldScreen {
   updateStamina() {
     const { link, player } = this;
     const { health, stamina, maxStamina, staminaRates } = player;
-    const { swimming, moving, frame } = link;
+    const { chargingSlash, swimming, moving, frame } = link;
 
     link.drowning = false;
 
-    // swimming
-    if (swimming && stamina > 0) {
+    // powering up a slash
+    if (chargingSlash && stamina > 0) {
+      if (this.staminaUsageElapsed(staminaRates.chargingSlash)) {
+        player.stamina -= 1;
+      }
+    // swimming  
+    } else if (swimming && stamina > 0) {
       if (this.staminaUsageElapsed(staminaRates.swim)) {
         player.stamina -= 1;
       }
@@ -712,22 +704,43 @@ export default class OverworldScreen {
       return;
     }
 
-    if (isPressed(buttons.A) && link.canAttack && this.player.weapon) {
-      if (!link.attacking) {
-        this.soundEngine.play(Sfx.sword);
-      }
+    // attack states
+    // 1. idle
+    // 2. jab/charging
+    // 3. slash/discharging/beam
+    // 4. cooldown
 
-      link.attacking = true;
+    // attack transitions
+    //   1. idle
+    // 1-2. jab when A is pressed
+    //   2. charge up to X
+    //   2. flash sword when charge == X
+    // 2-3. when A is released, if charge amount > X, perform a slash attack
+    //   3. discharge for N frames when A is released
+    //   3. if A is pressed again and health is max, perform a sword beam, cancel slash
+    //   4. prevent attack for P frames
+
+    // parry
+    // slash attack can parry Octorok projectiles
+
+    this.attackHelper.update(this);
+
+    // if (isPressed(buttons.A) && link.canAttack && this.player.weapon) {
+    //   if (!link.attacking) {
+    //     this.soundEngine.play(Sfx.sword);
+    //   }
+
+    //   link.attacking = true; // this means the attack is charging
       
-      if (link.attackFrame < 64) {
-        link.attackFrame++;
-      }
-      return;
-    } else if (!isPressed(buttons.A) && link.canAttack && link.attackFrame > 0) {
-      // start attacking and counting down
-      link.canAttack = false;
-      return;
-    }
+    //   if (link.attackFrame < 64) {
+    //     link.attackFrame++;
+    //   }
+    //   return;
+    // } else if (!isPressed(buttons.A) && link.canAttack && link.attackFrame > 0) {
+    //   // start attacking and counting down
+    //   link.canAttack = false;
+    //   return;
+    // }
 
     if (link.attacking) return;
 
@@ -799,7 +812,10 @@ export default class OverworldScreen {
     } = this.link;
     
     const { x: posx, y: posy } = pos.toPixels();
+    // min and max jab position based on frame
     const offset = (attackFrame < 4) ? 3 : 12;
+    // get sword position based on direction and offset
+    // the x offset varies a few pixels between up and down
     const [x,y] = {
       'up': [posx+3, posy-offset],
       'down': [posx+5, posy+offset],
@@ -810,23 +826,24 @@ export default class OverworldScreen {
     if (!this.playerMeleeObject || this.playerMeleeObject.disposed) {
       // make a new sprite
       const horiz = Direction.isHorizontal(direction);
-      const sprite1 = horiz ? SPRITES.weapon+17 : SPRITES.weapon;
-      const sprite2 = horiz ? SPRITES.weapon+1 : SPRITES.weapon+16;
-      const flipX = direction === Direction.left;
-      const flipY = direction === Direction.down;
+      // const sprite1 = horiz ? SPRITES.weapon+17 : SPRITES.weapon;
+      // const sprite2 = horiz ? SPRITES.weapon+1 : SPRITES.weapon+16;
+      // const flipX = direction === Direction.left;
+      // const flipY = direction === Direction.down;
       const width = horiz ? 16 : 8;
       const height = horiz ? 8 : 16;
 
       const { palette, attack: damage } = this.player.weapon;
-      const options = { palette, flipX, flipY, priority: false };
+      const sprite = MetaSprite.fromData(SPRITES.sword, direction, { x, y, palette });
+      //const options = { palette, flipX, flipY, priority: false };
 
-      if (horiz) {
-        this.link.weaponSprite = MetaSprite.Create16x8(x, y, sprite1, sprite2, options);
-      } else {
-        this.link.weaponSprite = MetaSprite.Create8x16(x, y, sprite1, sprite2, options);
-      }
+      // if (horiz) {
+      //   this.link.weaponSprite = MetaSprite.Create16x8(x, y, sprite1, sprite2, options);
+      // } else {
+      //   this.link.weaponSprite = MetaSprite.Create8x16(x, y, sprite1, sprite2, options);
+      // }
 
-      this.playerMeleeObject = new MeleeObject({ sprite: this.link.weaponSprite, x, y, width, height, isFriendly: true, damage });
+      this.playerMeleeObject = new MeleeObject({ sprite, x, y, width, height, isFriendly: true, damage });
       
       this.objectManager.projectiles.push(this.playerMeleeObject);
       this.playerMeleeObject.draw();

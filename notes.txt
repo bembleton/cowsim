@@ -21,8 +21,18 @@ PauseMenu
   SELECT - switch to next menu screen
 
 TASKS
-- octoroks
-- moblin projectiles
 - sword power attack
-- sword beams
-- bombs
+- rework chest opening sequence
+  freeze link during animation 
+  make chest collidable
+  A to open
+- improve world generation
+  make screens slightly harder to navigate
+  denser tree stands with paths
+- add Continue to gameover screen
+- change gameover quit to Quit and Save
+- save player and world state to local storage
+- restore state on load
+- start menu option for New Game/Continue
+  New Game (Are you sure?)
+  New Game (Set seed)

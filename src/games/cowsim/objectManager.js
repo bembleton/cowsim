@@ -1,3 +1,6 @@
+import { Projectile } from "./Projectile";
+import { Rock } from "./rock";
+
 export class ObjectManager {
   constructor() {
     this.projectiles = [];
@@ -11,7 +14,10 @@ export class ObjectManager {
   }
   updateProjectiles(game) {
     const { projectiles, creatures, drops } = this;
-    const { player } = game;
+    const { player, attackHelper } = game;
+    const meleeObject = attackHelper.meleeObject;
+    const parryObject = meleeObject && meleeObject.type == Projectile.Type.slash ? meleeObject : null;
+
     const link = game.link.getBbox();
     this.projectiles = projectiles.filter2(p => {
       // move
@@ -33,6 +39,11 @@ export class ObjectManager {
             p.onCollision(d, game);
           }
         }
+      }
+      // player can parry rocks
+      if (!p.disposed && p instanceof Rock && parryObject && !parryObject.disposed && p.bbox.intersects(parryObject.bbox)) {
+        // reverse direction and make the projectile friendly
+        p.parry();
       }
       // player collisions
       if(!p.disposed && !p.isFriendly && p.bbox.intersects(link)) {

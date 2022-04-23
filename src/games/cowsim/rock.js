@@ -1,20 +1,23 @@
 import { bbox } from "../../boundingBox";
 import { SubPixels } from "./utils";
 import sprites from "./data/sprites";
-import { MetaSprite } from "../../spriteManager";
+import { Sprite } from "../../spriteManager";
 import { Projectile } from "./Projectile";
-import { Direction } from "./direction";
 
-export class ArrowObject extends Projectile {
-  constructor({ x, y, isFriendly, damage, direction, palette = 0 }) {
-    const width = Direction.isHorizontal(direction) ? 16 : 8;
-    const height = Direction.isVertical(direction) ? 16 : 8;
+export class Rock extends Projectile {
+  constructor({ x, y, direction }) {
+    const width = 8;
+    const height = 8;
+    const isFriendly = false;
+    const palette = 0;
+    const damage = 2;
     
-    // use x,y as center
-    x = x-width/2;
-    y = y-height/2;
 
-    const sprite = MetaSprite.fromData(sprites.arrow, direction, { x, y, palette });
+    // use x,y as center
+    x = x - width / 2;
+    y = y - height / 2;
+
+    const sprite = new Sprite({ x, y, index: sprites.rock, palette });
 
     super({ sprite, x, y, width, height, direction, isFriendly, damage });
     this.velocity = SubPixels.fromDirection(direction, 48);
@@ -28,6 +31,10 @@ export class ArrowObject extends Projectile {
     if (!bbox.GAMEAREA.contains(this.bbox)) {
       this.blip();
     }
+  }
+  parry() {
+    this.isFriendly = true;
+    this.velocity = this.velocity.mul(-1);
   }
   blip() {
     // todo: draw SPRITES.hit

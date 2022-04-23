@@ -9,7 +9,8 @@ export class Projectile extends GameObject {
     boomerang: 3,
     magic: 4,
     explosion: 5,
-    fire: 6
+    fire: 6,
+    slash: 7
   };
   constructor({ sprite, x, y, width, height, direction, isFriendly, damage, type }) {
     super({ sprite, x, y, width, height });

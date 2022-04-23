@@ -1,5 +1,7 @@
 const mirrorX = true;
 const mirrorY = true;
+const flipX = true;
+const flipY = true;
 
 export default {
   // link
@@ -44,8 +46,8 @@ export default {
   chest_closed: 0x60, // move to seconday_item slot
   chest_open: 0x61, // move to seconday_item slot
 
-  // efects
-  slash: 0x47, // 48, 57, 58
+  // effects
+  //slash: 0x47, // 48, 57, 58
   smoke: [0x49, 0x4a, 0x4b],
   hit: 0x4c,
   mapIndicator: 0x5c,
@@ -54,8 +56,42 @@ export default {
   magic_splash: 0x4f,
   white_square: 0x62,
 
+  // slash offsets are from link top-left
+  slash: {
+    right: [
+      { tiles: [{tile:0x67, x:8, y:16, flipX, flipY}] },
+      { tiles: [{tile:0x57, x:16, y:10}, {tile:0x58, x:11, y:15}] },
+      { tiles: [{tile:0x77, x:15, y:2}, {tile:0x78, x:16, y:10}] },
+      { tiles: [{tile:0x58, x:11, y:15}]},
+    ],
+    up: [
+      { tiles: [{tile:0x77, x:15, y:2}] },
+      { tiles: [{tile:0x47, x:6, y:-8}, {tile:0x48, x:11, y:3}] },
+      { tiles: [{tile:0x67, x:-2, y:-8}, {tile:0x68, x:6, y:-8}] },
+      { tiles: [{tile:0x48, x:11, y:3}] },
+    ],
+    left: [
+      { tiles: [{ tile:0x67, x:-2, y:-8 }] },
+      { tiles: [{tile:0x57, x:-8, y:2, flipX, flipY}, {tile:0x58, x:-3, y:-3, flipX, flipY}] },
+      { tiles: [{tile:0x77, x:-8, y:10,  flipX, flipY}, {tile:0x78, x:-8, y:2, flipX, flipY}] },
+      { tiles: [{tile:0x58, x:-3, y:-3, flipX, flipY}] },
+    ],
+    down: [
+      { tiles: [{ tile:0x77, x:-8, y:10 }] },
+      { tiles: [{tile:0x47, x:0, y:16, flipX, flipY}, {tile:0x48, x:-5, y:11, flipX, flipY}] },
+      { tiles: [{tile:0x67, x:8, y:16, flipX, flipY}, {tile:0x68, x:0, y:16, flipX, flipY}] },
+      { tiles: [{tile:0x48, x:-5, y:11, flipX, flipY}] },
+    ]
+  },
+
   // weapons
   weapon: 0x40,
+  sword: {
+    up: { tile: 0x40, height: 2 },
+    right: { 
+      tiles: [{tile:0x51}, {tile:0x41, x:8}]
+    }
+  },
   boomerang: [0x42, 0x43, 0x52],
   banana_peel: 0x53,
   secondary_item: 0x44,
@@ -66,6 +102,7 @@ export default {
       tiles: [{tile:0x56}, {tile:0x46, x:8}]
     }
   },
+  rock: 0x90,
 
   plants: [0x80, 0x81, 0x82, 0x83],
   moon: 0x90,

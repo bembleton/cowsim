@@ -4,8 +4,9 @@ import { Direction } from "./direction";
 import sprites from "./data/sprites";
 import { MetaSprite, Sprite } from "../../spriteManager";
 import { MeleeObject } from "./MeleeObject";
+import { Projectile } from "./Projectile";
 
-export class SwordBeam extends MeleeObject {
+export class SwordBeam extends Projectile {
   constructor({ x, y, direction, damage }) {
     const horiz = Direction.isHorizontal(direction);
     const sprite1 = horiz ? sprites.weapon + 17 : sprites.weapon;

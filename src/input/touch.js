@@ -11,6 +11,11 @@ const B = 'x';
 const SELECT = 'a';
 const START = 's';
 
+// callbacks raised whenever any input is detected
+const inputCallbacks = [];
+const raiseInputEvent = () => {
+  inputCallbacks.forEach(x => x());
+};
 
 /** Adds touch+mouse input to the following html button controls */
 /** Inputs are mapped to keystate */
@@ -44,6 +49,7 @@ function startTouches(ev) {
   ev.preventDefault();
   const touches = [...ev.changedTouches].map(copyTouch);
   ongoingTouches.push(...touches);
+  raiseInputEvent();
   checkTouchState();
 }
 function updateTouches(ev) {
@@ -92,6 +98,7 @@ function checkTouchState() {
 
 function handleMousedown(ev) {
   ev.preventDefault();
+  raiseInputEvent();
   if (ev.buttons === 1) {
     const dpadBounds = dpad.getBoundingClientRect();
     if (contains(dpadBounds, ev.x, ev.y)) handleDpadPress(ev.x, ev.y);
@@ -191,5 +198,14 @@ function handleDpadRelease(ev) {
 //     e.preventDefault();
 //   };
 // });
+
+
+
+export const addInputListener = (callback) => {
+  inputCallbacks.push(callback);
+};
+export const removeInputListener = (callback) => {
+  inputCallbacks.filter2(x => x === callback);
+}
 
 export default touchstate;

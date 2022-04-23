@@ -1,7 +1,14 @@
 const keystate = {};
 let debug = false;
 
+// callbacks raised whenever any input is detected
+const inputCallbacks = [];
+const raiseInputEvent = () => {
+  inputCallbacks.forEach(x => x());
+};
+
 document.addEventListener('keydown', (event) => {
+  raiseInputEvent();
   const { code, key } = event;
   if (keyCodes.hasOwnProperty(code) || keys.hasOwnProperty(key)) event.preventDefault();
   else return;
@@ -77,5 +84,12 @@ const A = 'z';
 const B = 'x';
 const SELECT = 'a';
 const START = 's';
+
+export const addInputListener = (callback) => {
+  inputCallbacks.push(callback);
+};
+export const removeInputListener = (callback) => {
+  inputCallbacks.filter2(x => x === callback);
+}
 
 export default keystate;

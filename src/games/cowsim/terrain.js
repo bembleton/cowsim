@@ -2,6 +2,7 @@ import SimplexNoise from 'simplex-noise';
 import ppu from '~/ppu';
 import { Randy } from '~/random';
 import { drawTile, drawMetaTile } from './utils';
+
 const {
   setNametable,
   setBackgroundData
@@ -53,19 +54,20 @@ export const Biome = {
   water: 0,
   plains: 1,
   forest: 2,
-  desert: 3,
-  mountains: 4
+  hills: 3,
+  desert: 4,
+  mountains: 5
 };
 
 const elevation2Biome = (e) => {
   switch (e) {
     case 0: return Biome.water;
-    case 1:
-    case 3: return Biome.plains;
+    case 1: return Biome.plains;
     case 2:
     case 6: return Biome.forest;
+    case 3: return Biome.hills;
     case 4: return Biome.desert;
-    default: return Biome.mountains;
+    case 5: return Biome.mountains;
   }
 };
 
@@ -74,7 +76,7 @@ class Area {
   constructor(posx, posy, seed, terrain) {
     // area based randomizer
     this.randomizer = new Randy(seed + posx + posy*mapWidth);
-    const biomeCounts = [0,0,0,0,0];
+    const biomeCounts = [0,0,0,0,0,0];
     // elevation cache
     this.elevations = [];
     for (let y=-1; y<13; y++)
@@ -86,7 +88,7 @@ class Area {
     this.biomeStats = biomeCounts;
     let max = 0;
     this.biome = 0;
-    for (let i=0; i<5; i++) {
+    for (let i=0; i<6; i++) {
       // water is more important
       const count = i === 0 ? biomeCounts[i]*2 : biomeCounts[i];
       if (count > max) {
@@ -120,7 +122,7 @@ class Area {
         } else if (e === 5) {
           this.drawRock(x, y, tilex, tiley);
         } else if (e === 6) {
-          drawTile(x + tilex, y + tiley, 0xa8, 1); // tree
+          drawTile(x + tilex, y + tiley, 0x68, 1); // tree
         } else {
           this.drawGrass(x+tilex, y+tiley, e);
         }
@@ -360,10 +362,8 @@ export class Terrain {
   }
 
   /** Calculates the  biome for a given position */
-  getBiome(posx, posy) {
-    // todo: cache area
-    const area = new Area(posx, posy, this.baseSeed, this);
-    return area.biome;
+  getBiome(areaId) {
+    return this.biomes[areaId];
   }
 
   /** draws the current terrain elevation to the hud minimap */

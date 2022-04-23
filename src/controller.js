@@ -1,6 +1,8 @@
-import { inputs, isPressed as gamepadPressed, getAxis } from './input/gamepad';
-import keystate from './input/keybindings';
-import touchstate from './input/touch';
+import gamepadstate, * as gamepad from './input/gamepad';
+import keystate, * as keyboard from './input/keybindings';
+import touchstate, * as touchDevice from './input/touch';
+
+const { inputs, isPressed: gamepadPressed, getAxis } = gamepadstate;
 
 const buttons = {
   UP: 'UP',
@@ -34,6 +36,15 @@ const buttonsToGamepadInputs = {
   SELECT: inputs.BACK,
   START: inputs.START
 };
+
+
+// callbacks raised whenever any input is detected
+const inputCallbacks = [];
+const raiseInputEvent = () => inputCallbacks.forEach(x => x());
+
+touchDevice.addInputListener(raiseInputEvent);
+keyboard.addInputListener(raiseInputEvent);
+gamepad.addInputListener(raiseInputEvent);
 
 const hasAnalogStickEquivalent = (button) => {
   switch (button) {
@@ -70,5 +81,8 @@ const getButtonState = () => {
   return state;
 }
 
-// handle gamepad 
+export const addInputListener = (callback) => {
+  inputCallbacks.push(callback);
+};
+
 export { isPressed, buttons, getButtonState };

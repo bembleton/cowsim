@@ -17,39 +17,20 @@ const dropsById = {
   6: drops.Bomb,
   7: drops.Hourglass
 };
+
 const dropTables = {
-  A: [0,0,5,5,5,3,3,3,4,4],
-  B: [6,6,6,5,3,3,6,6,6,7], //[0,0,0,5,3,3,6,6,6,7]
-  C: [0,0,0,0,5,3,3,1,1,7],
-  D: [0,0,3,3,3,3,5,2,4,4],
+  A: [0,3,0,4,0,3,3,0,0,3],
+  B: [6,0,7,0,3,6,0,6,3,3],
+  C: [0,3,0,1,3,7,0,0,0,1],
+  D: [3,4,0,3,4,3,3,3,0,3],
   forced: [4,4,6,6,6,2]
 };
+
 const dropChances = {
   A: 0.31,
   B: 0.41,
   C: 0.59,
   D: 0.41
-};
-
-// each map screen uses 4 bits to describe which enemies to load
-// screens with water will always spawn a zola unless it's a fairy screen
-const enemyGroups = {
-  0: 'octoroks_red',
-  1: 'tektites_red',
-  2: 'levers_and_peahats',
-  3: 'octoroks_red_and_blue',
-  4: 'levers_blue',
-  5: 'levers_red',
-  6: 'moblins_black',
-  7: 'moblins_red_and_black',
-  8: 'peahats',
-  9: 'peahats_and_lynels',
-  10: 'lynels_red',
-  11: 'ghost', // custom
-  12: 'lynels_blue',
-  13: 'tektites_blue',
-  14: 'none',  // custom
-  15: 'custom' // based on screen type
 };
 
 export class Enemy {
@@ -61,9 +42,9 @@ export class Enemy {
     dead: 'dead'
   };
 
-  constructor(x, y, dir, sprite, spriteData, palette, health, meleeDamage, dropGroup) {
+  constructor(x, y, dir, spriteData, palette, health, meleeDamage, dropGroup, width = 2, height = 2) {
     this.pos = SubPixels.fromPixels(x, y);
-    this.bbox = new bbox(x, y, 16, 16);
+    this.bbox = new bbox(x, y, width*8, height*8);
 
     this.frame = 0;
     this.state = Enemy.state.idle;
@@ -77,14 +58,18 @@ export class Enemy {
     this.dropGroup = dropGroup;
     this.canBeKnockedBack = false;
 
-    this.sprite = sprite;
+    const sprite = Enemy.getSpriteFromState(spriteData, dir, this.frame);
+
+    // add missing height and width
+    this.sprite = new MetaSprite({ x, y, height, width, ...sprite });
     this.spriteData = spriteData;
     this.palette = palette;
-    this.updateSprite();
   }
+
   draw() {
     this.sprite.draw();
   }
+
   update(canMove, game, player) {
     this.frame = (this.frame+1) % 256;
     if (this.damageTimer > 0) this.damageTimer--;
@@ -96,7 +81,7 @@ export class Enemy {
         const frame = this.damageTimer > 8 ? 0 : 1;
         const sprite = SPRITES.death_blink[frame];
         const palette = this.frame % 4;
-        this.sprite.update({ palette, sprite });
+        this.sprite.update({ palette, sprite }); // mirroring??
       } else {
         this.spawnDrop(game);
         this.dispose();
@@ -112,28 +97,31 @@ export class Enemy {
       this.updateSprite();
     }
   }
+
   //abstract
   updateState() {
   }
+
   updateSprite() {
-    const { spriteData, dir, damageTimer } = this;
+    const { spriteData, dir, damageTimer, frame } = this;
     const { x, y } = this.pos.toPixels();
     
-    // SPRITES.enemies.moblin[left] || SPRITES.enemies.moblin[right]
-    const sprites = spriteData[dir] || spriteData[Direction.flipped[dir]];
-    if (sprites === undefined) console.log(this);
-    const singleFrame = !sprites.length;
-    const frame = frameIndex(this.frame, 16); // 0 or 1
-    const sprite = singleFrame ? sprites : sprites[frame];
-    
-    const vertical = (dir === Direction.up || dir === Direction.down);
-    const flipX = (!vertical && !spriteData[dir]) || (vertical && singleFrame && !!frame);
-    const flipY = (vertical && !spriteData[dir]) || (!vertical && singleFrame && !!frame);
-    
-    const palette = damageTimer > 0 ? frameIndex(this.frame, 2, 4) : this.palette;
+    const palette = damageTimer > 0 ? frameIndex(frame, 2, 4) : this.palette;
+    const sprite = Enemy.getSpriteFromState(spriteData, dir, frame);
+    this.sprite.update({ x, y, ...sprite, palette });
 
-    this.sprite.update({ x, y, sprite, palette, flipX, flipY });
+    // SPRITES.enemies.moblin[left] || SPRITES.enemies.moblin[right]
+    // const sprites = spriteData[dir] || spriteData[Direction.flipped[dir]];
+    // if (sprites === undefined) console.log(this);
+    // const singleFrame = !sprites.length;
+    // const frame = frameIndex(this.frame, 16); // 0 or 1
+    // const sprite = singleFrame ? sprites : sprites[frame];
+    
+    // const vertical = (dir === Direction.up || dir === Direction.down);
+    // const flipX = (!vertical && !spriteData[dir]) || (vertical && singleFrame && !!frame);
+    // const flipY = (vertical && !spriteData[dir]) || (!vertical && singleFrame && !!frame);
   }
+
   //abstract
   spawnDrop(game) {
     // drop table
@@ -216,10 +204,22 @@ export class Enemy {
     const even = frameIndex(frame, 16); // 0 or 1
     const sprite = singleFrame ? sprites : sprites[even];
     
+    // sprite can be a number or a sprite object
     const vertical = Direction.isVertical(dir);
-    const flipX = (!vertical && flipped) || (vertical && singleFrame && even);
-    const flipY = (vertical && flipped) || (!vertical && singleFrame && even);
+    let flipX, flipY;
+    
+    const { mirrorX, mirrorY } = sprite;
+    if (!mirrorX) {
+      flipX = (!vertical && flipped) || (vertical && singleFrame && even);
+    }
+    if (!mirrorY) {
+      flipY = (vertical && flipped) || (!vertical && singleFrame && even);
+    }
   
-    return { sprite, flipX, flipY };
+    if (isNaN(sprite)) {
+      return { ...sprite, flipX, flipY };
+    } else {
+      return { sprite, flipX, flipY };
+    }
   }
 }

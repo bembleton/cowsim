@@ -95,7 +95,7 @@ export default class LoadingScreen extends GameScreen {
     fillBlocks(0, 0, 16, 10, BLANK, 1);
     
     // add the title
-    dialog(9, 5, `THE EPIC OF
+    dialog(9, 4, `THE EPIC OF
 
     C O W S I M`, 0);
     

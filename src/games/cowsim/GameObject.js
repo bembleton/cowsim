@@ -9,7 +9,7 @@ export class GameObject {
   }
 
   draw() {
-    this.sprite.draw();
+    if (this.sprite) this.sprite.draw();
   }
   update(game) {
   }
@@ -17,10 +17,10 @@ export class GameObject {
     const { x, y } = this.pos.toPixels();
     const { width, height } = this.bbox;
     this.bbox = new bbox(x, y, width, height);
-    this.sprite.update({ x, y });
+    if (this.sprite) this.sprite.update({ x, y });
   }
   dispose() {
-    this.sprite.dispose();
+    if (this.sprite) this.sprite.dispose();
     this.disposed = true;
   }
 }

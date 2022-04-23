@@ -3,7 +3,7 @@ import ppu from './ppu';
 import Display from './display';
 import spriteManager from './spriteManager';
 import { apu } from './sound';
-import { getButtonState } from './controller';
+import { getButtonState, addInputListener } from './controller';
 
 const {
   HORIZONTAL,
@@ -63,10 +63,11 @@ export default class Console {
     }, 1000);
 
     // listen for user input to activate the web audio api
-    document.addEventListener('keydown', (event) => {
-      this.enableAPU();
+    // document.addEventListener('keydown', (event) => {
+    //   this.enableAPU();
       
-    }, false);
+    // }, false);
+    addInputListener(() => this.enableAPU());
   }
 
   // loads a cartridge/game instance

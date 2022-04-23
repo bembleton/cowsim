@@ -7,7 +7,6 @@ import {
   getAttributeByte
 } from './spriteAttributes';
 import ppu from './ppu';
-import { copyBitmap } from './bitmapLoader';
 import { Direction } from './games/cowsim/direction';
 
 // 64 sprites, 4 bytes each
@@ -163,7 +162,7 @@ export class Sprite extends SpriteBase {
       index: 0x00,
       palette: 0,
       x: 0,
-      y: 0,
+      y: 240,
       flipX: false,
       flipY: false,
       priority: false
@@ -211,7 +210,7 @@ export class MetaSprite extends SpriteBase {
     super();
     this.rendered = false;
     this.sprites = [];
-    Object.assign(this, { x, y, palette, flipX, flipY, priority });
+    Object.assign(this, { x, y, palette, flipX, flipY, mirrorX, mirrorY, priority });
 
     if (tiles !== undefined) {
       for (const t of tiles) {
@@ -221,6 +220,10 @@ export class MetaSprite extends SpriteBase {
       // does it make sense to allow mirroring with custom tile sets?
       // how do?
     }
+
+    // force height or width to 1 if mirroring is used
+    if (mirrorX) width = 1;
+    if (mirrorY) height = 1;
 
     // sprite is deprecated. use tile instead
     if (sprite !== undefined) tile = sprite;
@@ -304,15 +307,114 @@ export class MetaSprite extends SpriteBase {
     const {
       x = this.x,
       y = this.y,
-      sprite: index, // if sprite is set, set the first sprite and then update all other sprites, keeping the same offsets
+      //sprite: index, // if sprite is set, set the first sprite and then update all other sprites, keeping the same offsets
       palette = this.palette,
       priority = this.priority,
-      flipX = this.flipX,
-      flipY = this.flipY
+      // these options may vary the number of sprites required?  let's assume not :/
+      height,
+      width,
+      mirrorX,
+      mirrorY,
+      // handle these next
+      //flipX,
+      //flipY,
     } = options || {};
     
+
+    let flipX, flipY;
+    if (options.flipX !== undefined) {
+      flipX = options.flipX;
+      if (mirrorX) {
+        throw new Error('Cannot set both flipX and mirrorX');
+      }
+    } else if (mirrorX) {
+      flipX = undefined; // must be unset so we dont override the mirroring
+    } else {
+      flipX = this.flipX;
+    }
+
+    if (options.flipY !== undefined) {
+      flipY = options.flipY; // explicitly true or false
+      if (mirrorY) {
+        throw new Error('Cannot set both flipY and mirrorY');
+      }
+    } else if (mirrorY) {
+      flipY = undefined; // must be unset so we dont set it on individual sprites
+    } else {
+      flipY = this.flipY;
+    }
+
     Object.assign(this, { x, y, palette, flipX, flipY, priority });
 
+    const index0 = sprites[0].data.index;
+
+    /* --------- apply height and mirroring options --------- */
+    /* overrides the existing sprite offsets and tile indexes */
+    // sprites[0].data.flipX = flipX || false;
+    // sprites[1].data.flipY = flipY || false;
+
+    sprites[0].data.flipX = false;
+    sprites[0].data.flipY = false;
+
+    let i = 1;
+    if (height === 2) {
+      sprites[i].data.index = index0 + 16;
+      sprites[i].data.flipX = false;
+      sprites[i].offset = {x:0, y:8};
+      i++;
+    }
+    if (width === 2) {
+      sprites[i].data.index = index0 + 1;
+      sprites[i].data.flipY = false;
+      sprites[i].offset = {x:8, y:0};
+      i++;
+    }
+    if (height === 2 && width === 2) {
+      sprites[i].data.index = index0 + 17;
+      sprites[i].offset = {x:8, y:8};
+      i++;
+    }
+    if (mirrorX) {
+      // 16x8, reflected left-right
+      //this.add(new Sprite({ index: tile, flipX: true }), 8, 0);
+      // update sprite[1] to reflect sprite[0]
+      sprites[i].data.index = index0;
+      sprites[i].data.flipX = true;
+      sprites[i].offset = {x:8, y:0};
+      i++;
+    }
+    if (mirrorX && height === 2) {
+      // 16x16, reflected left-right
+      sprites[i].data.index = index0 + 16;
+      sprites[i].data.flipX = true;
+      sprites[i].offset = {x:8, y:8};
+      i++;
+    }
+    if (mirrorY) {
+      // 8x16, reflected up-down
+      sprites[i].data.index = index0;
+      sprites[i].data.flipY = true;
+      sprites[i].offset = {x:0, y:8};
+      i++;
+    }
+    if (mirrorY && width === 2) {
+      // 16x16, reflected up-down
+      sprites[i].data.index = index0 + 1;
+      sprites[i].data.flipY = true;
+      sprites[i].offset = {x:8, y:8};
+      i++;
+    }
+    if (mirrorX && mirrorY) {
+      // 16x16, rflected in both directions
+      sprites[i].data.index = index0;
+      sprites[i].data.flipX = true;
+      sprites[i].data.flipY = true;
+      sprites[i].offset = {x:8, y:8};
+      i++;
+    }
+
+    /* --------- apply flip options --------- */
+    
     let l, r, t, b;
     if (flipX || flipY) {
       // get bounds
@@ -329,25 +431,30 @@ export class MetaSprite extends SpriteBase {
       b = bottom;
     }
 
+    const { sprite, tile } = options;
+    const index = sprite !== undefined ? sprite : tile;
     const idx_offset = (index !== undefined) 
       ? index - sprites[0].data.index 
       : 0;
     
-    sprites.forEach(sprite => {
-      const { data, offset } = sprite;
-      sprite.update({
+    //
+    sprites.forEach(s => {
+      const { data, offset } = s;
+      
+      s.update({
         x: flipX ? (x + l + r - offset.x - 8) : (x + offset.x),
         y: flipY ? (y + t + b - offset.y - 8) : (y + offset.y),
         index: data.index + idx_offset,
         palette,
         priority,
-        flipX: flipX,
-        flipY: flipY
-      })
+        flipX,
+        flipY
+      });
     });
 
     return this;
   }
+
   draw() {
     if (this.rendered) return;
     this.rendered = true;
@@ -355,6 +462,7 @@ export class MetaSprite extends SpriteBase {
     this.sprites.forEach(x => x.draw());
     return this;
   }
+
   dispose() {
     if (!this.rendered) return;
     this.sprites.forEach(x => x.dispose());

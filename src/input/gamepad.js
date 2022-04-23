@@ -1,6 +1,12 @@
 const haveEvents = 'ongamepadconnected' in window;
 const controllers = {};
 
+// callbacks raised whenever any input is detected
+const inputCallbacks = [];
+const raiseInputEvent = () => {
+  inputCallbacks.forEach(x => x());
+};
+
 function connecthandler(e) {
   addgamepad(e.gamepad);
 }
@@ -76,7 +82,9 @@ const inputs = {
 const isPressed = (input) => {
   if (!controllers[0]) return false;
   const val = controllers[0].buttons[input];
-  return typeof(val) == "object" ? val.pressed : val > 0.7;
+  const pressed = typeof(val) == "object" ? val.pressed : val > 0.7;
+  if (pressed) raiseInputEvent();
+  return pressed;
 };
 
 const getAxis = (axis) => {
@@ -84,4 +92,11 @@ const getAxis = (axis) => {
   return controllers[0].axes[axis];  // -1 to 1
 };
 
-export { inputs, isPressed, getAxis };
+export const addInputListener = (callback) => {
+  inputCallbacks.push(callback);
+};
+export const removeInputListener = (callback) => {
+  inputCallbacks.filter2(x => x === callback);
+}
+
+export default { inputs, isPressed, getAxis };
